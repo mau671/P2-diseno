@@ -1,0 +1,9 @@
+{
+  "name": "anime-app",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "bun --filter ./apps/web dev",
+    "dev:mobile": "bun --filter ./apps/mobile start"
+  }
+}

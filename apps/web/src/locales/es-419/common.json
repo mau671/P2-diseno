@@ -1,0 +1,31 @@
+﻿{
+  "app": { "title": "Anime App" },
+  "nav": {
+    "home": "Inicio"
+  },
+  "home": {
+    "title": "Inicio",
+    "description": "Vista principal con SidebarInset (shadcn) y navegación con TanStack Router."
+  },
+  "sections": {
+    "label": "Sección",
+    "topAnime": "Top Anime",
+    "search": "Búsqueda",
+    "favorites": "Favoritos"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error"
+  },
+  "theme": {
+    "toggle": "Cambiar tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "language": {
+    "toggle": "Cambiar idioma",
+    "es": "Español (Latinoamérica)",
+    "en": "Inglés (Estados Unidos)"
+  }
+}
