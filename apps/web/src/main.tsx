@@ -10,6 +10,7 @@ import { RouterProvider } from "@tanstack/react-router"
 import { router } from "./router"
 import { ThemeProvider } from "./components/theme-provider"
 
+
 const queryClient = new QueryClient()
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

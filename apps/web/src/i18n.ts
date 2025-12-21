@@ -1,4 +1,4 @@
-﻿import i18n from "i18next"
+import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 import LanguageDetector from "i18next-browser-languagedetector"
 
@@ -20,8 +20,18 @@ i18n
     interpolation: { escapeValue: false },
     detection: {
       order: ["querystring", "localStorage", "navigator"],
+      lookupQuerystring: "lng",
+      lookupLocalStorage: "lng",
       caches: ["localStorage"],
     },
-  })
+    react: {
+      useSuspense: false
+    }
+  });
+
+// Make i18n available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as typeof window & { i18n: typeof i18n }).i18n = i18n;
+}
 
 export default i18n

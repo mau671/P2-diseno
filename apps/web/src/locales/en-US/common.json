@@ -31,21 +31,34 @@
   "auth": {
     "login": {
       "title": "Sign In",
+      "welcomeBack": "Welcome back",
+      "socialLogin": "Login with your Apple or Google account",
+      "loginWithApple": "Login with Apple",
+      "loginWithGoogle": "Login with Google",
+      "orContinueWith": "Or continue with",
       "email": "Email",
+      "emailPlaceholder": "m@example.com",
       "password": "Password",
       "forgotPassword": "Forgot your password?",
-      "submit": "Sign In",
-      "loading": "Loading...",
+      "submit": "Login",
+      "loading": "Signing in...",
       "noAccount": "Don't have an account?",
       "registerLink": "Sign up"
     },
     "register": {
       "title": "Create Account",
+      "createYourAccount": "Create your account",
+      "enterEmailToCreate": "Enter your email below to create your account",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
       "email": "Email",
+      "emailPlaceholder": "m@example.com",
       "password": "Password",
       "confirmPassword": "Confirm Password",
-      "submit": "Sign Up",
-      "loading": "Loading...",
+      "passwordMinLength": "Must be at least 6 characters long.",
+      "createAccount": "Create Account",
+      "submit": "Create Account",
+      "loading": "Creating account...",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in",
       "passwordMismatch": "Passwords do not match",
@@ -64,6 +77,12 @@
       "loginFailed": "Login failed",
       "registerFailed": "Registration failed",
       "resetFailed": "Failed to send email"
+    },
+    "legal": {
+      "byClickingContinue": "By clicking continue, you agree to our",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy"
     }
   }
 }
