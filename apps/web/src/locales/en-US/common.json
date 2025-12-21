@@ -27,5 +27,43 @@
     "toggle": "Change language",
     "es": "Spanish (Latin America)",
     "en": "English (United States)"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Sign In",
+      "loading": "Loading...",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up"
+    },
+    "register": {
+      "title": "Create Account",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Sign Up",
+      "loading": "Loading...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 6 characters"
+    },
+    "forgot": {
+      "title": "Recover Password",
+      "description": "Enter your email and we'll send you a link to reset your password",
+      "email": "Email",
+      "submit": "Send Link",
+      "loading": "Sending...",
+      "success": "Email sent! Check your inbox.",
+      "backToLogin": "Back to sign in"
+    },
+    "errors": {
+      "loginFailed": "Login failed",
+      "registerFailed": "Registration failed",
+      "resetFailed": "Failed to send email"
+    }
   }
 }

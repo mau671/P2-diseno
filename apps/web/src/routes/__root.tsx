@@ -1,7 +1,8 @@
-﻿import { Outlet, createRootRoute } from "@tanstack/react-router"
-import { useTranslation } from "react-i18next"
+﻿// apps/web/src/routes/__root.tsx
+import { Outlet, createRootRoute, useLocation } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,14 +10,22 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { ModeToggle } from "@/components/mode-toggle"
-import { LanguageToggle } from "@/components/language-toggle"
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { ModeToggle } from "@/components/mode-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 
 function RootLayout() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
+  const location = useLocation();
+
+  //Ruta de auth, solo renderiza el Outlet sin sidebar
+  const isAuthRoute = location.pathname.startsWith('/auth');
+
+  if (isAuthRoute) {
+    return <Outlet />;
+  }
 
   return (
     <SidebarProvider>
@@ -69,9 +78,9 @@ function RootLayout() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }
 
 export const Route = createRootRoute({
   component: RootLayout,
-})
+});
