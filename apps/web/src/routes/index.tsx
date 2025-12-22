@@ -31,6 +31,16 @@ function HomePage() {
             Encuentra tu anime favorito en nuestra base de datos
           </p>
         </a>
+
+        <a
+          href="/anime/catalog"
+          className="rounded-lg border p-6 hover:bg-accent transition-colors"
+        >
+          <h2 className="text-xl font-semibold mb-2">Catálogo de Anime</h2>
+          <p className="text-sm text-muted-foreground">
+            Explora el catálogo completo de animes
+          </p>
+        </a>
       </div>
     </div>
   );

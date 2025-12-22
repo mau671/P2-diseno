@@ -48,6 +48,8 @@ function RootLayout() {
         label = t("sections.topAnime");
       } else if (segment === "search") {
         label = t("sections.search");
+        } else if (segment === "catalog") {
+        label = t("sections.catalog");
       } else if (segment === "auth") {
         label = "Auth";
       } else if (segment === "login") {

@@ -52,6 +52,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: t("sections.search"),
             url: "/anime/search",
           },
+          {
+            title: t("sections.catalog"),
+            url: "/anime/catalog",
+          },
         ],
       },
     ],

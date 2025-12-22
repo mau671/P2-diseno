@@ -3,7 +3,8 @@
   "nav": {
     "home": "Inicio",
     "anime": "Anime",
-    "support": "Soporte"
+    "support": "Soporte",
+    "catalog": "Catálogo"
   },
   "home": {
     "title": "Inicio",
@@ -15,7 +16,9 @@
     "topAnimeDescription": "Los mejores animes rankeados por la comunidad",
     "search": "Búsqueda",
     "searchDescription": "Busca tu anime favorito",
-    "favorites": "Favoritos"
+    "favorites": "Favoritos",
+    "catalog": "Catálogo",
+    "catalogDescription": "Explora el catálogo de animes"
   },
   "common": {
   "loading": "Cargando...",
@@ -33,6 +36,21 @@
 },
 "topAnime": {
   "empty": "Sin elementos."
+},
+"catalog": {
+    "title": "Catálogo de Anime",
+    "description": "Explora los mejores animes.",
+    "loadMore": "Cargar más animes",
+    "empty": "No se encontraron animes",
+    "endOfList": "Has llegado al final del catálogo",
+    "previousSeason": "Temporada Anterior",
+    "nextSeason": "Siguiente Temporada"
+},
+"seasons": {
+    "winter": "Invierno",
+    "spring": "Primavera",
+    "summer": "Verano",
+    "fall": "Otoño"
 },
   "theme": {
     "toggle": "Cambiar tema",

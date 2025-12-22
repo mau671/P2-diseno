@@ -50,3 +50,53 @@ export function useSearchAnime(q: string, page = 1) {
     retry: false,
   });
 }
+
+export function getCurrentSeason(): { year: number; season: string } {
+  const now = new Date();
+  const month = now.getMonth() + 1; // 1-12
+  const year = now.getFullYear();
+
+  let season: string;
+  if (month >= 1 && month <= 3) season = "winter";
+  else if (month >= 4 && month <= 6) season = "spring";
+  else if (month >= 7 && month <= 9) season = "summer";
+  else season = "fall";
+
+  return { year, season };
+}
+
+export function getPreviousSeason(year: number, season: string): { year: number; season: string } {
+  const seasons = ["winter", "spring", "summer", "fall"];
+  const currentIndex = seasons.indexOf(season);
+  
+  if (currentIndex === 0) {
+    return { year: year - 1, season: "fall" };
+  } else {
+    //Ir a la temporada anterior del mismo año
+    return { year, season: seasons[currentIndex - 1] };
+  }
+}
+
+async function fetchSeasonAnime(
+  year: number,
+  season: string,
+  page = 1,
+  signal?: AbortSignal
+) {
+  return fetchJikan<JikanListResponse<Anime[]>>(
+    `/seasons/${year}/${season}`,
+    { page },
+    { signal }
+  );
+}
+
+export function useSeasonAnime(year: number, season: string, page = 1) {
+  return useQuery({
+    queryKey: ["seasonAnime", year, season, page],
+    queryFn: ({ signal }) => fetchSeasonAnime(year, season, page, signal),
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+}
+

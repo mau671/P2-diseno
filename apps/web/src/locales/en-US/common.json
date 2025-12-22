@@ -3,7 +3,8 @@
   "nav": {
     "home": "Home",
     "anime": "Anime",
-    "support": "Support"
+    "support": "Support",
+    "catalog": "Catalog"
   },
   "home": {
     "title": "Home",
@@ -15,7 +16,9 @@
     "topAnimeDescription": "The best anime ranked by the community",
     "search": "Search",
     "searchDescription": "Find your favorite anime",
-    "favorites": "Favorites"
+    "favorites": "Favorites",
+    "catalog": "Catalog",
+    "catalogDescription": "Browse the anime catalog"
   },
   "common": {
   "loading": "Loading...",
@@ -34,6 +37,21 @@
 "topAnime": {
   "empty": "No items."
 },
+"catalog": {
+    "title": "Anime Catalog",
+    "description": "Explore the best animes.",
+    "loadMore": "Load more anime",
+    "empty": "No anime found",
+    "endOfList": "You've reached the end of the catalog",
+    "previousSeason": "Previous Season",
+    "nextSeason": "Next Season"
+    },
+"seasons": {
+    "winter": "Winter",
+    "spring": "Spring",
+    "summer": "Summer",
+    "fall": "Fall"
+  },
   "theme": {
     "toggle": "Toggle theme",
     "light": "Light",
