@@ -14,13 +14,8 @@ function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
 
   React.useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
   }, [value, delay]);
 
   return debouncedValue;
@@ -54,20 +49,14 @@ function AnimeList({ items }: { items: any[] }) {
           <div key={a.mal_id} className="rounded-xl border p-4">
             <div className="flex gap-3">
               {img ? (
-                <img
-                  src={img}
-                  alt={a.title}
-                  className="h-16 w-12 rounded object-cover"
-                />
+                <img src={img} alt={a.title} className="h-16 w-12 rounded object-cover" />
               ) : (
                 <div className="h-16 w-12 rounded bg-muted" />
               )}
 
               <div className="min-w-0">
                 <div className="truncate font-semibold">{a.title}</div>
-                <div className="text-sm text-muted-foreground">
-                  Score: {a.score ?? "N/A"}
-                </div>
+                <div className="text-sm text-muted-foreground">Score: {a.score ?? "N/A"}</div>
               </div>
             </div>
           </div>
@@ -77,53 +66,77 @@ function AnimeList({ items }: { items: any[] }) {
   );
 }
 
+/**
+ * URL esperada:
+ * /anime/search?q=Chainsaw
+ */
+export const Route = createFileRoute("/anime/search")({
+  validateSearch: (search: Record<string, unknown>): { q: string | undefined } => {
+    const qRaw = typeof search.q === "string" ? search.q.trim() : "";
+    return { q: qRaw.length > 0 ? qRaw : undefined };
+  },
+  component: SearchAnimePage,
+});
+
 function SearchAnimePage() {
   const { t } = useTranslation();
 
-  const [input, setInput] = React.useState("");
-  const [shouldSearch, setShouldSearch] = React.useState(false);
-  
+  // ✅ Navegación tipada de ESTA ruta (evita broncas)
+  const navigate = Route.useNavigate();
+
+  // Leer query param desde la URL
+  const { q } = Route.useSearch();
+  const qValue = q ?? "";
+
+  // Input del usuario (UI)
+  const [input, setInput] = React.useState(qValue);
+
+  // Si el usuario llega por URL (o back/forward), sincronizar input
+  React.useEffect(() => {
+    setInput(qValue);
+  }, [qValue]);
+
   // Debounce automático del input (500ms)
   const debouncedInput = useDebounce(input, 500);
-  
-  // Término de búsqueda actual (se actualiza con debounce o al presionar Enter)
-  const [searchTerm, setSearchTerm] = React.useState("");
 
-  // Actualizar término de búsqueda cuando cambie el valor con debounce
+  // Cuando el usuario escribe, actualizamos la URL con debounce
   React.useEffect(() => {
-    if (shouldSearch && debouncedInput.trim().length > 0) {
-      setSearchTerm(debouncedInput);
-    }
-  }, [debouncedInput, shouldSearch]);
+    const next = debouncedInput.trim();
 
-  const search = useSearchAnime(searchTerm, 1);
+    // Si no cambió, no hagás nada
+    if (next === qValue) return;
+
+    // ✅ OJO: NUNCA mandés {}. Mandá { q: undefined }
+    navigate({
+      search: { q: next.length > 0 ? next : undefined },
+      replace: true,
+    });
+  }, [debouncedInput, navigate, qValue]);
+
+  // La búsqueda se basa 100% en la URL
+  const search = useSearchAnime(qValue, 1);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInput(value);
-    setShouldSearch(true);
+    setInput(e.target.value);
   };
 
+  // Botón/Enter: actualiza URL inmediatamente
   const handleSearch = () => {
-    if (input.trim().length > 0) {
-      setSearchTerm(input);
-      setShouldSearch(true);
-    }
+    const next = input.trim();
+    navigate({
+      search: { q: next.length > 0 ? next : undefined },
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
+    if (e.key === "Enter") handleSearch();
   };
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">{t("sections.search")}</h1>
-        <p className="text-sm text-muted-foreground">
-          {t("sections.searchDescription")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("sections.searchDescription")}</p>
       </div>
 
       <div className="flex gap-2">
@@ -136,10 +149,8 @@ function SearchAnimePage() {
         <Button onClick={handleSearch}>{t("search.button")}</Button>
       </div>
 
-      {searchTerm.trim().length === 0 ? (
-        <div className="text-sm text-muted-foreground">
-          {t("search.hint")}
-        </div>
+      {qValue.trim().length === 0 ? (
+        <div className="text-sm text-muted-foreground">{t("search.hint")}</div>
       ) : search.isLoading ? (
         <AnimeListSkeleton />
       ) : search.isError ? (
@@ -156,6 +167,3 @@ function SearchAnimePage() {
   );
 }
 
-export const Route = createFileRoute("/anime/search")({
-  component: SearchAnimePage,
-});

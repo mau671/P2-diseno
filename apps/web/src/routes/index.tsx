@@ -1,4 +1,4 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 function HomePage() {
@@ -12,25 +12,26 @@ function HomePage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <a
-          href="/anime/top"
+        <Link
+          to="/anime/top"
           className="rounded-lg border p-6 hover:bg-accent transition-colors"
         >
-          <h2 className="text-xl font-semibold mb-2">Top Anime</h2>
+          <h2 className="text-xl font-semibold mb-2">{t("sections.topAnime")}</h2>
           <p className="text-sm text-muted-foreground">
-            Explora los animes mejor valorados por la comunidad
+            {t("sections.topAnimeDescription")}
           </p>
-        </a>
+        </Link>
 
-        <a
-          href="/anime/search"
+        <Link
+          to="/anime/search"
+          search={{ q: undefined }}
           className="rounded-lg border p-6 hover:bg-accent transition-colors"
         >
-          <h2 className="text-xl font-semibold mb-2">Buscar Anime</h2>
+          <h2 className="text-xl font-semibold mb-2">{t("sections.search")}</h2>
           <p className="text-sm text-muted-foreground">
-            Encuentra tu anime favorito en nuestra base de datos
+            {t("sections.searchDescription")}
           </p>
-        </a>
+        </Link>
       </div>
     </div>
   );
