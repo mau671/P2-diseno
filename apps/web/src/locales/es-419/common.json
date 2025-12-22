@@ -1,7 +1,9 @@
 ﻿{
   "app": { "title": "Anime App" },
   "nav": {
-    "home": "Inicio"
+    "home": "Inicio",
+    "anime": "Anime",
+    "support": "Soporte"
   },
   "home": {
     "title": "Inicio",
@@ -10,13 +12,28 @@
   "sections": {
     "label": "Sección",
     "topAnime": "Top Anime",
+    "topAnimeDescription": "Los mejores animes rankeados por la comunidad",
     "search": "Búsqueda",
+    "searchDescription": "Busca tu anime favorito",
     "favorites": "Favoritos"
   },
   "common": {
-    "loading": "Cargando...",
-    "error": "Ocurrió un error"
-  },
+  "loading": "Cargando...",
+  "error": "Ocurrió un error",
+  "retry": "Reintentar",
+  "noInternet": "Sin conexión. Revisá tu internet.",
+  "loadError": "Error al cargar datos."
+},
+"search": {
+  "placeholder": "Buscar anime...",
+  "button": "Buscar",
+  "hint": "Escribí algo y presioná Buscar.",
+  "error": "Error al buscar.",
+  "empty": "Sin resultados."
+},
+"topAnime": {
+  "empty": "Sin elementos."
+},
   "theme": {
     "toggle": "Cambiar tema",
     "light": "Claro",
