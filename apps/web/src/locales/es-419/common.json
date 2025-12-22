@@ -1,7 +1,9 @@
 ﻿{
   "app": { "title": "Anime App" },
   "nav": {
-    "home": "Inicio"
+    "home": "Inicio",
+    "anime": "Anime",
+    "support": "Soporte"
   },
   "home": {
     "title": "Inicio",
@@ -10,7 +12,9 @@
   "sections": {
     "label": "Sección",
     "topAnime": "Top Anime",
+    "topAnimeDescription": "Los mejores animes rankeados por la comunidad",
     "search": "Búsqueda",
+    "searchDescription": "Busca tu anime favorito",
     "favorites": "Favoritos"
   },
   "common": {
