@@ -22,8 +22,8 @@ function ForgotPasswordPage() {
     try {
       await resetPassword(email);
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || t("auth.errors.resetFailed"));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("auth.errors.resetFailed"));
     } finally {
       setLoading(false);
     }

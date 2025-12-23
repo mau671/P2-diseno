@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useQueryState, parseAsBoolean } from "nuqs";
 
-import { useSearchAnime } from "@/api/queries";
+import { useSearchAnime, type Anime } from "@/api/queries";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { Input } from "@/components/ui/input";
@@ -53,7 +53,7 @@ function AnimeListSkeleton() {
   );
 }
 
-function AnimeList({ items }: { items: any[] }) {
+function AnimeList({ items }: { items: Anime[] }) {
   return (
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
       {items.map((a, index) => {
@@ -164,7 +164,7 @@ function SearchAnimePage() {
         <AnimeListSkeleton />
       ) : search.isError ? (
         <ErrorState
-          message={(search.error as any)?.message ?? t("search.error")}
+          message={search.error instanceof Error ? search.error.message : t("search.error")}
           onRetry={() => search.refetch()}
         />
       ) : (search.data?.data?.length ?? 0) === 0 ? (

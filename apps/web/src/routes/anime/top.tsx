@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import { useTopAnime } from "@/api/queries";
+import { useTopAnime, type Anime } from "@/api/queries";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +24,7 @@ function AnimeListSkeleton() {
   );
 }
 
-function AnimeList({ items }: { items: any[] }) {
+function AnimeList({ items }: { items: Anime[] }) {
   return (
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
       {items.map((a) => {
@@ -74,7 +74,7 @@ function TopAnimePage() {
         <AnimeListSkeleton />
       ) : top.isError ? (
         <ErrorState
-          message={(top.error as any)?.message ?? t("common.loadError")}
+          message={top.error instanceof Error ? top.error.message : t("common.loadError")}
           onRetry={() => top.refetch()}
         />
       ) : (top.data?.data?.length ?? 0) === 0 ? (
