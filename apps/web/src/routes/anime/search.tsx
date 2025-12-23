@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { useQueryState, parseAsBoolean } from "nuqs";
 
 import { useSearchAnime } from "@/api/queries";
 import { ErrorState } from "@/components/network/ErrorState";
@@ -8,17 +9,30 @@ import { EmptyState } from "@/components/network/EmptyState";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
-// Hook personalizado para debounce
-function useDebounce<T>(value: T, delay: number): T {
+// Custom debounce hook with flush function
+function useDebounce<T>(value: T, delay: number): [T, () => void] {
   const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
+  const timeoutRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(handler);
+    timeoutRef.current = window.setTimeout(() => setDebouncedValue(value), delay);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [value, delay]);
 
-  return debouncedValue;
+  const flush = React.useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setDebouncedValue(value);
+  }, [value]);
+
+  return [debouncedValue, flush];
 }
 
 function AnimeListSkeleton() {
@@ -42,11 +56,11 @@ function AnimeListSkeleton() {
 function AnimeList({ items }: { items: any[] }) {
   return (
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-      {items.map((a) => {
+      {items.map((a, index) => {
         const img = a?.images?.webp?.image_url || a?.images?.jpg?.image_url;
 
         return (
-          <div key={a.mal_id} className="rounded-xl border p-4">
+          <div key={`${a.mal_id}-${index}`} className="rounded-xl border p-4">
             <div className="flex gap-3">
               {img ? (
                 <img src={img} alt={a.title} className="h-16 w-12 rounded object-cover" />
@@ -66,66 +80,50 @@ function AnimeList({ items }: { items: any[] }) {
   );
 }
 
-/**
- * URL esperada:
- * /anime/search?q=Chainsaw
- */
 export const Route = createFileRoute("/anime/search")({
-  validateSearch: (search: Record<string, unknown>): { q: string | undefined } => {
-    const qRaw = typeof search.q === "string" ? search.q.trim() : "";
-    return { q: qRaw.length > 0 ? qRaw : undefined };
-  },
   component: SearchAnimePage,
 });
 
 function SearchAnimePage() {
   const { t } = useTranslation();
 
-  // ✅ Navegación tipada de ESTA ruta (evita broncas)
-  const navigate = Route.useNavigate();
+  // Search query state synchronized with URL
+  const [query, setQuery] = useQueryState("q", { defaultValue: "" });
 
-  // Leer query param desde la URL
-  const { q } = Route.useSearch();
-  const qValue = q ?? "";
+  // NSFW toggle state - false means SFW (default), true means allow NSFW
+  const [allowNsfw, setAllowNsfw] = useQueryState("nsfw", parseAsBoolean.withDefault(false));
 
-  // Input del usuario (UI)
-  const [input, setInput] = React.useState(qValue);
+  // Local input state for immediate UI responsiveness
+  const [input, setInput] = React.useState(query);
 
-  // Si el usuario llega por URL (o back/forward), sincronizar input
+  // Sync input with URL changes (back/forward navigation)
   React.useEffect(() => {
-    setInput(qValue);
-  }, [qValue]);
+    setInput(query);
+  }, [query]);
 
-  // Debounce automático del input (500ms)
-  const debouncedInput = useDebounce(input, 500);
+  // Debounced search to reduce API calls
+  const [debouncedInput, flushDebounce] = useDebounce(input, 500);
 
-  // Cuando el usuario escribe, actualizamos la URL con debounce
+  // Update URL when debounced input changes
   React.useEffect(() => {
-    const next = debouncedInput.trim();
+    const trimmed = debouncedInput.trim();
+    if (trimmed !== query) {
+      setQuery(trimmed || null); // Clear URL param if empty
+    }
+  }, [debouncedInput, query, setQuery]);
 
-    // Si no cambió, no hagás nada
-    if (next === qValue) return;
-
-    // ✅ OJO: NUNCA mandés {}. Mandá { q: undefined }
-    navigate({
-      search: { q: next.length > 0 ? next : undefined },
-      replace: true,
-    });
-  }, [debouncedInput, navigate, qValue]);
-
-  // La búsqueda se basa 100% en la URL
-  const search = useSearchAnime(qValue, 1);
+  // Search based on current URL query and SFW setting
+  const search = useSearchAnime(query, 1, !allowNsfw);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
 
-  // Botón/Enter: actualiza URL inmediatamente
+  // Immediate search on button click or Enter key
   const handleSearch = () => {
-    const next = input.trim();
-    navigate({
-      search: { q: next.length > 0 ? next : undefined },
-    });
+    flushDebounce(); // Cancel pending debounce
+    const trimmed = input.trim();
+    setQuery(trimmed || null); // Clear URL param if empty
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -149,7 +147,18 @@ function SearchAnimePage() {
         <Button onClick={handleSearch}>{t("search.button")}</Button>
       </div>
 
-      {qValue.trim().length === 0 ? (
+      <div className="flex items-center gap-2">
+        <Switch
+          id="nsfw-toggle"
+          checked={allowNsfw}
+          onCheckedChange={setAllowNsfw}
+        />
+        <Label htmlFor="nsfw-toggle" className="text-sm">
+          {t("search.allowNsfw", "Allow NSFW content")}
+        </Label>
+      </div>
+
+      {query.trim().length === 0 ? (
         <div className="text-sm text-muted-foreground">{t("search.hint")}</div>
       ) : search.isLoading ? (
         <AnimeListSkeleton />
