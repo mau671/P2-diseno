@@ -60,7 +60,7 @@ function AnimeList({ items }: { items: any[] }) {
         const img = a?.images?.webp?.image_url || a?.images?.jpg?.image_url;
 
         return (
-          <div key={`${a.mal_id}-${index}`} className="rounded-xl border p-4">
+          <div key={`${a.mal_id}-${index}`} className="rounded-xl border p-4 overflow-hidden">
             <div className="flex gap-3">
               {img ? (
                 <img src={img} alt={a.title} className="h-16 w-12 rounded object-cover" />
@@ -68,7 +68,7 @@ function AnimeList({ items }: { items: any[] }) {
                 <div className="h-16 w-12 rounded bg-muted" />
               )}
 
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1 overflow-hidden">
                 <div className="truncate font-semibold">{a.title}</div>
                 <div className="text-sm text-muted-foreground">Score: {a.score ?? "N/A"}</div>
               </div>
