@@ -221,7 +221,7 @@ function CatalogPage() {
         <AnimeListSkeleton />
       ) : isError ? (
         <ErrorState
-          message={(error as any)?.message ?? t("common.loadError")}
+          message={error instanceof Error ? error.message : t("common.loadError")}
           onRetry={refetch}
         />
       ) : isEmpty ? (
