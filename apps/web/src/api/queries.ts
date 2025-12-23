@@ -77,25 +77,16 @@ export function getPreviousSeason(year: number, season: string): { year: number;
   }
 }
 
-async function fetchSeasonAnime(
-  year: number,
-  season: string,
-  page = 1,
-  signal?: AbortSignal
-) {
-  return fetchJikan<JikanListResponse<Anime[]>>(
-    `/seasons/${year}/${season}`,
-    { page },
-    { signal }
-  );
+async function fetchSeasonAnime(year: number, season: string, page = 1, sfw = true, signal?: AbortSignal) {
+  return fetchJikan<JikanListResponse<Anime[]>>(`/seasons/${year}/${season}`, { page, sfw }, { signal });
 }
 
-export function useSeasonAnime(year: number, season: string, page = 1) {
+export function useSeasonAnime(year: number, season: string, page = 1, sfw = true) {
   return useQuery({
-    queryKey: ["seasonAnime", year, season, page],
-    queryFn: ({ signal }) => fetchSeasonAnime(year, season, page, signal),
+    queryKey: ["seasonAnime", year, season, page, sfw],
+    queryFn: ({ signal }) => fetchSeasonAnime(year, season, page, sfw, signal),
     staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     retry: false,
   });
 }

@@ -9,6 +9,9 @@ import { EmptyState } from "@/components/network/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {getCurrentSeason, getPreviousSeason, getNextSeason, isSeasonInFuture, type SeasonInfo} from "@/lib/season-utils";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useQueryState, parseAsBoolean } from "nuqs";
 
 function AnimeListSkeleton() {
   return (
@@ -156,11 +159,13 @@ function CatalogPage() {
   const { t } = useTranslation();
   const [currentSeason, setCurrentSeason] = React.useState<SeasonInfo>(() => getCurrentSeason());
   const [page, setPage] = React.useState(1);
-
+  const [allowNsfw, setAllowNsfw] = useQueryState("nsfw", parseAsBoolean.withDefault(false));
+  
   const { data, isLoading, isError, error, refetch } = useSeasonAnime(
     currentSeason.year,
     currentSeason.season,
-    page
+    page,
+    !allowNsfw
   );
 
   React.useEffect(() => {
@@ -192,6 +197,8 @@ function CatalogPage() {
 
   const seasonName = t(`seasons.${currentSeason.season}`);
 
+  
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -201,6 +208,17 @@ function CatalogPage() {
         <p className="text-sm text-muted-foreground">
           {t("catalog.description")}
         </p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Switch
+          id="nsfw-toggle"
+          checked={allowNsfw}
+          onCheckedChange={setAllowNsfw}
+        />
+        <Label htmlFor="nsfw-toggle" className="text-sm">
+          {t("search.allowNsfw", "Allow NSFW content")}
+        </Label>
       </div>
 
       <div className="flex items-center gap-2">
