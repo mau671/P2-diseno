@@ -24,8 +24,8 @@ async function fetchTopAnime(page = 1, signal?: AbortSignal) {
   return fetchJikan<JikanListResponse<Anime[]>>("/top/anime", { page }, { signal });
 }
 
-async function fetchSearchAnime(q: string, page = 1, signal?: AbortSignal) {
-  return fetchJikan<JikanListResponse<Anime[]>>("/anime", { q, page }, { signal });
+async function fetchSearchAnime(q: string, page = 1, sfw = true, signal?: AbortSignal) {
+  return fetchJikan<JikanListResponse<Anime[]>>("/anime", { q, page, sfw }, { signal });
 }
 
 export function useTopAnime(page = 1) {
@@ -38,12 +38,12 @@ export function useTopAnime(page = 1) {
   });
 }
 
-export function useSearchAnime(q: string, page = 1) {
+export function useSearchAnime(q: string, page = 1, sfw = true) {
   const query = q.trim();
 
   return useQuery({
-    queryKey: ["searchAnime", query, page],
-    queryFn: ({ signal }) => fetchSearchAnime(query, page, signal),
+    queryKey: ["searchAnime", query, page, sfw],
+    queryFn: ({ signal }) => fetchSearchAnime(query, page, sfw, signal),
     enabled: query.length > 0,
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: false,
