@@ -32,7 +32,8 @@
   "button": "Buscar",
   "hint": "Escribí algo y presioná Buscar.",
   "error": "Error al buscar.",
-  "empty": "Sin resultados."
+  "empty": "Sin resultados.",
+  "allowNsfw": "Permitir contenido NSFW"
 },
 "topAnime": {
   "empty": "Sin elementos."

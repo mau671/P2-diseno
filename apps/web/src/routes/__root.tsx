@@ -2,6 +2,7 @@
 import * as React from "react";
 import { Outlet, createRootRoute, useLocation } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import {
@@ -117,5 +118,9 @@ function RootLayout() {
 }
 
 export const Route = createRootRoute({
-  component: RootLayout,
+  component: () => (
+    <NuqsAdapter>
+      <RootLayout />
+    </NuqsAdapter>
+  ),
 });
