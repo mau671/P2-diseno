@@ -1,4 +1,4 @@
-﻿{
+{
   "app": { "title": "Anime App" },
   "nav": {
     "home": "Inicio",
@@ -33,7 +33,14 @@
   "hint": "Escribí algo y presioná Buscar.",
   "error": "Error al buscar.",
   "empty": "Sin resultados.",
-  "allowNsfw": "Permitir contenido NSFW"
+  "allowNsfw": "Permitir contenido NSFW",
+  "types": {
+    "anime": "Anime",
+    "manga": "Manga",
+    "characters": "Personajes",
+    "people": "Personas",
+    "studios": "Estudios"
+  }
 },
 "topAnime": {
   "empty": "Sin elementos."

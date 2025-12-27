@@ -1,4 +1,3 @@
-﻿// apps/web/src/routes/__root.tsx
 import * as React from "react";
 import { Outlet, createRootRoute, useLocation } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -22,15 +21,12 @@ function RootLayout() {
   const { t } = useTranslation();
   const location = useLocation();
 
-  //Ruta de auth, solo renderiza el Outlet sin sidebar
   const isAuthRoute = location.pathname.startsWith('/auth');
 
-  // Generar breadcrumb dinámicamente basado en la ruta
   const generateBreadcrumbs = () => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
-    
+
     if (pathSegments.length === 0) {
-      // Estamos en la página principal
       return [{ label: t("nav.home"), href: "/", isLast: true }];
     }
 
@@ -41,7 +37,6 @@ function RootLayout() {
       currentPath += `/${segment}`;
       const isLast = index === pathSegments.length - 1;
 
-      // Mapear segmentos a traducciones
       let label = segment;
       if (segment === "anime") {
         label = "Anime";
@@ -49,7 +44,7 @@ function RootLayout() {
         label = t("sections.topAnime");
       } else if (segment === "search") {
         label = t("sections.search");
-        } else if (segment === "catalog") {
+      } else if (segment === "catalog") {
         label = t("sections.catalog");
       } else if (segment === "auth") {
         label = "Auth";
@@ -86,7 +81,7 @@ function RootLayout() {
               <BreadcrumbList>
                 {breadcrumbs.map((crumb, index) => (
                   <React.Fragment key={crumb.href}>
-                    {index > 0 && <BreadcrumbSeparator className="hidden md:block" />}
+                    {index > 0 && <BreadcrumbSeparator />}
                     <BreadcrumbItem>
                       {crumb.isLast ? (
                         <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
@@ -108,7 +103,7 @@ function RootLayout() {
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="min-h-[100vh] flex-1 rounded-xl border p-4 md:min-h-min">
+          <div className="flex-1 rounded-xl border p-4">
             <Outlet />
           </div>
         </div>
