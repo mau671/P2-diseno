@@ -1,3 +1,4 @@
+import * as React from "react"
 import { ChevronRight, type LucideIcon } from "lucide-react"
 
 import {
@@ -16,6 +17,25 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { Link } from "@tanstack/react-router"
+
+const SIDEBAR_SECTIONS_KEY = "sidebar_sections"
+
+function getSavedSections(): Set<string> {
+  try {
+    const saved = localStorage.getItem(SIDEBAR_SECTIONS_KEY);
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSections(sections: Set<string>) {
+  try {
+    localStorage.setItem(SIDEBAR_SECTIONS_KEY, JSON.stringify(Array.from(sections)));
+  } catch {
+  }
+}
 
 export function NavMain({
   items,
@@ -31,18 +51,42 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const savedSections = React.useMemo(() => getSavedSections(), []);
+
+  const handleOpenChange = React.useCallback((isOpen: boolean, title: string) => {
+    const currentSections = getSavedSections();
+    if (isOpen) {
+      currentSections.add(title);
+    } else {
+      currentSections.delete(title);
+    }
+    saveSections(currentSections);
+  }, []);
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+          <Collapsible
+            key={item.title}
+            asChild
+            open={savedSections.has(item.title) || item.isActive}
+            onOpenChange={(open) => handleOpenChange(open, item.title)}
+          >
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </a>
+                {item.url === "#" ? (
+                  <button type="button">
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </button>
+                ) : (
+                  <Link to={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
+                )}
               </SidebarMenuButton>
               {item.items?.length ? (
                 <>
@@ -57,9 +101,9 @@ export function NavMain({
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
+                            <Link to={subItem.url}>
                               <span>{subItem.title}</span>
-                            </a>
+                            </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}
