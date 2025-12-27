@@ -1,4 +1,4 @@
-﻿import React from "react"
+import React from "react"
 import ReactDOM from "react-dom/client"
 import "./index.css"
 
@@ -11,7 +11,17 @@ import { router } from "./router"
 import { ThemeProvider } from "./components/theme-provider"
 
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 60 * 24,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchOnMount: false,
+    },
+  },
+})
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
