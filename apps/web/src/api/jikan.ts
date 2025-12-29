@@ -1,4 +1,3 @@
-// apps/web/src/lib/jikan.ts
 const BASE_URL = "https://api.jikan.moe/v4";
 
 export class ApiError extends Error {
@@ -11,11 +10,12 @@ export class ApiError extends Error {
   }
 }
 
-// Respuesta típica de Jikan v4
 export type JikanResponse<T> = {
   data: T;
   pagination?: unknown;
 };
+
+const requestQueue = new Map<string, Promise<unknown>>();
 
 export async function fetchJikan<T>(
   path: string,
@@ -30,19 +30,35 @@ export async function fetchJikan<T>(
     });
   }
 
-  let res: Response;
-  try {
-    res = await fetch(url.toString(), { signal: options?.signal });
-  } catch {
-    throw new ApiError("Sin conexión. Revisá tu internet.");
+  const cacheKey = url.toString();
+
+  if (requestQueue.has(cacheKey)) {
+    return requestQueue.get(cacheKey) as Promise<T>;
   }
 
-  if (!res.ok) {
-    if (res.status === 429) throw new ApiError("Demasiadas solicitudes. Intentá de nuevo.", 429);
-    throw new ApiError("Error al cargar datos.", res.status);
-  }
+  const requestPromise = (async () => {
+    let res: Response;
+    try {
+      res = await fetch(url.toString(), { signal: options?.signal });
+    } catch {
+      throw new ApiError("Sin conexión. Revisá tu internet.");
+    }
 
-  return (await res.json()) as T;
+    if (!res.ok) {
+      if (res.status === 429) throw new ApiError("Demasiadas solicitudes. Intentá de nuevo.", 429);
+      throw new ApiError("Error al cargar datos.", res.status);
+    }
+
+    return (await res.json()) as T;
+  })();
+
+  requestQueue.set(cacheKey, requestPromise);
+
+  requestPromise.finally(() => {
+    requestQueue.delete(cacheKey);
+  });
+
+  return requestPromise;
 }
 
 

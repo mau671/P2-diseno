@@ -18,30 +18,73 @@
     "searchDescription": "Busca tu anime favorito",
     "favorites": "Favoritos",
     "catalog": "Catálogo",
-    "catalogDescription": "Explora el catálogo de animes"
+    "catalogDescription": "Explora el catálogo de animes",
+    "trendingNow": "Tendencias ahora",
+    "upcomingNextSeason": "Próxima temporada",
+    "allTimePopular": "Populares de todos los tiempos"
   },
   "common": {
   "loading": "Cargando...",
   "error": "Ocurrió un error",
   "retry": "Reintentar",
   "noInternet": "Sin conexión. Revisá tu internet.",
-  "loadError": "Error al cargar datos."
+  "loadError": "Error al cargar datos.",
+  "scrollLeft": "Desplazar a la izquierda",
+  "scrollRight": "Desplazar a la derecha",
+  "tooManyRequests": "Demasiadas solicitudes. Intentá de nuevo."
 },
-"search": {
-  "placeholder": "Buscar anime...",
-  "button": "Buscar",
-  "hint": "Escribí algo y presioná Buscar.",
-  "error": "Error al buscar.",
-  "empty": "Sin resultados.",
-  "allowNsfw": "Permitir contenido NSFW",
-  "types": {
-    "anime": "Anime",
-    "manga": "Manga",
-    "characters": "Personajes",
-    "people": "Personas",
-    "studios": "Estudios"
-  }
-},
+  "search": {
+    "placeholder": "Buscar anime...",
+    "button": "Buscar",
+    "hint": "Escribí algo y presioná Buscar.",
+    "error": "Error al buscar.",
+    "empty": "Sin resultados.",
+    "allowNsfw": "Permitir contenido NSFW",
+    "moreFilters": "Más Filtros",
+    "clearAll": "limpiar todos",
+    "episodes": "episodios",
+    "unknown": "Desconocido",
+    "filters": {
+     "genres": "Géneros",
+     "year": "Año",
+     "season": "Temporada",
+     "format": "Formato",
+     "status": "Estado",
+     "streamingOn": "Disponible en",
+     "countryOfOrigin": "País de Origen",
+     "sourceMaterial": "Material Fuente",
+     "nsfw": "Contenido NSFW"
+   },
+   "seasons": {
+     "winter": "Invierno",
+     "spring": "Primavera",
+     "summer": "Verano",
+     "fall": "Otoño"
+   },
+   "formats": {
+     "tv": "TV",
+     "movie": "Película",
+     "ova": "OVA",
+     "special": "Especial",
+     "ona": "ONA",
+     "music": "Música",
+     "cm": "CM",
+     "pv": "PV",
+     "tv_special": "Especial de TV"
+   },
+   "statuses": {
+     "airing": "En Emisión",
+     "complete": "Completado",
+     "upcoming": "Próximamente"
+   },
+   "types": {
+     "anime": "Anime",
+     "manga": "Manga",
+     "characters": "Personajes",
+     "people": "Personas",
+     "studios": "Estudios"
+   }
+ },
 "topAnime": {
   "empty": "Sin elementos."
 },

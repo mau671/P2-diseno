@@ -119,12 +119,14 @@
   }
   body {
     @apply bg-background text-foreground overflow-x-hidden;
+    overflow-y: auto !important;
   }
 }
 
 html, body, #root {
   min-height: 100%;
   width: 100%;
+  scrollbar-gutter: stable;
 }
 
 @keyframes fadeInScale {
@@ -153,5 +155,74 @@ html, body, #root {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.708 0 0 / 0.3);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.556 0 0 / 0.5);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.708 0 0 / 0.4);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.708 0 0 / 0.6);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+[data-radix-dropdown-menu-content][data-state="open"] {
+  animation: none !important;
+}
+
+body {
+  scrollbar-gutter: stable;
+}
+
+[data-radix-popper-content-wrapper] {
+  z-index: 50;
+}
+
+*[data-radix-dropdown-menu-content] {
+  scrollbar-gutter: stable;
+}
+
+[data-radix-dropdown-menu-trigger][data-state="open"] ~ *,
+[data-radix-dropdown-menu-content][data-state="open"] ~ * {
+  scrollbar-gutter: stable;
+}
+
+[data-radix-dropdown-menu-checkbox-item] {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-radix-dropdown-menu-label] {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 

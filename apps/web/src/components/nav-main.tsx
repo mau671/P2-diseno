@@ -34,6 +34,7 @@ function saveSections(sections: Set<string>) {
   try {
     localStorage.setItem(SIDEBAR_SECTIONS_KEY, JSON.stringify(Array.from(sections)));
   } catch {
+    // Ignore localStorage errors
   }
 }
 
