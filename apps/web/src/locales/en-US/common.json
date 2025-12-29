@@ -31,7 +31,8 @@
   "loadError": "Failed to load data.",
   "scrollLeft": "Scroll left",
   "scrollRight": "Scroll right",
-  "tooManyRequests": "Too many requests. Please try again."
+  "tooManyRequests": "Too many requests. Please try again.",
+  "addToFavorites": "Add to favorites"
 },
 "search": {
    "placeholder": "Search anime...",
