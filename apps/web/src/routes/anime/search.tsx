@@ -39,7 +39,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ChevronDown, Info, ChevronLeft, ChevronRight, Search, X, Tags, Settings2 } from "lucide-react";
+import { ChevronDown, Info, ChevronLeft, ChevronRight, Search, X, Tags, Settings2, Heart } from "lucide-react";
 
 function AnimeCardSkeleton() {
   return (
@@ -97,6 +97,7 @@ function AnimeCard({ anime }: { anime: Anime }) {
   const { pastelColor } = useAnimePastelColor(img);
   const [placement, setPlacement] = React.useState<'left' | 'right'>('right');
   const [isHovered, setIsHovered] = React.useState(false);
+  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const cardRef = React.useRef<HTMLDivElement>(null);
 
   const seasonInfo = React.useMemo(() => {
@@ -178,6 +179,25 @@ function AnimeCard({ anime }: { anime: Anime }) {
         ) : (
           <div className="w-full h-full bg-muted" />
         )}
+        <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+          <TooltipTrigger asChild>
+            <button
+              className={`absolute bottom-2 right-2 transition-all duration-200 ease-out scale-95 z-10 bg-background/80 backdrop-blur-sm rounded-full p-2 hover:bg-background/90 hover:scale-110 shadow-lg cursor-pointer ${
+                isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              onMouseEnter={() => setIsTooltipOpen(true)}
+              onMouseLeave={() => setIsTooltipOpen(false)}
+            >
+              <Heart className="h-4 w-4 text-foreground transition-colors hover:text-red-500" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left" className="bg-popover text-popover-foreground border border-border">
+            <p>{t("common.addToFavorites")}</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       <div 
@@ -250,6 +270,7 @@ function AnimeResultCard({ item }: { item: SearchResult }) {
   const { pastelColor } = useAnimePastelColor(img);
   const [placement, setPlacement] = React.useState<'left' | 'right'>('right');
   const [isHovered, setIsHovered] = React.useState(false);
+  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const cardRef = React.useRef<HTMLDivElement>(null);
 
   const seasonInfo = React.useMemo(() => {
@@ -331,6 +352,25 @@ function AnimeResultCard({ item }: { item: SearchResult }) {
         ) : (
           <div className="w-full h-full bg-muted" />
         )}
+        <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+          <TooltipTrigger asChild>
+            <button
+              className={`absolute bottom-2 right-2 transition-all duration-200 ease-out scale-95 z-10 bg-background/80 backdrop-blur-sm rounded-full p-2 hover:bg-background/90 hover:scale-110 shadow-lg cursor-pointer ${
+                isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              onMouseEnter={() => setIsTooltipOpen(true)}
+              onMouseLeave={() => setIsTooltipOpen(false)}
+            >
+              <Heart className="h-4 w-4 text-foreground transition-colors hover:text-red-500" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left" className="bg-popover text-popover-foreground border border-border">
+            <p>{t("common.addToFavorites")}</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       <div 

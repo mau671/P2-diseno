@@ -31,7 +31,8 @@
   "loadError": "Error al cargar datos.",
   "scrollLeft": "Desplazar a la izquierda",
   "scrollRight": "Desplazar a la derecha",
-  "tooManyRequests": "Demasiadas solicitudes. Intentá de nuevo."
+  "tooManyRequests": "Demasiadas solicitudes. Intentá de nuevo.",
+  "addToFavorites": "Agregar a favoritos"
 },
   "search": {
     "placeholder": "Buscar anime...",
