@@ -5,10 +5,9 @@ export type SeasonInfo = {
   season: SeasonType;
 };
 
-//Obtiene la temporada actual basada en la fecha
 export function getCurrentSeason(): SeasonInfo {
   const now = new Date();
-  const month = now.getMonth() + 1; // 1-12
+  const month = now.getMonth() + 1;
   const year = now.getFullYear();
 
   let season: SeasonType;
@@ -20,7 +19,6 @@ export function getCurrentSeason(): SeasonInfo {
   return { year, season };
 }
 
-//Obtiene la temporada anterior
 export function getPreviousSeason(year: number, season: SeasonType): SeasonInfo {
   const seasons: SeasonType[] = ["winter", "spring", "summer", "fall"];
   const currentIndex = seasons.indexOf(season);
@@ -32,7 +30,6 @@ export function getPreviousSeason(year: number, season: SeasonType): SeasonInfo 
   }
 }
 
-//Obtiene la siguiente temporada
 export function getNextSeason(year: number, season: SeasonType): SeasonInfo {
   const seasons: SeasonType[] = ["winter", "spring", "summer", "fall"];
   const currentIndex = seasons.indexOf(season);
@@ -44,9 +41,6 @@ export function getNextSeason(year: number, season: SeasonType): SeasonInfo {
   }
 }
 
-
-//Verifica si una temporada es futura
- 
 export function isSeasonInFuture(year: number, season: SeasonType): boolean {
   const current = getCurrentSeason();
   if (year > current.year) return true;

@@ -1,4 +1,3 @@
-// apps/web/src/components/query-state.tsx
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/api/jikan";
 import { useTranslation } from "react-i18next";
@@ -15,7 +14,7 @@ type QueryStateProps = {
   error: unknown;
   isEmpty: boolean;
   onRetry?: () => void;
-  emptyText?: string; // si querés override desde afuera
+  emptyText?: string;
 };
 
 export function QueryState({
