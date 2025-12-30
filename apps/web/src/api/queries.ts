@@ -10,36 +10,7 @@ type JikanListResponse<T> = {
   };
 };
 
-export type Anime = {
-  mal_id: number;
-  title: string;
-  score?: number | null;
-  images?: {
-    jpg?: { image_url?: string; small_image_url?: string; large_image_url?: string };
-    webp?: { image_url?: string; small_image_url?: string; large_image_url?: string };
-  };
-  type?: string;
-  status?: string;
-  source?: string;
-  episodes?: number | null;
-  aired?: {
-    from?: string;
-    to?: string;
-  };
-  year?: number | null;
-  season?: string | null;
-  studios?: Array<{ name: string; mal_id: number }>;
-  genres?: Array<{ name: string; mal_id: number }>;
-  themes?: Array<{ name: string; mal_id: number }>;
-};
-
-export type Genre = {
-  mal_id: number;
-  name: string;
-  url?: string;
-};
-
-export type SearchResult = {
+export type AnimeBase = {
   mal_id: number;
   title?: string;
   name?: string;
@@ -66,6 +37,16 @@ export type SearchResult = {
   genres?: Array<{ name: string; mal_id: number }>;
   themes?: Array<{ name: string; mal_id: number }>;
 };
+
+export type Anime = AnimeBase & { title: string };
+
+export type Genre = {
+  mal_id: number;
+  name: string;
+  url?: string;
+};
+
+export type SearchResult = AnimeBase;
 
 async function fetchTopAnime(page = 1, signal?: AbortSignal) {
   return fetchJikan<JikanListResponse<Anime[]>>("/top/anime", { page }, { signal });
@@ -119,7 +100,7 @@ async function fetchSearch<T>(
 ) {
   const params: Record<string, string | number | boolean> = { page, sfw };
   
-  // Only include q parameter if it's not empty
+
   if (q.trim().length > 0) {
     params.q = q;
   }
@@ -212,7 +193,7 @@ export function useGenres() {
 
 export function getCurrentSeason(): { year: number; season: string } {
   const now = new Date();
-  const month = now.getMonth() + 1; // 1-12
+  const month = now.getMonth() + 1;
   const year = now.getFullYear();
 
   let season: string;

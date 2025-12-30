@@ -1,4 +1,3 @@
-// apps/web/src/routes/auth.tsx
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 function AuthLayout() {
