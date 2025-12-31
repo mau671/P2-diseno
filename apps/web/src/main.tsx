@@ -11,6 +11,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { RouterProvider } from "@tanstack/react-router"
 import { router } from "./router"
 import { ThemeProvider } from "./components/theme-provider"
+import { AuthProvider } from "./context/auth-context"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,10 +39,12 @@ const persister = createSyncStoragePersister({
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-        <RouterProvider router={router} />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </PersistQueryClientProvider>
+      <AuthProvider> 
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+          <RouterProvider router={router} />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </PersistQueryClientProvider>
+      </AuthProvider> 
     </ThemeProvider>
   </React.StrictMode>,
 )

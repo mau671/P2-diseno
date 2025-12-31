@@ -4,6 +4,9 @@ import type { AnimeBase } from "@/api/queries";
 import { useStablePastelColor } from "@/hooks/useStablePastelColor";
 import { useCardTooltip } from "@/hooks/useCardTooltip";
 import { useAnimeCardData } from "@/hooks/useAnimeCardData";
+import { useAuth } from "@/hooks/use-auth";
+import { useUserProfile } from "@/hooks/use-user-profile";
+import { useNavigate } from "@tanstack/react-router";
 import {
   Tooltip,
   TooltipContent,
@@ -25,7 +28,11 @@ function AnimeCard({ anime }: AnimeCardProps) {
   const { pastelColor } = useStablePastelColor(anime.mal_id);
   const cardRef = React.useRef<HTMLDivElement>(null);
   const [isButtonVisible, setIsButtonVisible] = React.useState(false);
-  const [isFavorited, setIsFavorited] = React.useState(false);
+  
+  const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useUserProfile();
+  const navigate = useNavigate();
+  const isFavorited = isFavorite(anime.mal_id);
 
   const { placement, handleMouseEnter, handleMouseLeave } = useCardTooltip(cardRef);
   const { seasonInfo, scoreColor, typeInfo } = useAnimeCardData(anime);
@@ -42,7 +49,13 @@ function AnimeCard({ anime }: AnimeCardProps) {
 
   const handleHeartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsFavorited(!isFavorited);
+    
+    if (!user) {
+      navigate({ to: "/auth/login" });
+      return;
+    }
+    
+    toggleFavorite(anime.mal_id);
   };
 
   return (
@@ -76,7 +89,7 @@ function AnimeCard({ anime }: AnimeCardProps) {
             </button>
           </TooltipTrigger>
           <TooltipContent side="left" className="bg-popover text-popover-foreground border border-border">
-            <p>{t("common.addToFavorites")}</p>
+            <p>{isFavorited ? t("common.removeFromFavorites") : t("common.addToFavorites")}</p>
           </TooltipContent>
         </Tooltip>
       </div>

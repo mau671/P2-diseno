@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { Outlet, createRootRoute, useLocation } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
@@ -46,6 +46,10 @@ function RootLayout() {
         label = t("sections.search");
       } else if (segment === "catalog") {
         label = t("sections.catalog");
+      } else if (segment === "user") {
+      label = t("sections.user");
+      } else if (segment === "favorites") {
+        label = t("sections.favorites");
       } else if (segment === "auth") {
         label = "Auth";
       } else if (segment === "login") {
@@ -53,6 +57,7 @@ function RootLayout() {
       } else if (segment === "register") {
         label = t("auth.register.title");
       }
+      
 
       breadcrumbs.push({ label, href: currentPath, isLast });
     });

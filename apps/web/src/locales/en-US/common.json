@@ -32,7 +32,8 @@
   "scrollLeft": "Scroll left",
   "scrollRight": "Scroll right",
   "tooManyRequests": "Too many requests. Please try again.",
-  "addToFavorites": "Add to favorites"
+  "addToFavorites": "Add to favorites",
+  "removeFromFavorites": "Remove from favorites"
 },
 "search": {
    "placeholder": "Search anime...",
@@ -116,9 +117,12 @@
     "en": "English (United States)"
   },
   "auth": {
+    "logout": "Sign out",
     "login": {
       "title": "Sign In",
       "welcomeBack": "Welcome back",
+      "accessAccount": "Access your account",
+      "signIn": "Sign in",
       "socialLogin": "Login with your Apple or Google account",
       "loginWithApple": "Login with Apple",
       "loginWithGoogle": "Login with Google",
@@ -171,6 +175,19 @@
       "and": "and",
       "privacyPolicy": "Privacy Policy"
     }
+  },
+  "user": {
+  "defaultName": "User",
+  "myProfile": "My Profile",
+  "favorites": "Favorites",
+  "myLists": "My Lists"
+  },
+  "favorites": {
+  "notLoggedIn": "You're not logged in",
+  "loginToView": "Sign in to view your favorite anime",
+  "empty": "No favorites yet",
+  "emptyDescription": "Start adding anime to your favorites!",
+  "count": "{{count}} favorite anime"
   }
 }
 

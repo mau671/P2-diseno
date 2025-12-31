@@ -1,4 +1,4 @@
-{
+﻿{
   "app": { "title": "Anime App" },
   "nav": {
     "home": "Inicio",
@@ -21,7 +21,8 @@
     "catalogDescription": "Explora el catálogo de animes",
     "trendingNow": "Tendencias ahora",
     "upcomingNextSeason": "Próxima temporada",
-    "allTimePopular": "Populares de todos los tiempos"
+    "allTimePopular": "Populares de todos los tiempos",
+    "user": "Usuario"
   },
   "common": {
   "loading": "Cargando...",
@@ -32,7 +33,8 @@
   "scrollLeft": "Desplazar a la izquierda",
   "scrollRight": "Desplazar a la derecha",
   "tooManyRequests": "Demasiadas solicitudes. Intentá de nuevo.",
-  "addToFavorites": "Agregar a favoritos"
+  "addToFavorites": "Agregar a favoritos",
+  "removeFromFavorites": "Quitar de favoritos"
 },
   "search": {
     "placeholder": "Buscar anime...",
@@ -116,9 +118,12 @@
     "en": "Inglés (Estados Unidos)"
   },
   "auth": {
+    "logout": "Cerrar sesión",
     "login": {
       "title": "Iniciar Sesión",
       "welcomeBack": "Bienvenido de nuevo",
+      "signIn": "Iniciar sesión",
+      "accessAccount": "Accede a tu cuenta",
       "socialLogin": "Inicia sesión con tu cuenta de Apple o Google",
       "loginWithApple": "Iniciar sesión con Apple",
       "loginWithGoogle": "Iniciar sesión con Google",
@@ -171,5 +176,18 @@
       "and": "y",
       "privacyPolicy": "Política de Privacidad"
     }
+  },
+  "user": {
+  "defaultName": "Usuario",
+  "myProfile": "Mi Perfil",
+  "favorites": "Favoritos",
+  "myLists": "Mis Listas"
+  },
+  "favorites": {
+  "notLoggedIn": "No has iniciado sesión",
+  "loginToView": "Inicia sesión para ver tus anime favoritos",
+  "empty": "Aún no tienes favoritos",
+  "emptyDescription": "¡Comienza a agregar anime a tus favoritos!",
+  "count": "{{count}} anime favoritos"
   }
 }
