@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, useLocation } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useQueryState, parseAsBoolean } from "nuqs";
 import { useDebouncedState } from "@tanstack/react-pacer";
@@ -19,6 +19,7 @@ import { useAnimePastelColor } from "@/hooks/useAnimePastelColor";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { getTranslatedErrorMessage } from "@/lib/error-utils";
+import { slugify } from "@/lib/slug";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,11 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChevronDown, Info, ChevronLeft, ChevronRight, Search, X, Tags, Settings2, Heart } from "lucide-react";
 
 function AnimeCardSkeleton() {
@@ -90,25 +87,62 @@ const TYPE_TO_ENDPOINT: Record<SearchType, string> = {
   studios: "producers",
 };
 
+function keyFromLabel(raw?: string | null) {
+  if (!raw) return null;
+  return raw.trim().toLowerCase().replace(/[^\w]+/g, "_");
+}
+
+function translateFormatLabel(t: any, rawType?: string | null) {
+  const key = keyFromLabel(rawType);
+  if (!key) return null;
+  return t(`search.formats.${key}` as any, { defaultValue: rawType?.toUpperCase?.() ?? String(rawType) });
+}
+
+function getFromHref(location: any) {
+  return (location as any)?.href ?? `${window.location.pathname}${window.location.search}`;
+}
+
+function normalizeSeason(raw?: unknown): Season | null {
+  if (typeof raw !== "string") return null;
+  return (SEASONS as readonly string[]).includes(raw) ? (raw as Season) : null;
+}
+
 function AnimeCard({ anime }: { anime: Anime }) {
-  const img = anime?.images?.webp?.large_image_url || anime?.images?.jpg?.large_image_url || anime?.images?.webp?.image_url || anime?.images?.jpg?.image_url;
-  const title = anime.title;
+  const location = useLocation();
+  const from = getFromHref(location);
+
+  const img =
+    anime?.images?.webp?.large_image_url ||
+    anime?.images?.jpg?.large_image_url ||
+    anime?.images?.webp?.image_url ||
+    anime?.images?.jpg?.image_url;
+
   const { t } = useTranslation();
+  const tAny = t as unknown as (key: string, options?: any) => string;
+
   const { pastelColor } = useAnimePastelColor(img);
-  const [placement, setPlacement] = React.useState<'left' | 'right'>('right');
+
+  const [placement, setPlacement] = React.useState<"left" | "right">("right");
   const [isHovered, setIsHovered] = React.useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
-  const cardRef = React.useRef<HTMLDivElement>(null);
+  const cardRef = React.useRef<HTMLAnchorElement>(null);
+
+  const titleForSlug = React.useMemo(() => {
+    return ((anime as any)?.title_english || anime.title || "anime") as string;
+  }, [anime]);
+
+  const slug = React.useMemo(() => slugify(titleForSlug), [titleForSlug]);
 
   const seasonInfo = React.useMemo(() => {
-    if (anime.season && anime.year) {
-      return t(`seasons.${anime.season}`) + " " + anime.year;
+    const season = normalizeSeason((anime as any).season);
+    if (season && anime.year) {
+      return `${tAny(`seasons.${season}`)} ${anime.year}`;
     }
     if (anime.aired?.from) {
       return new Date(anime.aired.from).getFullYear().toString();
     }
     return null;
-  }, [anime.season, anime.year, anime.aired, t]);
+  }, [anime, anime.aired, anime.year, tAny]);
 
   const scoreColor = React.useMemo(() => {
     if (!anime.score) return "#6b7280";
@@ -120,20 +154,23 @@ function AnimeCard({ anime }: { anime: Anime }) {
 
   const typeInfo = React.useMemo(() => {
     if (!anime.type) return null;
+    const typeLabel = translateFormatLabel(tAny, anime.type) ?? anime.type.toUpperCase();
     if (anime.episodes !== undefined && anime.episodes !== null) {
-      return `${anime.type.toUpperCase()} • ${anime.episodes} ${t("search.episodes", "episodios")}`;
+      return `${String(typeLabel).toUpperCase()} • ${anime.episodes} ${tAny("search.episodes", {
+        defaultValue: "episodios",
+      })}`;
     }
-    return anime.type.toUpperCase();
-  }, [anime.type, anime.episodes, t]);
+    return String(typeLabel).toUpperCase();
+  }, [anime.type, anime.episodes, tAny]);
 
   const updatePlacement = React.useCallback(() => {
     if (!cardRef.current) return;
-    
+
     const rect = cardRef.current.getBoundingClientRect();
     const windowWidth = window.innerWidth;
     const cardCenterX = rect.left + rect.width / 2;
-    
-    setPlacement(cardCenterX < windowWidth / 2 ? 'right' : 'left');
+
+    setPlacement(cardCenterX < windowWidth / 2 ? "right" : "left");
   }, []);
 
   React.useEffect(() => {
@@ -143,14 +180,9 @@ function AnimeCard({ anime }: { anime: Anime }) {
   React.useEffect(() => {
     if (!isHovered) return;
 
-    const handleScroll = () => {
-      updatePlacement();
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    const handleScroll = () => updatePlacement();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [isHovered, updatePlacement]);
 
   const handleMouseEnter = () => {
@@ -158,58 +190,61 @@ function AnimeCard({ anime }: { anime: Anime }) {
     updatePlacement();
   };
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
+  const handleMouseLeave = () => setIsHovered(false);
 
   return (
-    <div 
-      className="flex-shrink-0 w-36 md:w-44 cursor-pointer group relative"
+    <Link
+      to="/anime/$id/$slug"
+      params={{ id: String(anime.mal_id), slug }}
+      search={{ from }}
       ref={cardRef}
+      className="flex-shrink-0 w-36 md:w-44 cursor-pointer group relative block"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <div className="relative overflow-hidden rounded-lg bg-muted aspect-[2/3]">
         {img ? (
-          <img
-            src={img}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
+          <img src={img} alt={anime.title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full bg-muted" />
         )}
+
         <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
           <TooltipTrigger asChild>
             <button
               className={`absolute bottom-2 right-2 transition-all duration-200 ease-out scale-95 z-10 bg-background/80 backdrop-blur-sm rounded-full p-2 hover:bg-background/90 hover:scale-110 shadow-lg cursor-pointer ${
-                isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+                isHovered ? "opacity-100 scale-100" : "opacity-0"
               }`}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
+                // TODO: add to favorites
               }}
               onMouseEnter={() => setIsTooltipOpen(true)}
               onMouseLeave={() => setIsTooltipOpen(false)}
+              aria-label={tAny("common.addToFavorites", { defaultValue: "Add to favorites" })}
             >
               <Heart className="h-4 w-4 text-foreground transition-colors hover:text-red-500" />
             </button>
           </TooltipTrigger>
           <TooltipContent side="left" className="bg-popover text-popover-foreground border border-border">
-            <p>{t("common.addToFavorites")}</p>
+            <p>{tAny("common.addToFavorites", { defaultValue: "Add to favorites" })}</p>
           </TooltipContent>
         </Tooltip>
       </div>
 
-      <div 
-        className={`absolute top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out z-50 pointer-events-none w-72 ${placement === 'right' ? 'left-full ml-4 -translate-x-2 group-hover:translate-x-0' : 'right-full mr-4 translate-x-2 group-hover:translate-x-0'}`}
+      <div
+        className={`absolute top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out z-50 pointer-events-none w-72 ${
+          placement === "right"
+            ? "left-full ml-4 -translate-x-2 group-hover:translate-x-0"
+            : "right-full mr-4 translate-x-2 group-hover:translate-x-0"
+        }`}
       >
         <div className="bg-card border rounded-lg p-3 shadow-2xl shadow-black/20 pointer-events-auto">
           <div className="flex items-center justify-between mb-2">
-            {seasonInfo && (
-              <span className="text-sm font-medium">{seasonInfo}</span>
-            )}
+            {seasonInfo && <span className="text-sm font-medium">{seasonInfo}</span>}
             {anime.score !== undefined && anime.score !== null && (
-              <span 
+              <span
                 className="text-sm font-bold px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: `${scoreColor}20`, color: scoreColor }}
               >
@@ -219,16 +254,10 @@ function AnimeCard({ anime }: { anime: Anime }) {
           </div>
 
           {anime.studios && anime.studios.length > 0 && (
-            <div className="text-xs text-muted-foreground mb-1">
-              {anime.studios.map((s) => s.name).join(", ")}
-            </div>
+            <div className="text-xs text-muted-foreground mb-1">{anime.studios.map((s) => s.name).join(", ")}</div>
           )}
 
-          {typeInfo && (
-            <div className="text-xs text-muted-foreground mb-2">
-              {typeInfo}
-            </div>
-          )}
+          {typeInfo && <div className="text-xs text-muted-foreground mb-2">{typeInfo}</div>}
 
           {anime.genres && anime.genres.length > 0 && (
             <div className="flex flex-wrap gap-1">
@@ -236,12 +265,12 @@ function AnimeCard({ anime }: { anime: Anime }) {
                 <span
                   key={genre.mal_id}
                   className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ 
-                    backgroundColor: `${pastelColor || '#a855f7'}30`, 
-                    color: pastelColor || '#a855f7' 
+                  style={{
+                    backgroundColor: `${pastelColor || "#a855f7"}30`,
+                    color: pastelColor || "#a855f7",
                   }}
                 >
-                  {genre.name}
+                  {tAny(`genres.${genre.mal_id}`, { defaultValue: genre.name })}
                 </span>
               ))}
             </div>
@@ -249,64 +278,84 @@ function AnimeCard({ anime }: { anime: Anime }) {
         </div>
       </div>
 
-      <div 
+      <div
         className="text-sm font-medium line-clamp-2 mt-2 transition-colors"
-        style={{ 
-          '--hover-color': pastelColor || '#a855f7' 
-        } as React.CSSProperties}
+        style={{ "--hover-color": pastelColor || "#a855f7" } as React.CSSProperties}
       >
-        <span className="group-hover:[color:var(--hover-color)] transition-colors">
-          {title}
-        </span>
+        <span className="group-hover:[color:var(--hover-color)] transition-colors">{anime.title}</span>
       </div>
-    </div>
+    </Link>
   );
 }
 
-function AnimeResultCard({ item }: { item: SearchResult }) {
-  const img = item?.images?.webp?.large_image_url || item?.images?.jpg?.large_image_url || item?.images?.webp?.image_url || item?.images?.jpg?.image_url;
-  const title = item.title || item.name || item.titles?.[0]?.title;
+function SearchResultCard({ item, searchType }: { item: SearchResult; searchType: SearchType }) {
+  const location = useLocation();
+  const from = getFromHref(location);
+
+  const img =
+    item?.images?.webp?.large_image_url ||
+    item?.images?.jpg?.large_image_url ||
+    item?.images?.webp?.image_url ||
+    item?.images?.jpg?.image_url;
+
   const { t } = useTranslation();
+  const tAny = t as unknown as (key: string, options?: any) => string;
+
   const { pastelColor } = useAnimePastelColor(img);
-  const [placement, setPlacement] = React.useState<'left' | 'right'>('right');
+
+  const [placement, setPlacement] = React.useState<"left" | "right">("right");
   const [isHovered, setIsHovered] = React.useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
-  const cardRef = React.useRef<HTMLDivElement>(null);
+
+  const cardRef = React.useRef<HTMLAnchorElement | HTMLDivElement>(null);
+
+  const title = (item.title || item.name || item.titles?.[0]?.title || "Untitled") as string;
+  const titleForSlug = ((item as any)?.title_english || title) as string;
+  const slug = React.useMemo(() => slugify(titleForSlug), [titleForSlug]);
 
   const seasonInfo = React.useMemo(() => {
-    if (item.season && item.year) {
-      return t(`seasons.${item.season}`) + " " + item.year;
+    const season = normalizeSeason((item as any).season);
+    const year = (item as any).year as number | undefined;
+    if (season && year) {
+      return `${tAny(`seasons.${season}`)} ${year}`;
     }
-    if (item.aired?.from) {
-      return new Date(item.aired.from).getFullYear().toString();
+    if ((item as any).aired?.from) {
+      return new Date((item as any).aired.from).getFullYear().toString();
     }
     return null;
-  }, [item.season, item.year, item.aired, t]);
+  }, [item, tAny]);
 
   const scoreColor = React.useMemo(() => {
-    if (!item.score) return "#6b7280";
-    if (item.score >= 8) return "#22c55e";
-    if (item.score >= 6) return "#84cc16";
-    if (item.score >= 4) return "#f59e0b";
+    const score = (item as any).score as number | undefined;
+    if (!score) return "#6b7280";
+    if (score >= 8) return "#22c55e";
+    if (score >= 6) return "#84cc16";
+    if (score >= 4) return "#f59e0b";
     return "#ef4444";
-  }, [item.score]);
+  }, [item]);
 
   const typeInfo = React.useMemo(() => {
-    if (!item.type) return null;
-    if (item.episodes !== undefined && item.episodes !== null) {
-      return `${item.type.toUpperCase()} • ${item.episodes} ${t("search.episodes", "episodios")}`;
+    const rawType = (item as any).type as string | undefined;
+    if (!rawType) return null;
+    const typeLabel = translateFormatLabel(tAny, rawType) ?? rawType.toUpperCase();
+
+    const episodes = (item as any).episodes as number | undefined;
+    if (episodes !== undefined && episodes !== null) {
+      return `${String(typeLabel).toUpperCase()} • ${episodes} ${tAny("search.episodes", { defaultValue: "episodios" })}`;
     }
-    return item.type.toUpperCase();
-  }, [item.type, item.episodes, t]);
+    return String(typeLabel).toUpperCase();
+  }, [item, tAny]);
 
   const updatePlacement = React.useCallback(() => {
     if (!cardRef.current) return;
-    
-    const rect = cardRef.current.getBoundingClientRect();
+
+    const rect = (cardRef.current as any).getBoundingClientRect?.();
+    if (!rect) return;
+
     const windowWidth = window.innerWidth;
     const cardCenterX = rect.left + rect.width / 2;
-    
-    setPlacement(cardCenterX < windowWidth / 2 ? 'right' : 'left');
+
+    setPlacement(cardCenterX < windowWidth / 2 ? "right" : "left");
   }, []);
 
   React.useEffect(() => {
@@ -316,14 +365,9 @@ function AnimeResultCard({ item }: { item: SearchResult }) {
   React.useEffect(() => {
     if (!isHovered) return;
 
-    const handleScroll = () => {
-      updatePlacement();
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    const handleScroll = () => updatePlacement();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [isHovered, updatePlacement]);
 
   const handleMouseEnter = () => {
@@ -331,108 +375,129 @@ function AnimeResultCard({ item }: { item: SearchResult }) {
     updatePlacement();
   };
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
+  const handleMouseLeave = () => setIsHovered(false);
+
+  const isAnime = searchType === "anime";
+  const externalUrl = (item as any)?.url as string | undefined;
+
+  const Wrapper: React.ElementType = isAnime ? Link : "div";
+  const wrapperProps: any = isAnime
+    ? {
+        to: "/anime/$id/$slug",
+        params: { id: String((item as any).mal_id), slug },
+        search: { from },
+      }
+    : {
+        role: externalUrl ? "link" : undefined,
+        tabIndex: externalUrl ? 0 : undefined,
+        onClick: externalUrl ? () => window.open(externalUrl, "_blank", "noopener,noreferrer") : undefined,
+        onKeyDown: externalUrl
+          ? (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                window.open(externalUrl, "_blank", "noopener,noreferrer");
+              }
+            }
+          : undefined,
+      };
 
   return (
-    <div 
-      className="flex-shrink-0 w-36 md:w-44 cursor-pointer group relative"
-      ref={cardRef}
+    <Wrapper
+      {...wrapperProps}
+      ref={cardRef as any}
+      className="flex-shrink-0 w-36 md:w-44 cursor-pointer group relative block"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <div className="relative overflow-hidden rounded-lg bg-muted aspect-[2/3]">
         {img ? (
-          <img
-            src={img}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
+          <img src={img} alt={title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full bg-muted" />
         )}
+
         <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
           <TooltipTrigger asChild>
             <button
               className={`absolute bottom-2 right-2 transition-all duration-200 ease-out scale-95 z-10 bg-background/80 backdrop-blur-sm rounded-full p-2 hover:bg-background/90 hover:scale-110 shadow-lg cursor-pointer ${
-                isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+                isHovered ? "opacity-100 scale-100" : "opacity-0"
               }`}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
+                // TODO: add to favorites
               }}
               onMouseEnter={() => setIsTooltipOpen(true)}
               onMouseLeave={() => setIsTooltipOpen(false)}
+              aria-label={tAny("common.addToFavorites", { defaultValue: "Add to favorites" })}
             >
               <Heart className="h-4 w-4 text-foreground transition-colors hover:text-red-500" />
             </button>
           </TooltipTrigger>
           <TooltipContent side="left" className="bg-popover text-popover-foreground border border-border">
-            <p>{t("common.addToFavorites")}</p>
+            <p>{tAny("common.addToFavorites", { defaultValue: "Add to favorites" })}</p>
           </TooltipContent>
         </Tooltip>
       </div>
 
-      <div 
-        className={`absolute top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out z-50 pointer-events-none w-72 ${placement === 'right' ? 'left-full ml-4 -translate-x-2 group-hover:translate-x-0' : 'right-full mr-4 translate-x-2 group-hover:translate-x-0'}`}
+      <div
+        className={`absolute top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out z-50 pointer-events-none w-72 ${
+          placement === "right"
+            ? "left-full ml-4 -translate-x-2 group-hover:translate-x-0"
+            : "right-full mr-4 translate-x-2 group-hover:translate-x-0"
+        }`}
       >
         <div className="bg-card border rounded-lg p-3 shadow-2xl shadow-black/20 pointer-events-auto">
           <div className="flex items-center justify-between mb-2">
-            {seasonInfo && (
-              <span className="text-sm font-medium">{seasonInfo}</span>
-            )}
-            {item.score !== undefined && item.score !== null && (
-              <span 
+            {seasonInfo && <span className="text-sm font-medium">{seasonInfo}</span>}
+            {(item as any).score !== undefined && (item as any).score !== null && (
+              <span
                 className="text-sm font-bold px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: `${scoreColor}20`, color: scoreColor }}
               >
-                {item.score}
+                {(item as any).score}
               </span>
             )}
           </div>
 
-          {item.studios && item.studios.length > 0 && (
+          {(item as any).studios && (item as any).studios.length > 0 && (
             <div className="text-xs text-muted-foreground mb-1">
-              {item.studios.map((s) => s.name).join(", ")}
+              {(item as any).studios.map((s: any) => s.name).join(", ")}
             </div>
           )}
 
-          {typeInfo && (
-            <div className="text-xs text-muted-foreground mb-2">
-              {typeInfo}
-            </div>
-          )}
+          {typeInfo && <div className="text-xs text-muted-foreground mb-2">{typeInfo}</div>}
 
-          {item.genres && item.genres.length > 0 && (
+          {(item as any).genres && (item as any).genres.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {item.genres.slice(0, 3).map((genre) => (
+              {(item as any).genres.slice(0, 3).map((genre: any) => (
                 <span
                   key={genre.mal_id}
                   className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ 
-                    backgroundColor: `${pastelColor || '#a855f7'}30`, 
-                    color: pastelColor || '#a855f7' 
+                  style={{
+                    backgroundColor: `${pastelColor || "#a855f7"}30`,
+                    color: pastelColor || "#a855f7",
                   }}
                 >
-                  {genre.name}
+                  {tAny(`genres.${genre.mal_id}`, { defaultValue: genre.name })}
                 </span>
               ))}
             </div>
           )}
+
+          {!isAnime && externalUrl ? (
+            <div className="text-xs text-muted-foreground mt-2">{tAny("common.openExternal", { defaultValue: "Open external page" })}</div>
+          ) : null}
         </div>
       </div>
 
-      <div 
+      <div
         className="text-sm font-medium line-clamp-2 mt-2 transition-colors"
-        style={{ 
-          '--hover-color': pastelColor || '#a855f7' 
-        } as React.CSSProperties}
+        style={{ "--hover-color": pastelColor || "#a855f7" } as React.CSSProperties}
       >
-        <span className="group-hover:[color:var(--hover-color)] transition-colors">
-          {title}
-        </span>
+        <span className="group-hover:[color:var(--hover-color)] transition-colors">{title}</span>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 
@@ -468,12 +533,21 @@ function SearchTags({
   onClearAll: () => void;
 }) {
   const { t } = useTranslation();
+  const tAny = t as unknown as (key: string, options?: any) => string;
 
   const genreObjects = React.useMemo(() => {
-    return selectedGenres.map(id => genres.find(g => g.mal_id === id)).filter((g): g is Genre => g !== undefined);
+    return selectedGenres
+      .map((id) => genres.find((g) => g.mal_id === id))
+      .filter((g): g is Genre => g !== undefined);
   }, [selectedGenres, genres]);
 
-  const hasAnyFilters = query || selectedGenres.length > 0 || selectedYear !== null || selectedSeason !== null || selectedFormats.length > 0 || selectedStatuses.length > 0;
+  const hasAnyFilters =
+    query ||
+    selectedGenres.length > 0 ||
+    selectedYear !== null ||
+    selectedSeason !== null ||
+    selectedFormats.length > 0 ||
+    selectedStatuses.length > 0;
 
   return (
     <div className="group flex items-center gap-2 flex-wrap">
@@ -496,7 +570,7 @@ function SearchTags({
           key={genre.mal_id}
           className="group/tag relative inline-flex items-center gap-0 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-1 rounded-md text-sm transition-colors cursor-pointer overflow-hidden"
         >
-          <span className="max-w-[200px] truncate">{genre.name}</span>
+          <span className="max-w-[200px] truncate">{tAny(`genres.${genre.mal_id}`, { defaultValue: genre.name })}</span>
           <button
             onClick={() => onClearGenre(genre.mal_id)}
             className="opacity-0 group-hover/tag:opacity-100 w-0 group-hover/tag:w-auto group-hover/tag:ml-2 overflow-hidden transition-all hover:text-destructive flex-shrink-0 cursor-pointer"
@@ -508,7 +582,9 @@ function SearchTags({
 
       {selectedYear && (
         <div className="group/tag relative inline-flex items-center gap-0 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-1 rounded-md text-sm transition-colors cursor-pointer overflow-hidden">
-          <span>{t("search.filters.year")}: {selectedYear}</span>
+          <span>
+            {tAny("search.filters.year")}: {selectedYear}
+          </span>
           <button
             onClick={onClearYear}
             className="opacity-0 group-hover/tag:opacity-100 w-0 group-hover/tag:w-auto group-hover/tag:ml-2 overflow-hidden transition-all hover:text-destructive flex-shrink-0 cursor-pointer"
@@ -520,7 +596,7 @@ function SearchTags({
 
       {selectedSeason && selectedYear && (
         <div className="group/tag relative inline-flex items-center gap-0 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-1 rounded-md text-sm transition-colors cursor-pointer overflow-hidden">
-          <span>{t(`search.seasons.${selectedSeason}`)}</span>
+          <span>{tAny(`search.seasons.${selectedSeason}`)}</span>
           <button
             onClick={onClearSeason}
             className="opacity-0 group-hover/tag:opacity-100 w-0 group-hover/tag:w-auto group-hover/tag:ml-2 overflow-hidden transition-all hover:text-destructive flex-shrink-0 cursor-pointer"
@@ -535,7 +611,7 @@ function SearchTags({
           key={format}
           className="group/tag relative inline-flex items-center gap-0 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-1 rounded-md text-sm transition-colors cursor-pointer overflow-hidden"
         >
-          <span>{t(`search.formats.${format}`)}</span>
+          <span>{tAny(`search.formats.${format}`)}</span>
           <button
             onClick={onClearFormats}
             className="opacity-0 group-hover/tag:opacity-100 w-0 group-hover/tag:w-auto group-hover/tag:ml-2 overflow-hidden transition-all hover:text-destructive flex-shrink-0 cursor-pointer"
@@ -550,7 +626,7 @@ function SearchTags({
           key={status}
           className="group/tag relative inline-flex items-center gap-0 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-1 rounded-md text-sm transition-colors cursor-pointer overflow-hidden"
         >
-          <span>{t(`search.statuses.${status}`)}</span>
+          <span>{tAny(`search.statuses.${status}`)}</span>
           <button
             onClick={onClearStatuses}
             className="opacity-0 group-hover/tag:opacity-100 w-0 group-hover/tag:w-auto group-hover/tag:ml-2 overflow-hidden transition-all hover:text-destructive flex-shrink-0 cursor-pointer"
@@ -565,26 +641,27 @@ function SearchTags({
           onClick={onClearAll}
           className="opacity-0 group-hover:opacity-100 transition-opacity bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-1 rounded-md text-sm transition-colors cursor-pointer"
         >
-          {t("search.clearAll")}
+          {tAny("search.clearAll")}
         </button>
       )}
     </div>
   );
 }
 
-function AnimeSection({ 
-  title, 
-  infiniteQuery 
-}: { 
-  title: string; 
+function AnimeSection({
+  title,
+  infiniteQuery,
+}: {
+  title: string;
   infiniteQuery: ReturnType<typeof useSeasonsNow> | ReturnType<typeof useSeasonsUpcoming> | ReturnType<typeof useTopAnimeByPopularity>;
 }) {
   const { t } = useTranslation();
+  const tAny = t as unknown as (key: string, options?: any) => string;
+
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
   const fetchNextPageRef = React.useRef(infiniteQuery.fetchNextPage);
 
-  // Combine all pages into a single array
   const allItems = React.useMemo(() => {
     return infiniteQuery.data?.pages.flatMap((page) => page.data ?? []) ?? [];
   }, [infiniteQuery.data]);
@@ -596,28 +673,25 @@ function AnimeSection({
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
 
-  // Update fetchNextPage ref when it changes
   React.useEffect(() => {
     fetchNextPageRef.current = infiniteQuery.fetchNextPage;
   }, [infiniteQuery.fetchNextPage]);
 
-  // Infinite scroll: detect when loadMoreRef is visible or when near the end of scroll
   React.useEffect(() => {
     if (!infiniteQuery.hasNextPage || infiniteQuery.isFetchingNextPage) return;
 
     const checkScrollPosition = () => {
       if (!scrollRef.current || !loadMoreRef.current) return;
-      
+
       const container = scrollRef.current;
       const { scrollLeft, scrollWidth, clientWidth } = container;
       const loadMoreElement = loadMoreRef.current;
-      
-      // Check if loadMore element is visible or if we're near the end (within 200px)
+
       const isNearEnd = scrollLeft + clientWidth >= scrollWidth - 200;
       const loadMoreRect = loadMoreElement.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
       const isVisible = loadMoreRect.left < containerRect.right + 200;
-      
+
       if ((isNearEnd || isVisible) && infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) {
         fetchNextPageRef.current();
       }
@@ -625,44 +699,32 @@ function AnimeSection({
 
     const container = scrollRef.current;
     if (container) {
-      container.addEventListener('scroll', checkScrollPosition, { passive: true });
-      // Also check on initial load
+      container.addEventListener("scroll", checkScrollPosition, { passive: true });
       checkScrollPosition();
     }
 
     return () => {
-      if (container) {
-        container.removeEventListener('scroll', checkScrollPosition);
-      }
+      if (container) container.removeEventListener("scroll", checkScrollPosition);
     };
   }, [infiniteQuery.hasNextPage, infiniteQuery.isFetchingNextPage, uniqueItems.length]);
 
-  const scroll = (direction: 'left' | 'right') => {
+  const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
-    // Use a smaller scroll amount for smoother animation
     const scrollAmount = scrollRef.current.clientWidth * 0.6;
-    
-    // Use requestAnimationFrame for smoother scrolling
-      const startScroll = scrollRef.current.scrollLeft;
-      const targetScroll = direction === 'left' 
-        ? startScroll - scrollAmount 
-        : startScroll + scrollAmount;
-      const startTime = performance.now();
-      const duration = 400;
+
+    const startScroll = scrollRef.current.scrollLeft;
+    const targetScroll = direction === "left" ? startScroll - scrollAmount : startScroll + scrollAmount;
+    const startTime = performance.now();
+    const duration = 400;
 
     const animateScroll = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
-      // Easing function for smooth animation
       const ease = 1 - Math.pow(1 - progress, 3);
-      
+
       if (scrollRef.current) {
         scrollRef.current.scrollLeft = startScroll + (targetScroll - startScroll) * ease;
-        
-        if (progress < 1) {
-          requestAnimationFrame(animateScroll);
-        }
+        if (progress < 1) requestAnimationFrame(animateScroll);
       }
     };
 
@@ -679,13 +741,11 @@ function AnimeSection({
   React.useEffect(() => {
     const ref = scrollRef.current;
     if (ref) {
-      ref.addEventListener('scroll', updateScrollButtons, { passive: true });
+      ref.addEventListener("scroll", updateScrollButtons, { passive: true });
       updateScrollButtons();
     }
     return () => {
-      if (ref) {
-        ref.removeEventListener('scroll', updateScrollButtons);
-      }
+      if (ref) ref.removeEventListener("scroll", updateScrollButtons);
     };
   }, [uniqueItems]);
 
@@ -702,28 +762,29 @@ function AnimeSection({
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">{title}</h2>
         <div className="flex gap-1">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => scroll('left')} 
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => scroll("left")}
             disabled={!canScrollLeft}
             className="h-8 w-8 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label={t("common.scrollLeft")}
+            aria-label={tAny("common.scrollLeft", { defaultValue: "Scroll left" })}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => scroll('right')} 
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => scroll("right")}
             disabled={!canScrollRight}
             className="h-8 w-8 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label={t("common.scrollRight")}
+            aria-label={tAny("common.scrollRight", { defaultValue: "Scroll right" })}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
+
       {isLoading ? (
         <AnimeHorizontalSkeleton />
       ) : (
@@ -735,9 +796,8 @@ function AnimeSection({
             {uniqueItems.map((anime) => (
               <AnimeCard key={anime.mal_id} anime={anime} />
             ))}
-            {skeletonCount > 0 && Array.from({ length: skeletonCount }).map((_, i) => (
-              <AnimeCardSkeleton key={`loading-${i}`} />
-            ))}
+            {skeletonCount > 0 &&
+              Array.from({ length: skeletonCount }).map((_, i) => <AnimeCardSkeleton key={`loading-${i}`} />)}
             {infiniteQuery.hasNextPage && <div ref={loadMoreRef} className="w-1 h-full flex-shrink-0" />}
           </div>
         </div>
@@ -746,7 +806,7 @@ function AnimeSection({
   );
 }
 
-function SearchResults({ search }: { search: ReturnType<typeof useInfiniteSearch> }) {
+function SearchResults({ search, searchType }: { search: ReturnType<typeof useInfiniteSearch>; searchType: SearchType }) {
   const observerTarget = React.useRef<HTMLDivElement>(null);
   const fetchNextPageRef = React.useRef(search.fetchNextPage);
 
@@ -761,29 +821,25 @@ function SearchResults({ search }: { search: ReturnType<typeof useInfiniteSearch
           fetchNextPageRef.current();
         }
       },
-      { rootMargin: '100px' }
+      { rootMargin: "100px" }
     );
 
     const current = observerTarget.current;
-    if (current) {
-      observer.observe(current);
-    }
+    if (current) observer.observe(current);
 
     return () => {
-      if (current) {
-        observer.unobserve(current);
-      }
+      if (current) observer.unobserve(current);
     };
   }, [search.hasNextPage, search.isFetchingNextPage]);
-  
+
   const allItems = search.data?.pages.flatMap((page) => page.data ?? []) ?? [];
-  const uniqueItems = Array.from(new Map(allItems.map((item) => [item.mal_id, item])).values());
+  const uniqueItems = Array.from(new Map(allItems.map((item) => [(item as any).mal_id, item])).values());
   const skeletonCount = search.isFetchingNextPage ? 21 : 0;
-  
+
   return (
     <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
       {uniqueItems.map((item) => (
-        <AnimeResultCard key={item.mal_id} item={item} />
+        <SearchResultCard key={(item as any).mal_id} item={item as any} searchType={searchType} />
       ))}
       {Array.from({ length: skeletonCount }).map((_, i) => (
         <AnimeCardSkeleton key={`skeleton-${i}`} />
@@ -820,7 +876,6 @@ function MultiSelectFilter<T>({
     } else {
       onChange([...selected, value]);
     }
-    // Keep dropdown open after selection
   };
 
   return (
@@ -854,15 +909,18 @@ function MultiSelectFilter<T>({
 
 function SearchAnimePage() {
   const { t } = useTranslation();
+  const tAny = t as unknown as (key: string, options?: any) => string;
+
   const navigate = useNavigate();
 
   const [query, setQuery] = useQueryState("q", {
     defaultValue: "",
     clearOnDefault: true,
   });
+
   const [searchType, setSearchType] = useQueryState<SearchType>("type", {
     defaultValue: "anime",
-    parse: (value) => SEARCH_TYPES.includes(value as SearchType) ? (value as SearchType) : "anime",
+    parse: (value) => (SEARCH_TYPES.includes(value as SearchType) ? (value as SearchType) : "anime"),
     serialize: (value) => value,
     clearOnDefault: true,
   });
@@ -872,16 +930,16 @@ function SearchAnimePage() {
     clearOnDefault: true,
     parse: (value) => {
       if (!value) return [];
-      return value.split(',').map(Number).filter((n) => !isNaN(n));
+      return value.split(",").map(Number).filter((n) => !isNaN(n));
     },
-    serialize: (value) => value.join(','),
+    serialize: (value) => value.join(","),
     eq: (a, b) => a.length === b.length && a.every((val, i) => val === b[i]),
   });
 
   const [selectedYear, setSelectedYear] = useQueryState<number | null>("year", {
     defaultValue: null,
     clearOnDefault: true,
-    parse: (value) => value ? parseInt(value, 10) : null,
+    parse: (value) => (value ? parseInt(value, 10) : null),
     serialize: (value) => value?.toString() ?? "",
   });
 
@@ -897,10 +955,10 @@ function SearchAnimePage() {
     clearOnDefault: true,
     parse: (value) => {
       if (!value) return [];
-      const parsed = value.split(',').filter((f) => FORMATS.includes(f as Format));
+      const parsed = value.split(",").filter((f) => FORMATS.includes(f as Format));
       return parsed as Format[];
     },
-    serialize: (value) => value.join(','),
+    serialize: (value) => value.join(","),
     eq: (a, b) => a.length === b.length && a.every((val, i) => val === b[i]),
   });
 
@@ -909,10 +967,10 @@ function SearchAnimePage() {
     clearOnDefault: true,
     parse: (value) => {
       if (!value) return [];
-      const parsed = value.split(',').filter((s) => STATUSES.includes(s as Status));
+      const parsed = value.split(",").filter((s) => STATUSES.includes(s as Status));
       return parsed as Status[];
     },
-    serialize: (value) => value.join(','),
+    serialize: (value) => value.join(","),
     eq: (a, b) => a.length === b.length && a.every((val, i) => val === b[i]),
   });
 
@@ -921,17 +979,12 @@ function SearchAnimePage() {
   const [showMoreFilters, setShowMoreFilters] = React.useState(false);
 
   const [input, setInput] = React.useState(query);
-  const [debouncedInput, setDebouncedInput, debouncer] = useDebouncedState(input, {
-    wait: 500,
-  });
+  const [debouncedInput, setDebouncedInput, debouncer] = useDebouncedState(input, { wait: 500 });
 
   const isClearing = React.useRef(false);
 
-  // Sync input with query from URL (for browser navigation)
   React.useEffect(() => {
-    if (!isClearing.current) {
-      setInput(query || "");
-    }
+    if (!isClearing.current) setInput(query || "");
   }, [query]);
 
   React.useEffect(() => {
@@ -940,16 +993,11 @@ function SearchAnimePage() {
 
   React.useEffect(() => {
     const trimmed = debouncedInput.trim();
-    // Only update query if:
-    // 1. Not currently clearing
-    // 2. The trimmed value differs from current query
-    // 3. Either the trimmed value is empty (to clear) or has more than 2 characters (to search)
+
     if (!isClearing.current && trimmed !== query && (trimmed.length === 0 || trimmed.length > 2)) {
       setQuery(trimmed || null);
     }
-    if (isClearing.current) {
-      isClearing.current = false;
-    }
+    if (isClearing.current) isClearing.current = false;
   }, [debouncedInput, query, setQuery]);
 
   const searchEndpoint = TYPE_TO_ENDPOINT[searchType];
@@ -960,21 +1008,10 @@ function SearchAnimePage() {
       sfw: !allowNsfw,
     };
 
-    if (selectedFormats.length > 0) {
-      filters.type = selectedFormats[0];
-    }
-
-    if (selectedStatuses.length > 0) {
-      filters.status = selectedStatuses[0];
-    }
-
-    if (selectedYear) {
-      filters.year = selectedYear;
-    }
-
-    if (selectedSeason && selectedYear) {
-      filters.season = selectedSeason;
-    }
+    if (selectedFormats.length > 0) filters.type = selectedFormats[0];
+    if (selectedStatuses.length > 0) filters.status = selectedStatuses[0];
+    if (selectedYear) filters.year = selectedYear;
+    if (selectedSeason && selectedYear) filters.season = selectedSeason;
 
     return filters;
   }, [selectedGenres, selectedFormats, selectedStatuses, selectedYear, selectedSeason, allowNsfw]);
@@ -985,14 +1022,15 @@ function SearchAnimePage() {
 
   const selectedGenreObjects = React.useMemo(() => {
     const genreList = genres.data || [];
-    return selectedGenres.map(id => genreList.find(g => g.mal_id === id)).filter((g): g is Genre => g !== undefined);
-  }, [selectedGenres, genres]);
+    return selectedGenres
+      .map((id) => genreList.find((g) => g.mal_id === id))
+      .filter((g): g is Genre => g !== undefined);
+  }, [selectedGenres, genres.data]);
 
   const trending = useSeasonsNow(true, query.trim().length === 0);
   const upcoming = useSeasonsUpcoming(true, query.trim().length === 0);
   const allTimePopular = useTopAnimeByPopularity(20, query.trim().length === 0);
 
-  // Check if there are any active filters
   const hasActiveFilters = React.useMemo(() => {
     return (
       selectedGenres.length > 0 ||
@@ -1010,25 +1048,14 @@ function SearchAnimePage() {
   };
 
   const handleClearSearch = () => {
-    // Cancel any pending debounced updates to prevent race conditions
     debouncer.cancel();
-    
     isClearing.current = true;
     setInput("");
 
-    // If there are no active filters, navigate to clean URL (no query params)
-    // Otherwise, just clear the query parameter but keep other filters
     if (!hasActiveFilters) {
-      // Clear the query parameter and navigate to clean URL
       setQuery(null);
-      // Use navigate to ensure URL is completely clean (nuqs will handle clearing params with clearOnDefault)
-      navigate({
-        to: "/anime/search",
-        search: {},
-        replace: true,
-      });
+      navigate({ to: "/anime/search", search: {}, replace: true });
     } else {
-      // Keep filters but clear query
       setQuery(null);
     }
   };
@@ -1040,10 +1067,11 @@ function SearchAnimePage() {
     setSelectedFormats([]);
     setSelectedStatuses([]);
     setAllowNsfw(false);
+    setSearchType("anime");
   };
 
   const handleClearGenre = (genreId: number) => {
-    setSelectedGenres(selectedGenres.filter(g => g !== genreId));
+    setSelectedGenres(selectedGenres.filter((g) => g !== genreId));
   };
 
   const handleClearYear = () => {
@@ -1070,9 +1098,7 @@ function SearchAnimePage() {
   const yearOptions = React.useMemo(() => {
     const currentYear = new Date().getFullYear();
     const years: number[] = [];
-    for (let i = currentYear; i >= 1990; i--) {
-      years.push(i);
-    }
+    for (let i = currentYear; i >= 1990; i--) years.push(i);
     return years;
   }, []);
 
@@ -1084,11 +1110,11 @@ function SearchAnimePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <h1 className="text-2xl font-semibold">{t("sections.search")}</h1>
+        <h1 className="text-2xl font-semibold">{tAny("sections.search")}</h1>
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="flex items-center gap-1 text-2xl font-semibold h-9 px-2 hover:bg-accent">
-              <span>{t(`search.types.${searchType}`)}</span>
+              <span>{tAny(`search.types.${searchType}`)}</span>
               <ChevronDown className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
@@ -1099,7 +1125,7 @@ function SearchAnimePage() {
                 onClick={() => handleTypeChange(type)}
                 className={searchType === type ? "bg-accent" : "text-base"}
               >
-                <span className="truncate block max-w-[130px]">{t(`search.types.${type}`)}</span>
+                <span className="truncate block max-w-[130px]">{tAny(`search.types.${type}`)}</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -1109,35 +1135,28 @@ function SearchAnimePage() {
       <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
         <div className="relative flex-1 w-full md:w-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={input}
-            onChange={handleInputChange}
-            placeholder={t("search.placeholder")}
-            className="pl-9"
-          />
+          <Input value={input} onChange={handleInputChange} placeholder={tAny("search.placeholder")} className="pl-9" />
         </div>
 
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <MultiSelectFilter
-            label={t("search.filters.genres")}
+            label={tAny("search.filters.genres")}
             options={genres.data || []}
             selected={selectedGenreObjects}
-            onChange={(genres) => setSelectedGenres(genres.map(g => g.mal_id))}
-            getOptionLabel={(g) => g.name}
-            getOptionValue={(g) => g.mal_id}
+            onChange={(genresSelected) => setSelectedGenres(genresSelected.map((g) => (g as any).mal_id))}
+            getOptionLabel={(g: any) => g.name}
+            getOptionValue={(g: any) => g.mal_id}
           />
 
           <DropdownMenu modal={false} open={yearDropdownOpen} onOpenChange={setYearDropdownOpen}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="min-w-[120px] justify-between h-9">
-                <span className="truncate">
-                  {selectedYear ? selectedYear : t("search.filters.year")}
-                </span>
+                <span className="truncate">{selectedYear ? selectedYear : tAny("search.filters.year")}</span>
                 <ChevronDown className="h-4 w-4 ml-2 shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto min-w-[150px]">
-              <DropdownMenuLabel className="truncate max-w-[140px]">{t("search.filters.year")}</DropdownMenuLabel>
+              <DropdownMenuLabel className="truncate max-w-[140px]">{tAny("search.filters.year")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 {yearOptions.map((year) => (
@@ -1159,13 +1178,13 @@ function SearchAnimePage() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="min-w-[120px] justify-between h-9">
                 <span className="truncate">
-                  {selectedSeason ? t(`search.seasons.${selectedSeason}`) : t("search.filters.season")}
+                  {selectedSeason ? tAny(`search.seasons.${selectedSeason}`) : tAny("search.filters.season")}
                 </span>
                 <ChevronDown className="h-4 w-4 ml-2 shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-[150px]">
-              <DropdownMenuLabel className="truncate max-w-[140px]">{t("search.filters.season")}</DropdownMenuLabel>
+              <DropdownMenuLabel className="truncate max-w-[140px]">{tAny("search.filters.season")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 {SEASONS.map((season) => (
@@ -1176,7 +1195,7 @@ function SearchAnimePage() {
                     onSelect={(e) => e.preventDefault()}
                     className="pr-8"
                   >
-                    <span className="truncate block max-w-[120px]">{t(`search.seasons.${season}`)}</span>
+                    <span className="truncate block max-w-[120px]">{tAny(`search.seasons.${season}`)}</span>
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuGroup>
@@ -1187,15 +1206,13 @@ function SearchAnimePage() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="min-w-[120px] justify-between h-9">
                 <span className="truncate">
-                  {selectedFormats.length > 0
-                    ? t(`search.formats.${selectedFormats[0]}`)
-                    : t("search.filters.format")}
+                  {selectedFormats.length > 0 ? tAny(`search.formats.${selectedFormats[0]}`) : tAny("search.filters.format")}
                 </span>
                 <ChevronDown className="h-4 w-4 ml-2 shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-[150px]">
-              <DropdownMenuLabel className="truncate max-w-[140px]">{t("search.filters.format")}</DropdownMenuLabel>
+              <DropdownMenuLabel className="truncate max-w-[140px]">{tAny("search.filters.format")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 {FORMATS.map((format) => (
@@ -1206,7 +1223,7 @@ function SearchAnimePage() {
                     onSelect={(e) => e.preventDefault()}
                     className="pr-8"
                   >
-                    <span className="truncate block max-w-[120px]">{t(`search.formats.${format}`)}</span>
+                    <span className="truncate block max-w-[120px]">{tAny(`search.formats.${format}`)}</span>
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuGroup>
@@ -1217,15 +1234,13 @@ function SearchAnimePage() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="min-w-[120px] justify-between h-9">
                 <span className="truncate">
-                  {selectedStatuses.length > 0
-                    ? t(`search.statuses.${selectedStatuses[0]}`)
-                    : t("search.filters.status")}
+                  {selectedStatuses.length > 0 ? tAny(`search.statuses.${selectedStatuses[0]}`) : tAny("search.filters.status")}
                 </span>
                 <ChevronDown className="h-4 w-4 ml-2 shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-[150px]">
-              <DropdownMenuLabel className="truncate max-w-[140px]">{t("search.filters.status")}</DropdownMenuLabel>
+              <DropdownMenuLabel className="truncate max-w-[140px]">{tAny("search.filters.status")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 {STATUSES.map((status) => (
@@ -1236,19 +1251,14 @@ function SearchAnimePage() {
                     onSelect={(e) => e.preventDefault()}
                     className="pr-8"
                   >
-                    <span className="truncate block max-w-[120px]">{t(`search.statuses.${status}`)}</span>
+                    <span className="truncate block max-w-[120px]">{tAny(`search.statuses.${status}`)}</span>
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowMoreFilters(!showMoreFilters)}
-            className={showMoreFilters ? "bg-accent" : ""}
-          >
+          <Button variant="ghost" size="icon" onClick={() => setShowMoreFilters(!showMoreFilters)} className={showMoreFilters ? "bg-accent" : ""}>
             <Settings2 className="h-4 w-4" />
           </Button>
         </div>
@@ -1257,20 +1267,16 @@ function SearchAnimePage() {
       {showMoreFilters && (
         <div className="flex flex-wrap gap-2 p-4 bg-muted/50 rounded-lg border">
           <div className="flex items-center gap-2">
-            <Switch
-              id="nsfw-toggle"
-              checked={allowNsfw}
-              onCheckedChange={setAllowNsfw}
-            />
+            <Switch id="nsfw-toggle" checked={allowNsfw} onCheckedChange={setAllowNsfw} />
             <Label htmlFor="nsfw-toggle" className="text-sm">
-              {t("search.filters.nsfw")}
+              {tAny("search.filters.nsfw", { defaultValue: "NSFW" })}
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Info className="h-4 w-4 text-muted-foreground cursor-help" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>{t("search.allowNsfw")}</p>
+                <p>{tAny("search.allowNsfw")}</p>
               </TooltipContent>
             </Tooltip>
           </div>
@@ -1279,18 +1285,9 @@ function SearchAnimePage() {
 
       {query.trim().length === 0 && !hasActiveFilters ? (
         <div className="space-y-8 pb-8">
-          <AnimeSection
-            title={t("sections.trendingNow")}
-            infiniteQuery={trending}
-          />
-          <AnimeSection
-            title={t("sections.upcomingNextSeason")}
-            infiniteQuery={upcoming}
-          />
-          <AnimeSection
-            title={t("sections.allTimePopular")}
-            infiniteQuery={allTimePopular}
-          />
+          <AnimeSection title={tAny("sections.trendingNow")} infiniteQuery={trending} />
+          <AnimeSection title={tAny("sections.upcomingNextSeason")} infiniteQuery={upcoming} />
+          <AnimeSection title={tAny("sections.allTimePopular")} infiniteQuery={allTimePopular} />
         </div>
       ) : (
         <div className="space-y-8 pb-8">
@@ -1313,17 +1310,18 @@ function SearchAnimePage() {
                 onClearAll={handleClearAllFilters}
               />
             </div>
+
             {search.isLoading ? (
               <AnimeListSkeleton />
             ) : search.isError ? (
               <ErrorState
-                message={t(getTranslatedErrorMessage(search.error, "search.error"))}
+                message={tAny(getTranslatedErrorMessage(search.error, "search.error"))}
                 onRetry={() => search.refetch()}
               />
             ) : search.data?.pages.flatMap((page) => page.data ?? []).length === 0 ? (
-              <EmptyState message={t("search.empty")} />
+              <EmptyState message={tAny("search.empty")} />
             ) : (
-              <SearchResults search={search} />
+              <SearchResults search={search} searchType={searchType} />
             )}
           </div>
         </div>
