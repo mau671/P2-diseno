@@ -1,4 +1,3 @@
-// apps/web/src/hooks/use-auth.tsx
 import { useState, useEffect } from 'react';
 import { 
   type User,

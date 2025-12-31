@@ -1,4 +1,3 @@
-// apps/web/src/routes/auth/forgot-password.tsx
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

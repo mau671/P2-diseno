@@ -22,15 +22,15 @@ type JikanSingleResponse<T> = {
  *  Domain Types
  *  ======================= */
 
-export type Genre = {
+export type AnimeBase = {
   mal_id: number;
-  name: string;
-  url?: string;
-};
 
-export type Anime = {
-  mal_id: number;
-  title: string;
+  // depende del endpoint: anime tiene title; otros pueden traer name/titles/url
+  title?: string;
+  name?: string;
+  titles?: Array<{ type: string; title: string }>;
+  url?: string;
+
   score?: number | null;
 
   images?: {
@@ -58,36 +58,15 @@ export type Anime = {
   duration?: string | null;
 };
 
-export type SearchResult = {
+export type Anime = AnimeBase & { title: string };
+
+export type Genre = {
   mal_id: number;
-  title?: string;
-  name?: string;
-  titles?: Array<{ type: string; title: string }>;
-
-  score?: number | null;
-
-  images?: {
-    jpg?: { image_url?: string; small_image_url?: string; large_image_url?: string };
-    webp?: { image_url?: string; small_image_url?: string; large_image_url?: string };
-  };
-
-  type?: string | null;
-  status?: string | null;
-  source?: string | null;
-  episodes?: number | null;
-
-  aired?: {
-    from?: string | null;
-    to?: string | null;
-  };
-
-  year?: number | null;
-  season?: string | null;
-
-  studios?: Array<{ name: string; mal_id: number }> | null;
-  genres?: Array<{ name: string; mal_id: number }> | null;
-  themes?: Array<{ name: string; mal_id: number }> | null;
+  name: string;
+  url?: string;
 };
+
+export type SearchResult = AnimeBase;
 
 export type SearchFilters = {
   genres?: number[];
@@ -98,7 +77,7 @@ export type SearchFilters = {
   sfw?: boolean;
 };
 
-export type AnimeDetail = Anime & {
+export type AnimeDetail = (AnimeBase & { title: string }) & {
   synopsis?: string | null;
   background?: string | null;
 
@@ -108,7 +87,6 @@ export type AnimeDetail = Anime & {
   favorites?: number | null;
 
   rating?: string | null;
-  duration?: string | null;
 
   title_english?: string | null;
   title_japanese?: string | null;
@@ -134,7 +112,7 @@ export type AnimeDetail = Anime & {
  *  Helpers
  *  ======================= */
 
-function pickPoster(a?: { images?: Anime["images"] } | null) {
+function pickPoster(a?: { images?: AnimeBase["images"] } | null) {
   return (
     a?.images?.webp?.large_image_url ||
     a?.images?.jpg?.large_image_url ||
@@ -147,24 +125,17 @@ function pickPoster(a?: { images?: Anime["images"] } | null) {
 // Retry “inteligente” para evitar loading eterno por 429 o 404
 function getStatusFromError(err: unknown): number | undefined {
   const e: any = err;
-  return (
-    e?.status ??
-    e?.response?.status ??
-    e?.cause?.status ??
-    e?.cause?.response?.status ??
-    undefined
-  );
+  return e?.status ?? e?.response?.status ?? e?.cause?.status ?? e?.cause?.response?.status ?? undefined;
 }
 
 function shouldRetry(failureCount: number, err: unknown) {
   const status = getStatusFromError(err);
-  if (status === 404) return false; // no existe -> no reintentar
-  if (status === 429) return failureCount < 1; // rate limit -> 1 reintento
-  return failureCount < 2; // otros errores -> 2 intentos
+  if (status === 404) return false;
+  if (status === 429) return failureCount < 1;
+  return failureCount < 2;
 }
 
 function retryDelay(attemptIndex: number) {
-  // 1s, 2s, 4s (máx 4s)
   return Math.min(1000 * 2 ** attemptIndex, 4000);
 }
 
@@ -180,20 +151,6 @@ async function fetchGenres(signal?: AbortSignal) {
   return fetchJikan<JikanListResponse<Genre[]>>("/genres/anime", {}, { signal });
 }
 
-async function fetchSeasonAnime(
-  year: number,
-  season: string,
-  page = 1,
-  sfw = true,
-  signal?: AbortSignal
-) {
-  return fetchJikan<JikanListResponse<Anime[]>>(
-    `/seasons/${year}/${season}`,
-    { page, sfw },
-    { signal }
-  );
-}
-
 async function fetchSeasonsNow(page = 1, sfw = true, signal?: AbortSignal) {
   return fetchJikan<JikanListResponse<Anime[]>>("/seasons/now", { page, sfw }, { signal });
 }
@@ -203,11 +160,11 @@ async function fetchSeasonsUpcoming(page = 1, sfw = true, signal?: AbortSignal) 
 }
 
 async function fetchTopAnimeByPopularity(page = 1, limit = 20, signal?: AbortSignal) {
-  return fetchJikan<JikanListResponse<Anime[]>>(
-    "/top/anime",
-    { page, limit, filter: "bypopularity" },
-    { signal }
-  );
+  return fetchJikan<JikanListResponse<Anime[]>>("/top/anime", { page, limit, filter: "bypopularity" }, { signal });
+}
+
+async function fetchSeasonAnime(year: number, season: string, page = 1, sfw = true, signal?: AbortSignal) {
+  return fetchJikan<JikanListResponse<Anime[]>>(`/seasons/${year}/${season}`, { page, sfw }, { signal });
 }
 
 async function fetchSearch<T>(
@@ -221,7 +178,8 @@ async function fetchSearch<T>(
   const params: Record<string, string | number | boolean> = { page, sfw };
 
   // q solo si hay texto
-  if (q.trim().length > 0) params.q = q.trim();
+  const query = q.trim();
+  if (query.length > 0) params.q = query;
 
   if (filters?.genres?.length) params.genres = filters.genres.join(",");
   if (filters?.type) params.type = filters.type;
@@ -250,7 +208,6 @@ async function fetchSearch<T>(
 }
 
 async function fetchAnimeDetail(id: number, signal?: AbortSignal) {
-  // ✅ /anime/:id/full devuelve SINGLE { data: {...} }
   return fetchJikan<JikanSingleResponse<AnimeDetail>>(`/anime/${id}/full`, {}, { signal });
 }
 
@@ -281,13 +238,29 @@ export function useGenres() {
   });
 }
 
-export function useSeasonAnime(
-  year: number,
-  season: string,
-  page = 1,
-  sfw = true,
-  enabled = true
-) {
+export function getCurrentSeason(): { year: number; season: string } {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+  let season: string;
+  if (month >= 1 && month <= 3) season = "winter";
+  else if (month >= 4 && month <= 6) season = "spring";
+  else if (month >= 7 && month <= 9) season = "summer";
+  else season = "fall";
+
+  return { year, season };
+}
+
+export function getPreviousSeason(year: number, season: string): { year: number; season: string } {
+  const seasons = ["winter", "spring", "summer", "fall"];
+  const currentIndex = seasons.indexOf(season);
+
+  if (currentIndex === 0) return { year: year - 1, season: "fall" };
+  return { year, season: seasons[currentIndex - 1] };
+}
+
+export function useSeasonAnime(year: number, season: string, page = 1, sfw = true, enabled = true) {
   return useQuery({
     queryKey: ["seasonAnime", year, season, page, sfw],
     queryFn: ({ signal }) => fetchSeasonAnime(year, season, page, sfw, signal),
@@ -305,9 +278,7 @@ export function useSeasonsNow(sfw = true, enabled = true) {
     queryFn: ({ pageParam = 1, signal }) => fetchSeasonsNow(pageParam, sfw, signal),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
-      lastPage.pagination?.has_next_page
-        ? (lastPage.pagination?.current_page ?? 1) + 1
-        : undefined,
+      lastPage.pagination?.has_next_page ? (lastPage.pagination?.current_page ?? 1) + 1 : undefined,
     enabled,
     retry: shouldRetry,
     retryDelay,
@@ -322,9 +293,7 @@ export function useSeasonsUpcoming(sfw = true, enabled = true) {
     queryFn: ({ pageParam = 1, signal }) => fetchSeasonsUpcoming(pageParam, sfw, signal),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
-      lastPage.pagination?.has_next_page
-        ? (lastPage.pagination?.current_page ?? 1) + 1
-        : undefined,
+      lastPage.pagination?.has_next_page ? (lastPage.pagination?.current_page ?? 1) + 1 : undefined,
     enabled,
     retry: shouldRetry,
     retryDelay,
@@ -339,9 +308,7 @@ export function useTopAnimeByPopularity(limit = 20, enabled = true) {
     queryFn: ({ pageParam = 1, signal }) => fetchTopAnimeByPopularity(pageParam, limit, signal),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
-      lastPage.pagination?.has_next_page
-        ? (lastPage.pagination?.current_page ?? 1) + 1
-        : undefined,
+      lastPage.pagination?.has_next_page ? (lastPage.pagination?.current_page ?? 1) + 1 : undefined,
     enabled,
     retry: shouldRetry,
     retryDelay,
@@ -355,22 +322,15 @@ export function useInfiniteSearch(q: string, type: string, sfw = true, filters?:
 
   const hasActiveFilters =
     !!filters &&
-    ((filters.genres?.length ?? 0) > 0 ||
-      !!filters.type ||
-      !!filters.status ||
-      !!filters.year ||
-      !!filters.season);
+    ((filters.genres?.length ?? 0) > 0 || !!filters.type || !!filters.status || !!filters.year || !!filters.season);
 
   return useInfiniteQuery({
     queryKey: ["search", type, query, sfw, JSON.stringify(filters ?? {})],
-    queryFn: ({ pageParam = 1, signal }) =>
-      fetchSearch<SearchResult>(type, query, pageParam, sfw, filters, signal),
+    queryFn: ({ pageParam = 1, signal }) => fetchSearch<SearchResult>(type, query, pageParam, sfw, filters, signal),
     enabled: query.length > 0 || hasActiveFilters,
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
-      lastPage.pagination?.has_next_page
-        ? (lastPage.pagination?.current_page ?? 1) + 1
-        : undefined,
+      lastPage.pagination?.has_next_page ? (lastPage.pagination?.current_page ?? 1) + 1 : undefined,
     retry: shouldRetry,
     retryDelay,
     staleTime: 1000 * 60 * 60 * 2,
@@ -392,6 +352,6 @@ export function useAnimeDetail(id: number, enabled = true) {
   });
 }
 
-// Util export si te sirve en UI
 export const animeUtils = { pickPoster };
+
 
