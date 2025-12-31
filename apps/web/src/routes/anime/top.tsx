@@ -1,17 +1,15 @@
 import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { Heart } from "lucide-react";
+import type { TFunction } from "i18next";
 
 import { useTopAnime, type Anime } from "@/api/queries";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { slugify } from "@/lib/slug";
 
 function AnimeListSkeleton() {
   return (
@@ -31,14 +29,24 @@ function AnimeListSkeleton() {
   );
 }
 
-function AnimeListItem({ anime, t }: { anime: Anime; t: (key: string) => string }) {
+function AnimeListItem({ anime, t }: { anime: Anime; t: TFunction }) {
+  const location = useLocation();
   const [isGroupHovered, setIsGroupHovered] = React.useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
+
   const img = anime?.images?.webp?.image_url || anime?.images?.jpg?.image_url;
 
+  const titleForSlug = ((anime as any)?.title_english || anime.title || "anime") as string;
+  const slug = slugify(titleForSlug);
+
+  const from = (location as any)?.href ?? `${window.location.pathname}${window.location.search}`;
+
   return (
-    <div 
-      className="rounded-xl border p-4 overflow-hidden group"
+    <Link
+      to="/anime/$id/$slug"
+      params={{ id: String(anime.mal_id), slug }}
+      search={{ from }}
+      className="block rounded-xl border p-4 overflow-hidden group hover:bg-accent/30 transition-colors cursor-pointer"
       onMouseEnter={() => setIsGroupHovered(true)}
       onMouseLeave={() => setIsGroupHovered(false)}
     >
@@ -49,21 +57,25 @@ function AnimeListItem({ anime, t }: { anime: Anime; t: (key: string) => string 
               src={img}
               alt={anime.title}
               className="h-16 w-12 rounded object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="h-16 w-12 rounded bg-muted" />
           )}
+
           <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
             <TooltipTrigger asChild>
               <button
                 className={`absolute bottom-0 right-0 transition-all duration-200 ease-out scale-95 z-10 bg-background/80 backdrop-blur-sm rounded-full p-1 hover:bg-background/90 hover:scale-110 shadow-lg translate-x-1 translate-y-1 cursor-pointer ${
-                  isGroupHovered ? 'opacity-100 scale-100' : 'opacity-0'
+                  isGroupHovered ? "opacity-100 scale-100" : "opacity-0"
                 }`}
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                 }}
                 onMouseEnter={() => setIsTooltipOpen(true)}
                 onMouseLeave={() => setIsTooltipOpen(false)}
+                aria-label={t("common.addToFavorites")}
               >
                 <Heart className="h-3 w-3 text-foreground transition-colors hover:text-red-500" />
               </button>
@@ -77,17 +89,17 @@ function AnimeListItem({ anime, t }: { anime: Anime; t: (key: string) => string 
         <div className="min-w-0 flex-1 overflow-hidden">
           <div className="truncate font-semibold">{anime.title}</div>
           <div className="text-sm text-muted-foreground">
-            Score: {anime.score ?? "N/A"}
+            {t("anime.detail.scoreLabel", "Score")}: {anime.score ?? t("common.na", "N/A")}
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
 function AnimeList({ items }: { items: Anime[] }) {
   const { t } = useTranslation();
-  
+
   return (
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
       {items.map((a) => (
@@ -105,9 +117,7 @@ function TopAnimePage() {
     <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">{t("sections.topAnime")}</h1>
-        <p className="text-sm text-muted-foreground">
-          {t("sections.topAnimeDescription")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("sections.topAnimeDescription")}</p>
       </div>
 
       {top.isLoading ? (
