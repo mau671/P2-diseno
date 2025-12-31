@@ -163,6 +163,7 @@ function SearchAnimePage() {
           onClearStatuses={handleClearStatuses}
           onClearAll={handleClearAll}
           search={search}
+          searchType={searchType}
         />
       )}
     </div>

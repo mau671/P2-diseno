@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { Genre } from "@/api/queries";
-import type { Season, Format, Status } from "@/lib/search-constants";
+import type { Season, Format, Status, SearchType } from "@/lib/search-constants";
 import { SearchTags } from "./SearchTags";
 import { SearchResults } from "./SearchResults";
 import { ErrorState } from "@/components/network/ErrorState";
@@ -23,6 +23,7 @@ type SearchResultsContainerProps = {
   onClearStatuses: () => void;
   onClearAll: () => void;
   search: ReturnType<typeof import("@/api/queries").useInfiniteSearch>;
+  searchType: SearchType;
 };
 
 function SearchResultsContainer({
@@ -41,6 +42,7 @@ function SearchResultsContainer({
   onClearStatuses,
   onClearAll,
   search,
+  searchType,
 }: SearchResultsContainerProps) {
   const { t } = useTranslation();
 
@@ -65,6 +67,7 @@ function SearchResultsContainer({
             onClearAll={onClearAll}
           />
         </div>
+
         {search.isLoading ? (
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
             {Array.from({ length: 21 }).map((_, i) => (
@@ -76,13 +79,13 @@ function SearchResultsContainer({
           </div>
         ) : search.isError ? (
           <ErrorState
-            message={t(getTranslatedErrorMessage(search.error, "search.error"))}
+            message={t("search.error", { defaultValue: getTranslatedErrorMessage(search.error, "search.error") })}
             onRetry={() => search.refetch()}
           />
-        ) : search.data?.pages.flatMap((page) => page.data ?? []).length === 0 ? (
+        ) : (search.data?.pages.flatMap((page: any) => page.data ?? []).length ?? 0) === 0 ? (
           <EmptyState message={t("search.empty")} />
         ) : (
-          <SearchResults search={search} />
+          <SearchResults search={search} searchType={searchType} />
         )}
       </div>
     </div>

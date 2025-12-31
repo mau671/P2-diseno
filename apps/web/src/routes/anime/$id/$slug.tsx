@@ -14,7 +14,7 @@ import {
 
 import { useAnimeDetail } from "@/api/queries";
 import { slugify } from "@/lib/slug";
-import { useAnimePastelColor } from "@/hooks/useAnimePastelColor";
+import { useStablePastelColor } from "@/hooks/useStablePastelColor";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -116,9 +116,14 @@ function AnimeDetailPage() {
 
   const rawId = params?.id ?? "";
   const routeSlug = params?.slug ?? "";
-  const animeId = React.useMemo(() => Number(rawId), [rawId]);
 
+  const animeId = React.useMemo(() => Number(rawId), [rawId]);
   const enabled = Number.isFinite(animeId) && animeId > 0;
+
+  // ✅ Hook NO puede ser condicional, entonces le pasamos un ID seguro
+  const safeAnimeId = enabled ? animeId : 0;
+  const pastelColor = useStablePastelColor(safeAnimeId);
+
   const detail = useAnimeDetail(animeId, enabled);
   const anime = detail.data?.data;
 
@@ -130,8 +135,6 @@ function AnimeDetailPage() {
     "";
 
   const banner = poster;
-
-  const { pastelColor } = useAnimePastelColor(poster || "");
 
   const goBack = React.useCallback(() => {
     if (from && from.startsWith("/")) {
@@ -303,7 +306,7 @@ function AnimeDetailPage() {
                 {score != null ? (
                   <div
                     className="shrink-0 rounded-xl px-3 py-2 border bg-background/60 backdrop-blur-sm"
-                    style={{ borderColor: pastelColor || undefined }}
+                    style={{ borderColor: pastelColor ? String(pastelColor) : undefined }}
                   >
                     <div className="flex items-center gap-2">
                       <Star className="h-4 w-4" />
