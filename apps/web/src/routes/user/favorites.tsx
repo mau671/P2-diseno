@@ -6,12 +6,15 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimeCard } from "@/components/anime/AnimeCard";
 import { Heart } from "lucide-react";
 
+//Función helper para esperar
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 function FavoritesPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useUserProfile();
 
-  // Obtener los detalles de los anime favoritos
+  //Obtiene los detalles de los anime favoritos
   const { data: favoriteAnimes, isLoading: animesLoading } = useQuery({
     queryKey: ["favorites", profile?.favorites],
     queryFn: async () => {
@@ -19,21 +22,35 @@ function FavoritesPage() {
         return [];
       }
 
-      // Obtener los detalles de cada anime favorito
-      const animePromises = profile.favorites.map(async (id) => {
-        const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
-        if (!response.ok) return null;
-        const data = await response.json();
-        return data.data;
-      });
+      console.log('Fetching favorites:', profile.favorites);
 
-      const results = await Promise.all(animePromises);
-      return results.filter((anime) => anime !== null);
+      //Obtiene los detalles de cada anime favorito
+      const animes = [];
+      for (const id of profile.favorites) {
+        try {
+          const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            animes.push(data.data);
+            console.log(`Loaded anime ${id}:`, data.data.title);
+          } else {
+            console.error(`Failed to load anime ${id}:`, response.status);
+          }
+          await sleep(30);
+        } catch (error) {
+          console.error(`Error fetching anime ${id}:`, error);
+        }
+      }
+
+      console.log(`Loaded ${animes.length} of ${profile.favorites.length} favorites`);
+      return animes;
     },
     enabled: !!profile && profile.favorites.length > 0,
+    staleTime: 1000 * 60 * 5, 
   });
 
-  // Si no está autenticado
+  //Si no está autenticado
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -44,7 +61,7 @@ function FavoritesPage() {
     );
   }
 
-  // Mientras carga el perfil
+  //Mientras carga el perfil
   if (profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -56,7 +73,7 @@ function FavoritesPage() {
     );
   }
 
-  // Si el perfil ya cargó pero no hay favoritos
+  //Si el perfil ya cargó pero no hay favoritos
   if (!profile?.favorites || profile.favorites.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -67,7 +84,7 @@ function FavoritesPage() {
     );
   }
 
-  // Mientras cargan los detalles de los anime
+  //Mientras cargan los detalles de los anime
   if (animesLoading) {
     return (
       <div className="space-y-6">
@@ -85,6 +102,9 @@ function FavoritesPage() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">{t("favorites.loadingAnimes")}</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {t("common.loading")}...
+            </p>
           </div>
         </div>
       </div>
@@ -99,15 +119,24 @@ function FavoritesPage() {
           {t("user.favorites")}
         </h1>
         <p className="text-muted-foreground">
-          {t("favorites.count", { count: profile.favorites.length })}
+          {favoriteAnimes && favoriteAnimes.length > 0 
+            ? `${favoriteAnimes.length} ${t("user.favorites").toLowerCase()}`
+            : t("favorites.count", { count: profile.favorites.length })
+          }
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {favoriteAnimes?.map((anime) => (
-          <AnimeCard key={anime.mal_id} anime={anime} />
-        ))}
-      </div>
+      {favoriteAnimes && favoriteAnimes.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          {favoriteAnimes.map((anime) => (
+            <AnimeCard key={anime.mal_id} anime={anime} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">{t("common.error")}</p>
+        </div>
+      )}
     </div>
   );
 }

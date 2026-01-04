@@ -1,4 +1,4 @@
-{
+﻿{
   "nav": {
     "home": "Home",
     "anime": "Anime",
@@ -20,7 +20,8 @@
     "catalogDescription": "Browse the anime catalog",
     "trendingNow": "Trending now",
     "upcomingNextSeason": "Upcoming next season",
-    "allTimePopular": "All time popular"
+    "allTimePopular": "All time popular",
+    "user": "User"
   },
   "common": {
   "loading": "Loading...",

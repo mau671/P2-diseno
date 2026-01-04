@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { AnimeBase } from "@/api/queries";
 import { useStablePastelColor } from "@/hooks/useStablePastelColor";
@@ -43,7 +42,6 @@ function AnimeCard({ anime }: AnimeCardProps) {
   
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useUserProfile();
-  const navigate = useNavigate();
   const isFavorited = isFavorite(anime.mal_id);
 
   const { placement, handleMouseEnter, handleMouseLeave } = useCardTooltip(cardRef);
