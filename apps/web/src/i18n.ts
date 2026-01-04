@@ -9,9 +9,6 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    returnObjects: false,
-    returnNull: false,
-    returnEmptyString: false,
     fallbackLng: "es-419",
     supportedLngs: ["es-419", "en-US"],
     ns: ["common"],

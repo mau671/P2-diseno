@@ -13,80 +13,24 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { ModeToggle } from "@/components/mode-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
-
-type Crumb = { label: string; href: string; isLast: boolean };
-
-function isNumericSegment(s: string) {
-  return /^\d+$/.test(s);
-}
-
-function humanizeSlug(slug: string) {
-  const text = decodeURIComponent(slug).replace(/-/g, " ").trim();
-  if (!text) return slug;
-  return text.replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function safeGetFromSearchStr(location: any) {
-  const searchStr = location?.searchStr ?? window.location.search;
-  const sp = new URLSearchParams(searchStr);
-  const from = sp.get("from");
-  if (!from) return null;
-
-  try {
-    const decoded = decodeURIComponent(from);
-    return decoded.startsWith("/") ? decoded : null;
-  } catch {
-    return from.startsWith("/") ? from : null;
-  }
-}
 
 function RootLayout() {
   const { t } = useTranslation();
   const location = useLocation();
 
-  const isAuthRoute = location.pathname.startsWith("/auth");
+  const isAuthRoute = location.pathname.startsWith('/auth');
 
-  const generateBreadcrumbs = (): Crumb[] => {
-    const pathSegments = location.pathname.split("/").filter(Boolean);
+  const generateBreadcrumbs = () => {
+    const pathSegments = location.pathname.split('/').filter(Boolean);
 
     if (pathSegments.length === 0) {
-      return [{ label: t("nav.home", "Inicio"), href: "/", isLast: true }];
+      return [{ label: t("nav.home"), href: "/", isLast: true }];
     }
 
-    // ✅ Caso especial: detalle /anime/:id/:slug (o /anime/:id)
-    if (pathSegments[0] === "anime" && pathSegments.length >= 2) {
-      const second = pathSegments[1];
-
-      if (isNumericSegment(second)) {
-        const id = second;
-        const slug = pathSegments[2] ?? "";
-        const name = slug ? humanizeSlug(slug) : `#${id}`;
-
-        const from = safeGetFromSearchStr(location);
-
-        return [
-          {
-            label: t("nav.anime", "Anime"),
-            href: from ?? "/anime/catalog",
-            isLast: false,
-          },
-          {
-            label: name,
-            href: slug ? `/anime/${id}/${slug}` : `/anime/${id}`,
-            isLast: true,
-          },
-        ];
-      }
-    }
-
-    const breadcrumbs: Crumb[] = [];
+    const breadcrumbs: Array<{ label: string; href: string; isLast: boolean }> = [];
     let currentPath = "";
 
     pathSegments.forEach((segment, index) => {
@@ -94,24 +38,20 @@ function RootLayout() {
       const isLast = index === pathSegments.length - 1;
 
       let label = segment;
-
       if (segment === "anime") {
-        label = t("nav.anime", "Anime");
-        currentPath = "/anime/catalog";
+        label = "Anime";
       } else if (segment === "top") {
-        label = t("sections.topAnime", "Top Anime");
+        label = t("sections.topAnime");
       } else if (segment === "search") {
-        label = t("sections.search", "Búsqueda");
+        label = t("sections.search");
       } else if (segment === "catalog") {
-        label = t("sections.catalog", "Catálogo");
+        label = t("sections.catalog");
       } else if (segment === "auth") {
         label = "Auth";
       } else if (segment === "login") {
-        label = t("auth.login.title", "Iniciar Sesión");
+        label = t("auth.login.title");
       } else if (segment === "register") {
-        label = t("auth.register.title", "Crear Cuenta");
-      } else if (segment === "forgot-password") {
-        label = t("auth.forgot.title", "Recuperar Contraseña");
+        label = t("auth.register.title");
       }
 
       breadcrumbs.push({ label, href: currentPath, isLast });
@@ -140,7 +80,7 @@ function RootLayout() {
             <Breadcrumb>
               <BreadcrumbList>
                 {breadcrumbs.map((crumb, index) => (
-                  <React.Fragment key={`${crumb.href}-${index}`}>
+                  <React.Fragment key={crumb.href}>
                     {index > 0 && <BreadcrumbSeparator />}
                     <BreadcrumbItem>
                       {crumb.isLast ? (
@@ -156,7 +96,6 @@ function RootLayout() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-
           <div className="ml-auto flex items-center gap-2 px-4">
             <LanguageToggle />
             <ModeToggle />

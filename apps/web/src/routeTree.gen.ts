@@ -17,9 +17,6 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AnimeTopRouteImport } from './routes/anime/top'
 import { Route as AnimeSearchRouteImport } from './routes/anime/search'
 import { Route as AnimeCatalogRouteImport } from './routes/anime/catalog'
-import { Route as AnimeIdRouteRouteImport } from './routes/anime/$id/route'
-import { Route as AnimeIdIndexRouteImport } from './routes/anime/$id/index'
-import { Route as AnimeIdSlugRouteImport } from './routes/anime/$id/$slug'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -61,34 +58,16 @@ const AnimeCatalogRoute = AnimeCatalogRouteImport.update({
   path: '/anime/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AnimeIdRouteRoute = AnimeIdRouteRouteImport.update({
-  id: '/anime/$id',
-  path: '/anime/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnimeIdIndexRoute = AnimeIdIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AnimeIdRouteRoute,
-} as any)
-const AnimeIdSlugRoute = AnimeIdSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => AnimeIdRouteRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/anime/$id': typeof AnimeIdRouteRouteWithChildren
   '/anime/catalog': typeof AnimeCatalogRoute
   '/anime/search': typeof AnimeSearchRoute
   '/anime/top': typeof AnimeTopRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/anime/$id/$slug': typeof AnimeIdSlugRoute
-  '/anime/$id/': typeof AnimeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,37 +78,29 @@ export interface FileRoutesByTo {
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/anime/$id/$slug': typeof AnimeIdSlugRoute
-  '/anime/$id': typeof AnimeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/anime/$id': typeof AnimeIdRouteRouteWithChildren
   '/anime/catalog': typeof AnimeCatalogRoute
   '/anime/search': typeof AnimeSearchRoute
   '/anime/top': typeof AnimeTopRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/anime/$id/$slug': typeof AnimeIdSlugRoute
-  '/anime/$id/': typeof AnimeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
-    | '/anime/$id'
     | '/anime/catalog'
     | '/anime/search'
     | '/anime/top'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
-    | '/anime/$id/$slug'
-    | '/anime/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,27 +111,21 @@ export interface FileRouteTypes {
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
-    | '/anime/$id/$slug'
-    | '/anime/$id'
   id:
     | '__root__'
     | '/'
     | '/auth'
-    | '/anime/$id'
     | '/anime/catalog'
     | '/anime/search'
     | '/anime/top'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
-    | '/anime/$id/$slug'
-    | '/anime/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
-  AnimeIdRouteRoute: typeof AnimeIdRouteRouteWithChildren
   AnimeCatalogRoute: typeof AnimeCatalogRoute
   AnimeSearchRoute: typeof AnimeSearchRoute
   AnimeTopRoute: typeof AnimeTopRoute
@@ -224,27 +189,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeCatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/anime/$id': {
-      id: '/anime/$id'
-      path: '/anime/$id'
-      fullPath: '/anime/$id'
-      preLoaderRoute: typeof AnimeIdRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/anime/$id/': {
-      id: '/anime/$id/'
-      path: '/'
-      fullPath: '/anime/$id/'
-      preLoaderRoute: typeof AnimeIdIndexRouteImport
-      parentRoute: typeof AnimeIdRouteRoute
-    }
-    '/anime/$id/$slug': {
-      id: '/anime/$id/$slug'
-      path: '/$slug'
-      fullPath: '/anime/$id/$slug'
-      preLoaderRoute: typeof AnimeIdSlugRouteImport
-      parentRoute: typeof AnimeIdRouteRoute
-    }
   }
 }
 
@@ -262,24 +206,9 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
-interface AnimeIdRouteRouteChildren {
-  AnimeIdSlugRoute: typeof AnimeIdSlugRoute
-  AnimeIdIndexRoute: typeof AnimeIdIndexRoute
-}
-
-const AnimeIdRouteRouteChildren: AnimeIdRouteRouteChildren = {
-  AnimeIdSlugRoute: AnimeIdSlugRoute,
-  AnimeIdIndexRoute: AnimeIdIndexRoute,
-}
-
-const AnimeIdRouteRouteWithChildren = AnimeIdRouteRoute._addFileChildren(
-  AnimeIdRouteRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
-  AnimeIdRouteRoute: AnimeIdRouteRouteWithChildren,
   AnimeCatalogRoute: AnimeCatalogRoute,
   AnimeSearchRoute: AnimeSearchRoute,
   AnimeTopRoute: AnimeTopRoute,
