@@ -1,107 +1,18 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { useSeasonAnime, type Anime } from "@/api/queries";
+import { useSeasonAnime } from "@/api/queries";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {getCurrentSeason, getPreviousSeason, getNextSeason, isSeasonInFuture, type SeasonInfo} from "@/lib/season-utils";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useQueryState, parseAsBoolean } from "nuqs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-function AnimeListSkeleton() {
-  return (
-    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <div key={i} className="rounded-xl border p-4">
-          <div className="flex gap-3">
-            <Skeleton className="h-16 w-12 rounded" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-full" />
-              <Skeleton className="h-4 w-20" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function AnimeListItem({ anime, t }: { anime: Anime; t: (key: string) => string }) {
-  const [isGroupHovered, setIsGroupHovered] = React.useState(false);
-  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
-  const img = anime?.images?.webp?.image_url || anime?.images?.jpg?.image_url;
-
-  return (
-    <div 
-      className="rounded-xl border p-4 group"
-      onMouseEnter={() => setIsGroupHovered(true)}
-      onMouseLeave={() => setIsGroupHovered(false)}
-    >
-      <div className="flex gap-3">
-        <div className="relative flex-shrink-0">
-          {img ? (
-            <img
-              src={img}
-              alt={anime.title}
-              className="h-16 w-12 rounded object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <div className="h-16 w-12 rounded bg-muted" />
-          )}
-          <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
-            <TooltipTrigger asChild>
-              <button
-                className={`absolute bottom-0 right-0 transition-all duration-200 ease-out scale-95 z-10 bg-background/80 backdrop-blur-sm rounded-full p-1 hover:bg-background/90 hover:scale-110 shadow-lg translate-x-1 translate-y-1 cursor-pointer ${
-                  isGroupHovered ? 'opacity-100 scale-100' : 'opacity-0'
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                onMouseEnter={() => setIsTooltipOpen(true)}
-                onMouseLeave={() => setIsTooltipOpen(false)}
-              >
-                <Heart className="h-3 w-3 text-foreground transition-colors hover:text-red-500" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="left" className="bg-popover text-popover-foreground border border-border">
-              <p>{t("common.addToFavorites")}</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-
-        <div className="min-w-0">
-          <div className="truncate font-semibold">{anime.title}</div>
-          <div className="text-sm text-muted-foreground">
-            Score: {anime.score ?? "N/A"}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AnimeList({ items }: { items: Anime[] }) {
-  const { t } = useTranslation();
-  
-  return (
-    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-      {items.map((a) => (
-        <AnimeListItem key={a.mal_id} anime={a} t={t} />
-      ))}
-    </div>
-  );
-}
+import { AnimeCard } from "@/components/anime/AnimeCard";
+import { AnimeCardSkeleton } from "@/components/anime/AnimeCardSkeleton";
 
 function Pagination({
   currentPage,
@@ -116,7 +27,7 @@ function Pagination({
 }) {
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
-    const showMax = 7; 
+    const showMax = 7;
 
     if (totalPages <= showMax) {
       for (let i = 1; i <= totalPages; i++) {
@@ -198,7 +109,7 @@ function CatalogPage() {
   const [currentSeason, setCurrentSeason] = React.useState<SeasonInfo>(() => getCurrentSeason());
   const [page, setPage] = React.useState(1);
   const [allowNsfw, setAllowNsfw] = useQueryState("nsfw", parseAsBoolean.withDefault(false));
-  
+
   const { data, isLoading, isError, error, refetch } = useSeasonAnime(
     currentSeason.year,
     currentSeason.season,
@@ -234,8 +145,6 @@ function CatalogPage() {
   };
 
   const seasonName = t(`seasons.${currentSeason.season}`);
-
-  
 
   return (
     <div className="space-y-6">
@@ -274,7 +183,11 @@ function CatalogPage() {
       </div>
 
       {isLoading ? (
-        <AnimeListSkeleton />
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+          {Array.from({ length: 21 }).map((_, i) => (
+            <AnimeCardSkeleton key={`skeleton-${i}`} />
+          ))}
+        </div>
       ) : isError ? (
         <ErrorState
           message={error instanceof Error ? error.message : t("common.loadError")}
@@ -284,7 +197,11 @@ function CatalogPage() {
         <EmptyState message={t("catalog.empty")} />
       ) : (
         <>
-          <AnimeList items={data?.data ?? []} />
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+            {data?.data?.map((item) => (
+              <AnimeCard key={item.mal_id} anime={item} />
+            ))}
+          </div>
 
           {totalPages > 1 && (
             <Pagination

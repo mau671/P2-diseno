@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { AnimeBase } from "@/api/queries";
 import { useStablePastelColor } from "@/hooks/useStablePastelColor";
@@ -18,7 +19,18 @@ type AnimeCardProps = {
   anime: AnimeBase;
 };
 
+function slugifyLocal(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function AnimeCard({ anime }: AnimeCardProps) {
+  const navigate = useNavigate();
   const img = anime?.images?.webp?.large_image_url ||
               anime?.images?.jpg?.large_image_url ||
               anime?.images?.webp?.image_url ||
@@ -58,10 +70,19 @@ function AnimeCard({ anime }: AnimeCardProps) {
     toggleFavorite(anime.mal_id);
   };
 
+  const handleCardClick = () => {
+    const slug = slugifyLocal(title || "anime") || "anime";
+    navigate({
+      to: "/anime/$id/$slug",
+      params: { id: String(anime.mal_id), slug },
+    });
+  };
+
   return (
     <div 
       className="flex-shrink-0 w-36 md:w-44 cursor-pointer group relative"
       ref={cardRef}
+      onClick={handleCardClick}
       onMouseEnter={handleCardMouseEnter}
       onMouseLeave={handleCardMouseLeave}
     >

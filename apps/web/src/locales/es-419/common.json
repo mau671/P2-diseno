@@ -1,5 +1,4 @@
-﻿{
-  "app": { "title": "Anime App" },
+{
   "nav": {
     "home": "Inicio",
     "anime": "Anime",
@@ -14,14 +13,14 @@
     "label": "Sección",
     "topAnime": "Top Anime",
     "topAnimeDescription": "Los mejores animes rankeados por la comunidad",
-    "search": "Búsqueda",
-    "searchDescription": "Busca tu anime favorito",
+    "search": "Buscar",
+    "searchDescription": "Encuentra tu anime favorito",
     "favorites": "Favoritos",
     "catalog": "Catálogo",
-    "catalogDescription": "Explora el catálogo de animes",
+    "catalogDescription": "Explora el catálogo de anime",
     "trendingNow": "Tendencias ahora",
     "upcomingNextSeason": "Próxima temporada",
-    "allTimePopular": "Populares de todos los tiempos",
+    "allTimePopular": "Más populares de todos los tiempos",
     "user": "Usuario"
   },
   "common": {
@@ -32,80 +31,84 @@
   "loadError": "Error al cargar datos.",
   "scrollLeft": "Desplazar a la izquierda",
   "scrollRight": "Desplazar a la derecha",
-  "tooManyRequests": "Demasiadas solicitudes. Intentá de nuevo.",
+  "tooManyRequests": "Demasiadas solicitudes. Intenta de nuevo.",
   "addToFavorites": "Agregar a favoritos",
-  "removeFromFavorites": "Quitar de favoritos"
-},
+  "removeFromFavorites": "Quitar de favoritos",
+  "back": "Volver",
+  "notFound": "No encontrado",
+  "comingSoon": "Próximamente",
+  "na": "N/A"
+  },
   "search": {
     "placeholder": "Buscar anime...",
     "button": "Buscar",
-    "hint": "Escribí algo y presioná Buscar.",
-    "error": "Error al buscar.",
+    "hint": "Escribe algo y presiona Buscar.",
+    "error": "La búsqueda falló.",
     "empty": "Sin resultados.",
     "allowNsfw": "Permitir contenido NSFW",
-    "moreFilters": "Más Filtros",
-    "clearAll": "limpiar todos",
+    "moreFilters": "Más filtros",
+    "clearAll": "limpiar todo",
     "episodes": "episodios",
     "unknown": "Desconocido",
     "filters": {
-     "genres": "Géneros",
-     "year": "Año",
-     "season": "Temporada",
-     "format": "Formato",
-     "status": "Estado",
-     "streamingOn": "Disponible en",
-     "countryOfOrigin": "País de Origen",
-     "sourceMaterial": "Material Fuente",
-     "nsfw": "Contenido NSFW"
-   },
-   "seasons": {
-     "winter": "Invierno",
-     "spring": "Primavera",
-     "summer": "Verano",
-     "fall": "Otoño"
-   },
-   "formats": {
-     "tv": "TV",
-     "movie": "Película",
-     "ova": "OVA",
-     "special": "Especial",
-     "ona": "ONA",
-     "music": "Música",
-     "cm": "CM",
-     "pv": "PV",
-     "tv_special": "Especial de TV"
-   },
-   "statuses": {
-     "airing": "En Emisión",
-     "complete": "Completado",
-     "upcoming": "Próximamente"
-   },
-   "types": {
-     "anime": "Anime",
-     "manga": "Manga",
-     "characters": "Personajes",
-     "people": "Personas",
-     "studios": "Estudios"
-   }
- },
-"topAnime": {
-  "empty": "Sin elementos."
-},
-"catalog": {
-    "title": "Catálogo de Anime",
+      "genres": "Géneros",
+      "year": "Año",
+      "season": "Temporada",
+      "format": "Formato",
+      "status": "Estado",
+      "streamingOn": "Disponible en",
+      "countryOfOrigin": "País de origen",
+      "sourceMaterial": "Material de origen",
+      "nsfw": "Contenido NSFW"
+    },
+    "seasons": {
+      "winter": "Invierno",
+      "spring": "Primavera",
+      "summer": "Verano",
+      "fall": "Otoño"
+    },
+    "formats": {
+      "tv": "TV",
+      "movie": "Película",
+      "ova": "OVA",
+      "special": "Especial",
+      "ona": "ONA",
+      "music": "Música",
+      "cm": "CM",
+      "pv": "PV",
+      "tv_special": "Especial de TV"
+    },
+    "statuses": {
+      "airing": "En emisión",
+      "complete": "Completo",
+      "upcoming": "Próximamente"
+    },
+    "types": {
+      "anime": "Anime",
+      "manga": "Manga",
+      "characters": "Personajes",
+      "people": "Personas",
+      "studios": "Estudios"
+    }
+  },
+  "topAnime": {
+    "empty": "No hay elementos."
+  },
+  "catalog": {
+    "title": "Catálogo de anime",
     "description": "Explora los mejores animes.",
-    "loadMore": "Cargar más animes",
-    "empty": "No se encontraron animes",
-    "endOfList": "Has llegado al final del catálogo",
-    "previousSeason": "Temporada Anterior",
-    "nextSeason": "Siguiente Temporada"
-},
-"seasons": {
+    "loadMore": "Cargar más anime",
+    "empty": "No se encontró anime",
+    "endOfList": "Llegaste al final del catálogo",
+    "previousSeason": "Temporada anterior",
+    "nextSeason": "Siguiente temporada"
+  },
+  "seasons": {
     "winter": "Invierno",
     "spring": "Primavera",
     "summer": "Verano",
     "fall": "Otoño"
-},
+  },
   "theme": {
     "toggle": "Cambiar tema",
     "light": "Claro",
@@ -114,67 +117,153 @@
   },
   "language": {
     "toggle": "Cambiar idioma",
-    "es": "Español (Latinoamérica)",
+    "es": "Español (LatAm)",
     "en": "Inglés (Estados Unidos)"
   },
+  "anime": {
+    "detail": {
+      "scoreLabel": "Puntaje",
+      "noSynopsis": "Sin sinopsis disponible",
+      "studiosLabel": "Estudios",
+      "minPerEp": "{{minutes}} min por ep",
+      "sections": {
+        "characters": "Personajes",
+        "related": "Relacionados",
+        "episodes": "Episodios",
+        "moreInfo": "Más información"
+      }
+    },
+    "status": {
+      "finished_airing": "Finalizado",
+      "currently_airing": "En emisión",
+      "not_yet_aired": "Aún no estrenado",
+      "unknown": "Desconocido"
+    }
+  },
+  "genres": {
+  "1": "Acción",
+  "2": "Aventura",
+  "4": "Comedia",
+  "7": "Misterio",
+  "8": "Drama",
+  "10": "Fantasía",
+  "11": "Romance",
+  "14": "Terror",
+  "17": "Artes marciales",
+  "18": "Mecha",
+  "19": "Música",
+  "20": "Parodia",
+  "22": "Subtexto romántico",
+  "23": "Escolar",
+  "24": "Ciencia ficción",
+  "25": "Shōjo",
+  "27": "Shōnen",
+  "29": "Espacio",
+  "30": "Deportes",
+  "31": "Superpoderes",
+  "36": "Recuentos de la vida",
+  "37": "Sobrenatural",
+  "38": "Militar",
+  "39": "Policial",
+  "40": "Psicológico",
+  "41": "Suspenso",
+  "42": "Seinen",
+  "43": "Josei",
+  "46": "Premiado",
+  "47": "Gastronomía",
+  "48": "Trabajo",
+  "49": "Erótica",
+  "50": "Reparto adulto",
+  "51": "Antropomórfico",
+  "52": "Chicas lindas haciendo cosas lindas",
+  "53": "Cuidado infantil",
+  "54": "Deportes de combate",
+  "55": "Delincuentes",
+  "56": "Detectives",
+  "57": "Educativo",
+  "58": "Humor absurdo",
+  "59": "Gore",
+  "60": "Harén",
+  "61": "Juego de alto riesgo",
+  "62": "Histórico",
+  "63": "Isekai",
+  "64": "Iyashikei",
+  "65": "Polígono amoroso",
+  "66": "Cambio de sexo mágico",
+  "67": "Mahō shōjo",
+  "68": "Médico",
+  "69": "Memorias",
+  "70": "Mitología",
+  "71": "Crimen organizado",
+  "72": "Cultura otaku",
+  "73": "Artes escénicas",
+  "74": "Mascotas",
+  "75": "Reencarnación",
+  "76": "Harén inverso",
+  "77": "Samurái",
+  "78": "Farándula",
+  "79": "Juego de estrategia",
+  "80": "Supervivencia",
+  "81": "Deportes de equipo"
+},
   "auth": {
     "logout": "Cerrar sesión",
     "login": {
       "title": "Iniciar Sesión",
-      "welcomeBack": "Bienvenido de nuevo",
+      "welcomeBack": "Qué bueno verte de nuevo",
       "signIn": "Iniciar sesión",
       "accessAccount": "Accede a tu cuenta",
-      "socialLogin": "Inicia sesión con tu cuenta de Apple o Google",
-      "loginWithApple": "Iniciar sesión con Apple",
-      "loginWithGoogle": "Iniciar sesión con Google",
-      "orContinueWith": "O continuar con",
-      "email": "Correo electrónico",
+      "socialLogin": "Ingresa con tu cuenta de Apple o Google",
+      "loginWithApple": "Ingresar con Apple",
+      "loginWithGoogle": "Ingresar con Google",
+      "orContinueWith": "O continúa con",
+      "email": "Correo",
       "emailPlaceholder": "m@ejemplo.com",
       "password": "Contraseña",
       "forgotPassword": "¿Olvidaste tu contraseña?",
-      "submit": "Iniciar Sesión",
-      "loading": "Iniciando sesión...",
+      "submit": "Ingresar",
+      "loading": "Ingresando...",
       "noAccount": "¿No tienes cuenta?",
-      "registerLink": "Regístrate"
+      "registerLink": "Crear cuenta"
     },
     "register": {
-      "title": "Crear Cuenta",
+      "title": "Crear cuenta",
       "createYourAccount": "Crea tu cuenta",
-      "enterEmailToCreate": "Ingresa tu correo electrónico para crear tu cuenta",
+      "enterEmailToCreate": "Ingresa tu correo para crear tu cuenta",
       "fullName": "Nombre completo",
       "fullNamePlaceholder": "Juan Pérez",
-      "email": "Correo electrónico",
+      "email": "Correo",
       "emailPlaceholder": "m@ejemplo.com",
       "password": "Contraseña",
-      "confirmPassword": "Confirmar Contraseña",
+      "confirmPassword": "Confirmar contraseña",
       "passwordMinLength": "Debe tener al menos 6 caracteres.",
-      "createAccount": "Crear Cuenta",
-      "submit": "Crear Cuenta",
+      "createAccount": "Crear cuenta",
+      "submit": "Crear cuenta",
       "loading": "Creando cuenta...",
       "hasAccount": "¿Ya tienes cuenta?",
-      "loginLink": "Inicia sesión",
+      "loginLink": "Iniciar sesión",
       "passwordMismatch": "Las contraseñas no coinciden",
       "passwordTooShort": "La contraseña debe tener al menos 6 caracteres"
     },
     "forgot": {
-      "title": "Recuperar Contraseña",
-      "description": "Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña",
-      "email": "Correo electrónico",
-      "submit": "Enviar enlace",
+      "title": "Recuperar contraseña",
+      "description": "Ingresa tu correo y te enviaremos un link para restablecer tu contraseña",
+      "email": "Correo",
+      "submit": "Enviar link",
       "loading": "Enviando...",
       "success": "¡Correo enviado! Revisa tu bandeja de entrada.",
-      "backToLogin": "Volver al inicio de sesión"
+      "backToLogin": "Volver a iniciar sesión"
     },
     "errors": {
-      "loginFailed": "Error al iniciar sesión",
-      "registerFailed": "Error al registrar usuario",
-      "resetFailed": "Error al enviar el correo"
+      "loginFailed": "Falló el inicio de sesión",
+      "registerFailed": "Falló el registro",
+      "resetFailed": "No se pudo enviar el correo"
     },
     "legal": {
-      "byClickingContinue": "Al hacer clic en continuar, aceptas nuestros",
-      "termsOfService": "Términos de Servicio",
+      "byClickingContinue": "Al continuar, aceptas nuestros",
+      "termsOfService": "Términos de servicio",
       "and": "y",
-      "privacyPolicy": "Política de Privacidad"
+      "privacyPolicy": "Política de privacidad"
     }
   },
   "user": {

@@ -31,7 +31,7 @@ function MoreFilters({ allowNsfw, onNsfwChange }: MoreFiltersProps) {
           <TooltipTrigger asChild>
             <Info className="h-4 w-4 text-muted-foreground cursor-help" />
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent className="bg-popover text-popover-foreground border border-border">
             <p>{t("search.allowNsfw")}</p>
           </TooltipContent>
         </Tooltip>
