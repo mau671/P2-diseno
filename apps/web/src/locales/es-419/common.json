@@ -24,20 +24,16 @@
     "allTimePopular": "Populares de todos los tiempos"
   },
   "common": {
-    "loading": "Cargando...",
-    "error": "Ocurrió un error",
-    "retry": "Reintentar",
-    "noInternet": "Sin conexión. Revisá tu internet.",
-    "loadError": "Error al cargar datos.",
-    "scrollLeft": "Desplazar a la izquierda",
-    "scrollRight": "Desplazar a la derecha",
-    "tooManyRequests": "Demasiadas solicitudes. Intentá de nuevo.",
-    "addToFavorites": "Agregar a favoritos",
-    "back": "Volver",
-    "notFound": "No encontrado",
-    "comingSoon": "Próximamente",
-    "na": "N/A"
-  },
+  "loading": "Cargando...",
+  "error": "Ocurrió un error",
+  "retry": "Reintentar",
+  "noInternet": "Sin conexión. Revisá tu internet.",
+  "loadError": "Error al cargar datos.",
+  "scrollLeft": "Desplazar a la izquierda",
+  "scrollRight": "Desplazar a la derecha",
+  "tooManyRequests": "Demasiadas solicitudes. Intentá de nuevo.",
+  "addToFavorites": "Agregar a favoritos"
+},
   "search": {
     "placeholder": "Buscar anime...",
     "button": "Buscar",
@@ -50,50 +46,50 @@
     "episodes": "episodios",
     "unknown": "Desconocido",
     "filters": {
-      "genres": "Géneros",
-      "year": "Año",
-      "season": "Temporada",
-      "format": "Formato",
-      "status": "Estado",
-      "streamingOn": "Disponible en",
-      "countryOfOrigin": "País de Origen",
-      "sourceMaterial": "Material Fuente",
-      "nsfw": "Contenido NSFW"
-    },
-    "seasons": {
-      "winter": "Invierno",
-      "spring": "Primavera",
-      "summer": "Verano",
-      "fall": "Otoño"
-    },
-    "formats": {
-      "tv": "TV",
-      "movie": "Película",
-      "ova": "OVA",
-      "special": "Especial",
-      "ona": "ONA",
-      "music": "Música",
-      "cm": "CM",
-      "pv": "PV",
-      "tv_special": "Especial de TV"
-    },
-    "statuses": {
-      "airing": "En Emisión",
-      "complete": "Completado",
-      "upcoming": "Próximamente"
-    },
-    "types": {
-      "anime": "Anime",
-      "manga": "Manga",
-      "characters": "Personajes",
-      "people": "Personas",
-      "studios": "Estudios"
-    }
-  },
-  "topAnime": {
-    "empty": "Sin elementos."
-  },
-  "catalog": {
+     "genres": "Géneros",
+     "year": "Año",
+     "season": "Temporada",
+     "format": "Formato",
+     "status": "Estado",
+     "streamingOn": "Disponible en",
+     "countryOfOrigin": "País de Origen",
+     "sourceMaterial": "Material Fuente",
+     "nsfw": "Contenido NSFW"
+   },
+   "seasons": {
+     "winter": "Invierno",
+     "spring": "Primavera",
+     "summer": "Verano",
+     "fall": "Otoño"
+   },
+   "formats": {
+     "tv": "TV",
+     "movie": "Película",
+     "ova": "OVA",
+     "special": "Especial",
+     "ona": "ONA",
+     "music": "Música",
+     "cm": "CM",
+     "pv": "PV",
+     "tv_special": "Especial de TV"
+   },
+   "statuses": {
+     "airing": "En Emisión",
+     "complete": "Completado",
+     "upcoming": "Próximamente"
+   },
+   "types": {
+     "anime": "Anime",
+     "manga": "Manga",
+     "characters": "Personajes",
+     "people": "Personas",
+     "studios": "Estudios"
+   }
+ },
+"topAnime": {
+  "empty": "Sin elementos."
+},
+"catalog": {
     "title": "Catálogo de Anime",
     "description": "Explora los mejores animes.",
     "loadMore": "Cargar más animes",
@@ -101,13 +97,13 @@
     "endOfList": "Has llegado al final del catálogo",
     "previousSeason": "Temporada Anterior",
     "nextSeason": "Siguiente Temporada"
-  },
-  "seasons": {
+},
+"seasons": {
     "winter": "Invierno",
     "spring": "Primavera",
     "summer": "Verano",
     "fall": "Otoño"
-  },
+},
   "theme": {
     "toggle": "Cambiar tema",
     "light": "Claro",
@@ -118,92 +114,6 @@
     "toggle": "Cambiar idioma",
     "es": "Español (Latinoamérica)",
     "en": "Inglés (Estados Unidos)"
-  },
-  "anime": {
-    "detail": {
-      "scoreLabel": "Puntaje",
-      "noSynopsis": "Sin sinopsis disponible",
-      "studiosLabel": "Estudios",
-      "minPerEp": "{{minutes}} min por ep",
-      "sections": {
-        "characters": "Personajes",
-        "related": "Relacionados",
-        "episodes": "Episodios",
-        "moreInfo": "Más información"
-      }
-    },
-    "status": {
-      "finished_airing": "Finalizado",
-      "currently_airing": "En emisión",
-      "not_yet_aired": "Próximamente",
-      "unknown": "Desconocido"
-    }
-  },
-  "genres": {
-    "1": "Acción",
-    "2": "Aventura",
-    "4": "Comedia",
-    "7": "Misterio",
-    "8": "Drama",
-    "10": "Fantasía",
-    "11": "Romance",
-    "14": "Terror",
-    "17": "Artes marciales",
-    "18": "Mecha",
-    "19": "Música",
-    "20": "Parodia",
-    "22": "Subtexto romántico",
-    "23": "Escolar",
-    "24": "Ciencia ficción",
-    "25": "Shoujo",
-    "27": "Shounen",
-    "29": "Espacio",
-    "30": "Deportes",
-    "31": "Superpoderes",
-    "36": "Recuentos de la vida",
-    "37": "Sobrenatural",
-    "38": "Militar",
-    "39": "Policía",
-    "40": "Psicológico",
-    "41": "Suspenso",
-    "42": "Seinen",
-    "43": "Josei",
-    "46": "Galardonado",
-    "47": "Gastronomía",
-    "48": "Trabajo",
-    "49": "Erótica",
-    "50": "Elenco adulto",
-    "51": "Antropomórfico",
-    "52": "Chicas haciendo cosas lindas",
-    "53": "Cuidado infantil",
-    "54": "Deportes de combate",
-    "55": "Delincuentes",
-    "56": "Detective",
-    "57": "Educativo",
-    "58": "Humor absurdo",
-    "59": "Gore",
-    "60": "Harem",
-    "61": "Juego de alto riesgo",
-    "62": "Histórico",
-    "63": "Isekai",
-    "64": "Iyashikei",
-    "65": "Polígono amoroso",
-    "66": "Cambio de sexo mágico",
-    "67": "Mahou shoujo",
-    "68": "Médico",
-    "69": "Memorias",
-    "70": "Mitología",
-    "71": "Crimen organizado",
-    "72": "Cultura otaku",
-    "73": "Artes escénicas",
-    "74": "Mascotas",
-    "75": "Reencarnación",
-    "76": "Harem inverso",
-    "77": "Samurái",
-    "78": "Farándula",
-    "79": "Juego de estrategia",
-    "80": "Supervivencia",
-    "81": "Deportes en equipo"
   },
   "auth": {
     "login": {
@@ -263,4 +173,3 @@
     }
   }
 }
-

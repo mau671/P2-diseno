@@ -24,76 +24,72 @@
     "allTimePopular": "All time popular"
   },
   "common": {
-    "loading": "Loading...",
-    "error": "Something went wrong",
-    "retry": "Retry",
-    "noInternet": "No connection. Check your internet.",
-    "loadError": "Failed to load data.",
-    "scrollLeft": "Scroll left",
-    "scrollRight": "Scroll right",
-    "tooManyRequests": "Too many requests. Please try again.",
-    "addToFavorites": "Add to favorites",
-    "back": "Back",
-    "notFound": "Not found",
-    "comingSoon": "Coming soon",
-    "na": "N/A"
-  },
-  "search": {
-    "placeholder": "Search anime...",
-    "button": "Search",
-    "hint": "Type something and press Search.",
-    "error": "Search failed.",
-    "empty": "No results.",
+  "loading": "Loading...",
+  "error": "Something went wrong",
+  "retry": "Retry",
+  "noInternet": "No connection. Check your internet.",
+  "loadError": "Failed to load data.",
+  "scrollLeft": "Scroll left",
+  "scrollRight": "Scroll right",
+  "tooManyRequests": "Too many requests. Please try again.",
+  "addToFavorites": "Add to favorites"
+},
+"search": {
+   "placeholder": "Search anime...",
+   "button": "Search",
+   "hint": "Type something and press Search.",
+   "error": "Search failed.",
+   "empty": "No results.",
     "allowNsfw": "Allow NSFW content",
     "moreFilters": "More Filters",
     "clearAll": "clear all",
     "episodes": "episodes",
     "unknown": "Unknown",
     "filters": {
-      "genres": "Genres",
-      "year": "Year",
-      "season": "Season",
-      "format": "Format",
-      "status": "Status",
-      "streamingOn": "Streaming On",
-      "countryOfOrigin": "Country of Origin",
-      "sourceMaterial": "Source Material",
-      "nsfw": "NSFW Content"
-    },
-    "seasons": {
-      "winter": "Winter",
-      "spring": "Spring",
-      "summer": "Summer",
-      "fall": "Fall"
-    },
-    "formats": {
-      "tv": "TV",
-      "movie": "Movie",
-      "ova": "OVA",
-      "special": "Special",
-      "ona": "ONA",
-      "music": "Music",
-      "cm": "CM",
-      "pv": "PV",
-      "tv_special": "TV Special"
-    },
-    "statuses": {
-      "airing": "Airing",
-      "complete": "Complete",
-      "upcoming": "Upcoming"
-    },
-    "types": {
-      "anime": "Anime",
-      "manga": "Manga",
-      "characters": "Characters",
-      "people": "People",
-      "studios": "Studios"
-    }
-  },
-  "topAnime": {
-    "empty": "No items."
-  },
-  "catalog": {
+     "genres": "Genres",
+     "year": "Year",
+     "season": "Season",
+     "format": "Format",
+     "status": "Status",
+     "streamingOn": "Streaming On",
+     "countryOfOrigin": "Country of Origin",
+     "sourceMaterial": "Source Material",
+     "nsfw": "NSFW Content"
+   },
+   "seasons": {
+     "winter": "Winter",
+     "spring": "Spring",
+     "summer": "Summer",
+     "fall": "Fall"
+   },
+   "formats": {
+     "tv": "TV",
+     "movie": "Movie",
+     "ova": "OVA",
+     "special": "Special",
+     "ona": "ONA",
+     "music": "Music",
+     "cm": "CM",
+     "pv": "PV",
+     "tv_special": "TV Special"
+   },
+   "statuses": {
+     "airing": "Airing",
+     "complete": "Complete",
+     "upcoming": "Upcoming"
+   },
+   "types": {
+     "anime": "Anime",
+     "manga": "Manga",
+     "characters": "Characters",
+     "people": "People",
+     "studios": "Studios"
+   }
+ },
+"topAnime": {
+  "empty": "No items."
+},
+"catalog": {
     "title": "Anime Catalog",
     "description": "Explore the best animes.",
     "loadMore": "Load more anime",
@@ -101,8 +97,8 @@
     "endOfList": "You've reached the end of the catalog",
     "previousSeason": "Previous Season",
     "nextSeason": "Next Season"
-  },
-  "seasons": {
+    },
+"seasons": {
     "winter": "Winter",
     "spring": "Spring",
     "summer": "Summer",
@@ -118,92 +114,6 @@
     "toggle": "Change language",
     "es": "Spanish (Latin America)",
     "en": "English (United States)"
-  },
-  "anime": {
-    "detail": {
-      "scoreLabel": "Score",
-      "noSynopsis": "No synopsis available",
-      "studiosLabel": "Studios",
-      "minPerEp": "{{minutes}} min per ep",
-      "sections": {
-        "characters": "Characters",
-        "related": "Related",
-        "episodes": "Episodes",
-        "moreInfo": "More information"
-      }
-    },
-    "status": {
-      "finished_airing": "Finished Airing",
-      "currently_airing": "Currently Airing",
-      "not_yet_aired": "Not Yet Aired",
-      "unknown": "Unknown"
-    }
-  },
-  "genres": {
-    "1": "Action",
-    "2": "Adventure",
-    "4": "Comedy",
-    "7": "Mystery",
-    "8": "Drama",
-    "10": "Fantasy",
-    "11": "Romance",
-    "14": "Horror",
-    "17": "Martial Arts",
-    "18": "Mecha",
-    "19": "Music",
-    "20": "Parody",
-    "22": "Romantic Subtext",
-    "23": "School",
-    "24": "Sci-Fi",
-    "25": "Shoujo",
-    "27": "Shounen",
-    "29": "Space",
-    "30": "Sports",
-    "31": "Super Power",
-    "36": "Slice of Life",
-    "37": "Supernatural",
-    "38": "Military",
-    "39": "Police",
-    "40": "Psychological",
-    "41": "Suspense",
-    "42": "Seinen",
-    "43": "Josei",
-    "46": "Award Winning",
-    "47": "Gourmet",
-    "48": "Workplace",
-    "49": "Erotica",
-    "50": "Adult Cast",
-    "51": "Anthropomorphic",
-    "52": "CGDCT",
-    "53": "Childcare",
-    "54": "Combat Sports",
-    "55": "Delinquents",
-    "56": "Detective",
-    "57": "Educational",
-    "58": "Gag Humor",
-    "59": "Gore",
-    "60": "Harem",
-    "61": "High Stakes Game",
-    "62": "Historical",
-    "63": "Isekai",
-    "64": "Iyashikei",
-    "65": "Love Polygon",
-    "66": "Magical Sex Shift",
-    "67": "Mahou Shoujo",
-    "68": "Medical",
-    "69": "Memoir",
-    "70": "Mythology",
-    "71": "Organized Crime",
-    "72": "Otaku Culture",
-    "73": "Performing Arts",
-    "74": "Pets",
-    "75": "Reincarnation",
-    "76": "Reverse Harem",
-    "77": "Samurai",
-    "78": "Showbiz",
-    "79": "Strategy Game",
-    "80": "Survival",
-    "81": "Team Sports"
   },
   "auth": {
     "login": {
@@ -263,5 +173,4 @@
     }
   }
 }
-
 

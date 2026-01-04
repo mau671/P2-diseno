@@ -2,13 +2,7 @@ import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { SearchFilters } from "@/api/queries";
-import {
-  useInfiniteSearch,
-  useGenres,
-  useSeasonsNow,
-  useSeasonsUpcoming,
-  useTopAnimeByPopularity,
-} from "@/api/queries";
+import { useInfiniteSearch, useGenres, useSeasonsNow, useSeasonsUpcoming, useTopAnimeByPopularity } from "@/api/queries";
 import type { Genre } from "@/api/queries";
 import { TYPE_TO_ENDPOINT } from "@/lib/search-constants";
 import { SearchHeader } from "@/components/search/SearchHeader";
@@ -27,8 +21,8 @@ export const Route = createFileRoute("/anime/search")({
 function SearchAnimePage() {
   const { t } = useTranslation();
   const genres = useGenres();
-
-  const {
+  
+  const { 
     selectedGenres,
     setSelectedGenres,
     selectedYear,
@@ -82,9 +76,7 @@ function SearchAnimePage() {
 
   const selectedGenreObjects = React.useMemo(() => {
     const genreList = genres.data || [];
-    return selectedGenres
-      .map((id) => genreList.find((g) => g.mal_id === id))
-      .filter((g): g is Genre => g !== undefined);
+    return selectedGenres.map(id => genreList.find(g => g.mal_id === id)).filter((g): g is Genre => g !== undefined);
   }, [selectedGenres, genres]);
 
   const trending = useSeasonsNow(true, query.trim().length === 0 && !hasActiveFilters);
@@ -94,7 +86,7 @@ function SearchAnimePage() {
   const [showMoreFilters, setShowMoreFilters] = React.useState(false);
 
   const handleClearGenre = (genreId: number) => {
-    setSelectedGenres(selectedGenres.filter((g) => g !== genreId));
+    setSelectedGenres(selectedGenres.filter(g => g !== genreId));
   };
 
   const handleClearYear = () => {
@@ -124,7 +116,7 @@ function SearchAnimePage() {
         <SearchFiltersRow
           genres={genres.data || []}
           selectedGenres={selectedGenreObjects}
-          setSelectedGenres={(genresSelected) => setSelectedGenres(genresSelected.map((g) => g.mal_id))}
+          setSelectedGenres={(genres) => setSelectedGenres(genres.map(g => g.mal_id))}
           selectedYear={selectedYear}
           setSelectedYear={setSelectedYear}
           selectedSeason={selectedSeason}
@@ -142,9 +134,18 @@ function SearchAnimePage() {
 
       {query.trim().length === 0 && !hasActiveFilters ? (
         <div className="space-y-8 pb-8">
-          <AnimeSection title={t("sections.trendingNow")} infiniteQuery={trending} />
-          <AnimeSection title={t("sections.upcomingNextSeason")} infiniteQuery={upcoming} />
-          <AnimeSection title={t("sections.allTimePopular")} infiniteQuery={allTimePopular} />
+          <AnimeSection
+            title={t("sections.trendingNow")}
+            infiniteQuery={trending}
+          />
+          <AnimeSection
+            title={t("sections.upcomingNextSeason")}
+            infiniteQuery={upcoming}
+          />
+          <AnimeSection
+            title={t("sections.allTimePopular")}
+            infiniteQuery={allTimePopular}
+          />
         </div>
       ) : (
         <SearchResultsContainer
@@ -163,10 +164,8 @@ function SearchAnimePage() {
           onClearStatuses={handleClearStatuses}
           onClearAll={handleClearAll}
           search={search}
-          searchType={searchType}
         />
       )}
     </div>
   );
 }
-
