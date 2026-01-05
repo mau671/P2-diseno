@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/network/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStablePastelColor } from "@/hooks/useStablePastelColor";
+import { AnimeCharactersPanel } from "@/components/anime/AnimeCharactersPanel";
 
 type JikanGenre = { mal_id: number; name: string };
 type JikanStudio = { mal_id: number; name: string };
@@ -116,13 +117,7 @@ function getPastelBaseColor(pastel: unknown): string {
 
   if (pastel && typeof pastel === "object") {
     const p = pastel as Record<string, unknown>;
-    const candidates = [
-      p.bg,
-      p.background,
-      p.base,
-      p.color,
-      p.hex,
-    ].filter(Boolean);
+    const candidates = [p.bg, p.background, p.base, p.color, p.hex].filter(Boolean);
 
     const first = candidates[0];
     if (typeof first === "string" && first.trim()) return first.trim();
@@ -357,11 +352,8 @@ function AnimeDetailPage() {
         {/* tira superior */}
         <div
           className="relative h-20 md:h-24 z-0"
-          style={{
-            backgroundColor: pastel,
-          }}
+          style={{ backgroundColor: pastel }}
         >
-          {/* overlay suave para que no quede “plano” y combine con dark */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/10 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-background/65 via-background/15 to-transparent" />
         </div>
@@ -369,10 +361,14 @@ function AnimeDetailPage() {
         <div className="p-4 md:p-6">
           <div className="flex flex-col md:flex-row gap-4 md:gap-6">
             {/* Poster */}
-            <div className="shrink-0 -mt-10 md:-mt-12 z-10">
+            <div className="shrink-0 -mt-10 md:-mt-12 relative z-10">
               <div className="w-32 md:w-44 aspect-[2/3] rounded-xl overflow-hidden border bg-muted shadow-lg">
                 {poster ? (
-                  <img src={poster} alt={anime.title} className="h-full w-full object-cover" />
+                  <img
+                    src={poster}
+                    alt={anime.title}
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <div className="h-full w-full bg-muted" />
                 )}
@@ -487,14 +483,11 @@ function AnimeDetailPage() {
 
       {/* Arriba: 2 columnas grandes (Characters + Episodes) */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border p-5 bg-card min-h-[220px]">
-          <div className="font-semibold mb-2 text-lg">
-            {tAny("anime.detail.sections.characters")}
-          </div>
-          <div className="text-sm text-muted-foreground">{tAny("common.comingSoon")}</div>
-        </div>
+        {/* ✅ US-14: Characters Panel */}
+        <AnimeCharactersPanel animeId={animeId} />
 
-        <div className="rounded-2xl border p-5 bg-card min-h-[220px]">
+        {/* Episodes (se queda “coming soon” por ahora) */}
+        <div className="rounded-2xl border p-5 bg-card min-h-[280px]">
           <div className="font-semibold mb-2 text-lg">
             {tAny("anime.detail.sections.episodes")}
           </div>

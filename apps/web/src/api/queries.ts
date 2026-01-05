@@ -48,6 +48,40 @@ export type Genre = {
 
 export type SearchResult = AnimeBase;
 
+/* ================================
+   ✅ US-14: Anime Characters types
+================================ */
+export type AnimeCharacter = {
+  character: {
+    mal_id: number;
+    name: string;
+    images?: {
+      jpg?: { image_url?: string };
+      webp?: { image_url?: string };
+    };
+  };
+  role?: string;
+};
+
+type JikanCharactersResponse = {
+  data: AnimeCharacter[];
+};
+
+async function fetchAnimeCharacters(animeId: number, signal?: AbortSignal) {
+  return fetchJikan<JikanCharactersResponse>(`/anime/${animeId}/characters`, {}, { signal });
+}
+
+export function useAnimeCharacters(animeId: number, enabled = true) {
+  return useQuery({
+    queryKey: ["animeCharacters", animeId],
+    queryFn: ({ signal }) => fetchAnimeCharacters(animeId, signal),
+    enabled: enabled && Number.isFinite(animeId) && animeId > 0,
+    select: (data) => data?.data ?? [],
+    staleTime: 1000 * 60 * 30,
+  });
+}
+/* ================================ */
+
 async function fetchTopAnime(page = 1, signal?: AbortSignal) {
   return fetchJikan<JikanListResponse<Anime[]>>("/top/anime", { page }, { signal });
 }
@@ -99,7 +133,6 @@ async function fetchSearch<T>(
   signal?: AbortSignal
 ) {
   const params: Record<string, string | number | boolean> = { page, sfw };
-  
 
   if (q.trim().length > 0) {
     params.q = q;
@@ -157,7 +190,7 @@ export function useSearch(q: string, type: string, page = 1, sfw = true, filters
 
 export function useInfiniteSearch(q: string, type: string, sfw = true, filters?: SearchFilters) {
   const query = q.trim();
-  
+
   // Check if there are any active filters (excluding sfw as it's a default)
   const hasActiveFilters = filters && (
     (filters.genres && filters.genres.length > 0) ||
