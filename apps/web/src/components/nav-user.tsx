@@ -124,11 +124,6 @@ export function NavUser() {
               <DropdownMenuItem onClick={() => navigate({ to: "/user/favorites" })}>
                 <Heart className="mr-2 h-4 w-4" />
                 {t("user.favorites")}
-                {profile && profile.favorites.length > 0 && (
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {profile.favorites.length}
-                  </span>
-                )}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

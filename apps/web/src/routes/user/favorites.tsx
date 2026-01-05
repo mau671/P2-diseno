@@ -37,7 +37,7 @@ function FavoritesPage() {
           } else {
             console.error(`Failed to load anime ${id}:`, response.status);
           }
-          await sleep(30);
+          await sleep(15);
         } catch (error) {
           console.error(`Error fetching anime ${id}:`, error);
         }
@@ -115,7 +115,6 @@ function FavoritesPage() {
     <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Heart className="h-8 w-8 fill-red-500 text-red-500" />
           {t("user.favorites")}
         </h1>
         <p className="text-muted-foreground">
