@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStablePastelColor } from "@/hooks/useStablePastelColor";
 import { AnimeCharactersPanel } from "@/components/anime/AnimeCharactersPanel";
+import { AnimeEpisodesPanel } from "@/components/anime/AnimeEpisodesPanel";
 
 type JikanGenre = { mal_id: number; name: string };
 type JikanStudio = { mal_id: number; name: string };
@@ -153,26 +154,14 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
 function toRgba(color: string, alpha: number) {
   const a = clamp(alpha, 0, 1);
 
-  // si ya viene en rgb/rgba, lo dejamos (con alpha simple si es rgb)
   if (/^rgba?\(/i.test(color)) {
-    if (/^rgba\(/i.test(color)) return color; // ya tiene alpha
-    // rgb(r,g,b) -> rgba(r,g,b,a)
+    if (/^rgba\(/i.test(color)) return color;
     return color.replace(/^rgb\(/i, "rgba(").replace(/\)\s*$/, `, ${a})`);
   }
 
-  // hex
   const rgb = hexToRgb(color);
   if (!rgb) return color;
   return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a})`;
-}
-
-function readableTextOn(bgHexOrRgb: string): string {
-  // intentamos calcular contraste solo si es hex
-  const rgb = bgHexOrRgb.startsWith("#") ? hexToRgb(bgHexOrRgb) : null;
-  if (!rgb) return "rgba(255,255,255,0.92)";
-  // luminancia aproximada
-  const lum = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
-  return lum > 0.66 ? "rgba(10,10,10,0.92)" : "rgba(255,255,255,0.92)";
 }
 
 export const Route = createFileRoute("/anime/$id/$slug")({
@@ -231,14 +220,11 @@ function AnimeDetailPage() {
   const animeId = React.useMemo(() => Number(rawId), [rawId]);
   const enabled = Number.isFinite(animeId) && animeId > 0;
 
-  // color pastel estable (mismo que catálogo)
   const pastelRaw = useStablePastelColor(enabled ? animeId : 0);
   const pastel = React.useMemo(() => getPastelBaseColor(pastelRaw), [pastelRaw]);
 
-  // variantes para UI (chips/puntaje)
   const chipBg = React.useMemo(() => toRgba(pastel, 0.18), [pastel]);
   const chipBorder = React.useMemo(() => toRgba(pastel, 0.38), [pastel]);
-  const chipText = React.useMemo(() => readableTextOn(pastel), [pastel]);
   const scoreBg = React.useMemo(() => toRgba(pastel, 0.22), [pastel]);
   const scoreBorder = React.useMemo(() => toRgba(pastel, 0.42), [pastel]);
 
@@ -347,20 +333,14 @@ function AnimeDetailPage() {
         {tAny("common.back")}
       </Button>
 
-      {/* Card Header con tira pastel (sin banner gigante) */}
       <div className="relative overflow-hidden rounded-2xl border bg-card">
-        {/* tira superior */}
-        <div
-          className="relative h-20 md:h-24 z-0"
-          style={{ backgroundColor: pastel }}
-        >
+        <div className="relative h-20 md:h-24 z-0" style={{ backgroundColor: pastel }}>
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/10 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-background/65 via-background/15 to-transparent" />
         </div>
 
         <div className="p-4 md:p-6">
           <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-            {/* Poster */}
             <div className="shrink-0 -mt-10 md:-mt-12 relative z-10">
               <div className="w-32 md:w-44 aspect-[2/3] rounded-xl overflow-hidden border bg-muted shadow-lg">
                 {poster ? (
@@ -386,7 +366,6 @@ function AnimeDetailPage() {
               </div>
             </div>
 
-            {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -425,7 +404,6 @@ function AnimeDetailPage() {
                   </div>
                 </div>
 
-                {/* Score con color pastel */}
                 {anime.score != null ? (
                   <div
                     className="shrink-0 rounded-xl px-3 py-2 border backdrop-blur-sm"
@@ -443,17 +421,15 @@ function AnimeDetailPage() {
                 ) : null}
               </div>
 
-              {/* Géneros con pastel */}
               {genres.length > 0 ? (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {genres.slice(0, 10).map((g) => (
                     <span
                       key={g.mal_id}
-                      className="text-xs px-3 py-1 rounded-full border"
+                      className="text-xs px-3 py-1 rounded-full border text-foreground"
                       style={{
                         backgroundColor: chipBg,
                         borderColor: chipBorder,
-                        color: chipText,
                       }}
                     >
                       {tAny(`genres.${g.mal_id}`, { defaultValue: g.name })}
@@ -481,21 +457,13 @@ function AnimeDetailPage() {
         </div>
       </div>
 
-      {/* Arriba: 2 columnas grandes (Characters + Episodes) */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* ✅ US-14: Characters Panel */}
         <AnimeCharactersPanel animeId={animeId} />
 
-        {/* Episodes (se queda “coming soon” por ahora) */}
-        <div className="rounded-2xl border p-5 bg-card min-h-[280px]">
-          <div className="font-semibold mb-2 text-lg">
-            {tAny("anime.detail.sections.episodes")}
-          </div>
-          <div className="text-sm text-muted-foreground">{tAny("common.comingSoon")}</div>
-        </div>
+        {/* ✅ US-15: Episodes Panel */}
+        <AnimeEpisodesPanel animeId={animeId} />
       </div>
 
-      {/* Abajo: Related full-width */}
       <div className="rounded-2xl border p-5 bg-card min-h-[220px]">
         <div className="flex items-center justify-between gap-3">
           <div className="font-semibold text-lg">
