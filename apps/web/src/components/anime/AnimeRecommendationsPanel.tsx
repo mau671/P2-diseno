@@ -25,7 +25,7 @@ type RecommendationEntry = {
   votes: number;
 };
 
-//Función para obtener detalles completos 
+//Función para obtener detalles de los animes recomendados
 async function fetchAnimeDetails(animeId: number, signal?: AbortSignal) {
   try {
     const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`, { signal });
