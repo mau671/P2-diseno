@@ -37,7 +37,8 @@
   "back": "Volver",
   "notFound": "No encontrado",
   "comingSoon": "Próximamente",
-  "na": "N/A"
+  "na": "N/A",
+  "loadMore": "Cargar más"
   },
   "search": {
     "placeholder": "Buscar anime...",
@@ -132,6 +133,13 @@
         "episodes": "Episodios",
         "moreInfo": "Más información",
         "recommendations": "Recomendaciones"
+      },
+      "episodes": {
+        "countShown": "{{count}} mostrados",
+        "empty": "No hay episodios disponibles.",
+        "fallbackTitle": "Episodio {{number}}",
+        "moreAvailable": "Hay más episodios disponibles.",
+        "end": "Fin de la lista."
       }
     },
     "status": {

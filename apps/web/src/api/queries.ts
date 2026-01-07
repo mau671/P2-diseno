@@ -83,6 +83,67 @@ export function useAnimeCharacters(animeId: number, enabled = true) {
 }
 /* ================================ */
 
+/* ================================
+   ✅ US-15: Anime Episodes (Infinite)
+================================ */
+
+export type AnimeEpisode = {
+  mal_id?: number; // a veces funciona como número/id del episodio
+  episode?: number; // si viene, es el número real del episodio
+  title?: string | null;
+  title_romanji?: string | null;
+  title_japanese?: string | null;
+};
+
+type JikanEpisodesResponse = {
+  data: AnimeEpisode[];
+  pagination?: {
+    last_visible_page?: number;
+    has_next_page?: boolean;
+    items?: {
+      count?: number;
+      total?: number;
+      per_page?: number;
+    };
+  };
+};
+
+async function fetchAnimeEpisodesPage(
+  animeId: number,
+  page = 1,
+  signal?: AbortSignal
+) {
+  return fetchJikan<JikanEpisodesResponse>(
+    `/anime/${animeId}/episodes`,
+    { page },
+    { signal }
+  );
+}
+
+export function useAnimeEpisodesInfinite(animeId: number, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: ["animeEpisodes", animeId],
+    enabled: enabled && Number.isFinite(animeId) && animeId > 0,
+    queryFn: ({ pageParam = 1, signal }) =>
+      fetchAnimeEpisodesPage(animeId, pageParam as number, signal),
+    initialPageParam: 1,
+
+    // ✅ FIX REAL: Jikan NO da current_page aquí, usamos lastPageParam (TanStack Query v5)
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      const hasNext = !!lastPage?.pagination?.has_next_page;
+      if (!hasNext) return undefined;
+
+      const current = typeof lastPageParam === "number" ? lastPageParam : 1;
+      return current + 1;
+    },
+
+    staleTime: 1000 * 60 * 30,
+  });
+}
+
+/* ================================ */
+
+
 
 // anime recommendations
 
