@@ -1,4 +1,4 @@
-{
+﻿{
   "nav": {
     "home": "Inicio",
     "anime": "Anime",
@@ -130,7 +130,8 @@
         "characters": "Personajes",
         "related": "Relacionados",
         "episodes": "Episodios",
-        "moreInfo": "Más información"
+        "moreInfo": "Más información",
+        "recommendations": "Recomendaciones"
       }
     },
     "status": {
@@ -278,5 +279,8 @@
   "empty": "Aún no tienes favoritos",
   "emptyDescription": "¡Comienza a agregar anime a tus favoritos!",
   "count": "{{count}} anime favoritos"
+  },
+  "recommendations": {
+      "empty": "No hay recomendaciones disponibles."
   }
 }

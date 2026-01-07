@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
   Star,
-  Users,
   Heart,
   Clock,
   Tv2,
@@ -19,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStablePastelColor } from "@/hooks/useStablePastelColor";
 import { AnimeCharactersPanel } from "@/components/anime/AnimeCharactersPanel";
+import { AnimeRecommendationsPanel } from "@/components/anime/AnimeRecommendationsPanel";
 
 type JikanGenre = { mal_id: number; name: string };
 type JikanStudio = { mal_id: number; name: string };
@@ -496,20 +496,7 @@ function AnimeDetailPage() {
       </div>
 
       {/* Abajo: Related full-width */}
-      <div className="rounded-2xl border p-5 bg-card min-h-[220px]">
-        <div className="flex items-center justify-between gap-3">
-          <div className="font-semibold text-lg">
-            {tAny("anime.detail.sections.related")}
-          </div>
-
-          <div className="text-xs text-muted-foreground inline-flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            {formatNumber(anime.members) ?? tAny("common.na")}
-          </div>
-        </div>
-
-        <div className="mt-2 text-sm text-muted-foreground">{tAny("common.comingSoon")}</div>
-      </div>
+      <AnimeRecommendationsPanel animeId={animeId} />
     </div>
   );
 }

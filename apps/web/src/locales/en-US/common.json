@@ -126,7 +126,8 @@
         "characters": "Characters",
         "related": "Related",
         "episodes": "Episodes",
-        "moreInfo": "More information"
+        "moreInfo": "More information",
+        "recommendations": "Recommendations"
       }
     },
     "status": {
@@ -274,5 +275,8 @@
   "empty": "No favorites yet",
   "emptyDescription": "Start adding anime to your favorites!",
   "count": "{{count}} favorite anime"
+  },
+  "recommendations": {
+      "empty": "No recommendations available."
   }
 }

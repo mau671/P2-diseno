@@ -10,6 +10,7 @@ type JikanListResponse<T> = {
   };
 };
 
+
 export type AnimeBase = {
   mal_id: number;
   title?: string;
@@ -81,6 +82,58 @@ export function useAnimeCharacters(animeId: number, enabled = true) {
   });
 }
 /* ================================ */
+
+
+// anime recommendations
+
+export type RecommendationEntry = {
+  mal_id: number;
+  entry: {
+    mal_id: number;
+    url: string;
+    images: {
+      jpg?: { image_url?: string; large_image_url?: string };
+      webp?: { image_url?: string; large_image_url?: string };
+    };
+    title: string;
+  };
+  votes: number;
+};
+
+type JikanRecommendationsResponse = {
+  data: RecommendationEntry[];
+};
+
+async function fetchAnimeRecommendations(animeId: number, signal?: AbortSignal) {
+  const res = await fetch(
+    `https://api.jikan.moe/v4/anime/${animeId}/recommendations`,
+    { signal }
+  );
+  
+  if (!res.ok) {
+    if (res.status === 429) {
+      throw new Error("Too many requests. Please try again in a moment.");
+    }
+    throw new Error(`Failed to fetch recommendations: ${res.status}`);
+  }
+  
+  const json = await res.json() as JikanRecommendationsResponse;
+  //Limitar a máximo 27 recomendaciones 
+  return { data: (json.data ?? []).slice(0, 27) };
+}
+
+export function useAnimeRecommendations(animeId: number, enabled = true) {
+  return useQuery({
+    queryKey: ["animeRecommendations", animeId],
+    queryFn: ({ signal }) => fetchAnimeRecommendations(animeId, signal),
+    enabled: enabled && Number.isFinite(animeId) && animeId > 0,
+    select: (data) => data?.data ?? [],
+    staleTime: 1000 * 60 * 10,
+    retry: false,
+  });
+}
+
+
 
 async function fetchTopAnime(page = 1, signal?: AbortSignal) {
   return fetchJikan<JikanListResponse<Anime[]>>("/top/anime", { page }, { signal });
