@@ -65,15 +65,6 @@ function slugifyLocal(input: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-function formatNumber(n?: number | null) {
-  if (n == null) return null;
-  try {
-    return new Intl.NumberFormat().format(n);
-  } catch {
-    return String(n);
-  }
-}
-
 function keyFromLabel(raw?: string | null) {
   if (!raw) return null;
   return raw.trim().toLowerCase().replace(/[^\w]+/g, "_");
