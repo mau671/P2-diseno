@@ -2,6 +2,9 @@
   "name": "anime-app",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
+  "devDependencies": {
+    "wrangler": "^4.58.0"
+  },
   "scripts": {
     "dev:web": "bun --filter ./apps/web dev",
     "dev:mobile": "bun --filter ./apps/mobile start"
