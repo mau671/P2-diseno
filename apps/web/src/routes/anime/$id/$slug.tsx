@@ -3,7 +3,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
-  ChevronLeft,
   Star,
   Heart,
   Clock,
@@ -14,8 +13,8 @@ import {
 
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useStablePastelColor } from "@/hooks/useStablePastelColor";
 import { AnimeCharactersPanel } from "@/components/anime/AnimeCharactersPanel";
 import { AnimeEpisodesPanel } from "@/components/anime/AnimeEpisodesPanel";
@@ -70,8 +69,10 @@ function keyFromLabel(raw?: string | null) {
   return raw.trim().toLowerCase().replace(/[^\w]+/g, "_");
 }
 
+type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
+
 function translateAnimeFormat(
-  tAny: (k: string, o?: any) => string,
+  tAny: TranslateFn,
   rawType?: string | null
 ) {
   const key = keyFromLabel(rawType);
@@ -80,7 +81,7 @@ function translateAnimeFormat(
 }
 
 function translateAnimeStatus(
-  tAny: (k: string, o?: any) => string,
+  tAny: TranslateFn,
   rawStatus?: string | null
 ) {
   const key = keyFromLabel(rawStatus);
@@ -88,7 +89,7 @@ function translateAnimeStatus(
   return tAny(`anime.status.${key}`, { defaultValue: rawStatus ?? "" });
 }
 
-function translateDuration(tAny: (k: string, o?: any) => string, raw?: string | null) {
+function translateDuration(tAny: TranslateFn, raw?: string | null) {
   if (!raw) return null;
   const m = raw.match(/(\d+)\s*min/i);
   if (m?.[1]) {
@@ -162,27 +163,33 @@ export const Route = createFileRoute("/anime/$id/$slug")({
 function AnimeDetailSkeleton() {
   return (
     <div className="space-y-6">
-      <Skeleton className="h-9 w-28" />
-
       <div className="relative overflow-hidden rounded-2xl border bg-card">
-        <Skeleton className="h-20 md:h-24 w-full" />
-
         <div className="p-4 md:p-6">
-          <div className="flex gap-4 md:gap-6">
-            <Skeleton className="w-32 md:w-44 aspect-[2/3] rounded-xl border" />
-            <div className="flex-1 space-y-3">
-              <Skeleton className="h-7 w-2/3" />
-              <Skeleton className="h-4 w-1/2" />
+          <div className="flex flex-row gap-3 md:gap-6">
+            {/* Poster con botón debajo */}
+            <div className="shrink-0 flex flex-col">
+              <Skeleton className="w-24 md:w-44 aspect-[2/3] rounded-xl border" />
+              <Skeleton className="h-8 md:h-10 w-full mt-3 rounded-md" />
+            </div>
+            
+            {/* Contenido principal */}
+            <div className="flex-1 space-y-2 md:space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <Skeleton className="h-5 md:h-7 w-2/3" />
+                <Skeleton className="h-12 md:h-14 w-12 md:w-14 rounded-lg shrink-0" />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-24" />
+              </div>
               <div className="flex gap-2">
                 <Skeleton className="h-6 w-16 rounded-full" />
                 <Skeleton className="h-6 w-20 rounded-full" />
                 <Skeleton className="h-6 w-24 rounded-full" />
               </div>
-              <Skeleton className="h-16 w-full" />
-              <div className="flex gap-2">
-                <Skeleton className="h-9 w-28 rounded-lg" />
-                <Skeleton className="h-9 w-28 rounded-lg" />
-              </div>
+              <Skeleton className="h-16 md:h-24 w-full" />
+              <Skeleton className="h-4 w-32" />
             </div>
           </div>
         </div>
@@ -200,7 +207,7 @@ function AnimeDetailSkeleton() {
 
 function AnimeDetailPage() {
   const { t } = useTranslation();
-  const tAny = t as unknown as (key: string, options?: any) => string;
+  const tAny = t as TranslateFn;
 
   const navigate = useNavigate();
 
@@ -216,8 +223,6 @@ function AnimeDetailPage() {
 
   const chipBg = React.useMemo(() => toRgba(pastel, 0.18), [pastel]);
   const chipBorder = React.useMemo(() => toRgba(pastel, 0.38), [pastel]);
-  const scoreBg = React.useMemo(() => toRgba(pastel, 0.22), [pastel]);
-  const scoreBorder = React.useMemo(() => toRgba(pastel, 0.42), [pastel]);
 
   const detail = useQuery({
     queryKey: ["animeDetail", animeId],
@@ -228,10 +233,14 @@ function AnimeDetailPage() {
 
   const anime = detail.data ?? null;
 
-  const goBack = React.useCallback(() => {
-    if (window.history.length > 1) window.history.back();
-    else navigate({ to: "/anime/catalog" });
-  }, [navigate]);
+  // Use the same score color logic as AnimeCard
+  const scoreColor = React.useMemo(() => {
+    if (!anime?.score) return "#6b7280";
+    if (anime.score >= 8) return "#22c55e";
+    if (anime.score >= 6) return "#84cc16";
+    if (anime.score >= 4) return "#f59e0b";
+    return "#ef4444";
+  }, [anime?.score]);
 
   React.useEffect(() => {
     if (!anime) return;
@@ -248,48 +257,26 @@ function AnimeDetailPage() {
   }, [anime, animeId, routeSlug, navigate]);
 
   if (!enabled) {
-    return (
-      <div className="space-y-4">
-        <Button variant="outline" size="sm" onClick={goBack}>
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          {tAny("common.back")}
-        </Button>
-        <EmptyState message={tAny("common.notFound")} />
-      </div>
-    );
+    return <EmptyState message={tAny("common.notFound")} />;
   }
 
   if (detail.isLoading) return <AnimeDetailSkeleton />;
 
   if (detail.isError) {
     return (
-      <div className="space-y-4">
-        <Button variant="outline" size="sm" onClick={goBack}>
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          {tAny("common.back")}
-        </Button>
-        <ErrorState
-          message={
-            detail.error instanceof Error
-              ? detail.error.message
-              : tAny("common.loadError")
-          }
-          onRetry={() => detail.refetch()}
-        />
-      </div>
+      <ErrorState
+        message={
+          detail.error instanceof Error
+            ? detail.error.message
+            : tAny("common.loadError")
+        }
+        onRetry={() => detail.refetch()}
+      />
     );
   }
 
   if (!anime) {
-    return (
-      <div className="space-y-4">
-        <Button variant="outline" size="sm" onClick={goBack}>
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          {tAny("common.back")}
-        </Button>
-        <EmptyState message={tAny("common.notFound")} />
-      </div>
-    );
+    return <EmptyState message={tAny("common.notFound")} />;
   }
 
   const poster =
@@ -319,21 +306,12 @@ function AnimeDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Button variant="outline" size="sm" onClick={goBack}>
-        <ChevronLeft className="h-4 w-4 mr-1" />
-        {tAny("common.back")}
-      </Button>
-
       <div className="relative overflow-hidden rounded-2xl border bg-card">
-        <div className="relative h-20 md:h-24 z-0" style={{ backgroundColor: pastel }}>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/10 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/65 via-background/15 to-transparent" />
-        </div>
-
         <div className="p-4 md:p-6">
-          <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-            <div className="shrink-0 -mt-10 md:-mt-12 relative z-10">
-              <div className="w-32 md:w-44 aspect-[2/3] rounded-xl overflow-hidden border bg-muted shadow-lg">
+          <div className="flex flex-row gap-3 md:gap-6">
+            {/* Poster con botón de favoritos debajo */}
+            <div className="shrink-0 flex flex-col">
+              <div className="w-24 md:w-44 aspect-[2/3] rounded-xl overflow-hidden border bg-muted shadow-lg">
                 {poster ? (
                   <img
                     src={poster}
@@ -344,80 +322,89 @@ function AnimeDetailPage() {
                   <div className="h-full w-full bg-muted" />
                 )}
               </div>
-
-              <div className="flex gap-2 mt-3">
+              
+              {/* Botón de favoritos debajo del poster */}
+              <div className="mt-3">
                 <Button
                   variant="outline"
-                  className="w-full"
+                  size="sm"
+                  className="w-full h-8 md:h-10 text-xs md:text-sm"
                   onClick={(e) => e.preventDefault()}
                 >
-                  <Heart className="h-4 w-4 mr-2" />
-                  {tAny("common.addToFavorites")}
+                  <Heart className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+                  <span className="hidden md:inline">{tAny("common.addToFavorites")}</span>
+                  <span className="md:hidden">{tAny("common.favorite")}</span>
                 </Button>
               </div>
             </div>
 
+            {/* Contenido principal */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h1 className="text-2xl md:text-3xl font-semibold leading-tight truncate">
-                    {anime.title}
-                  </h1>
-
-                  <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
-                    {typeLine ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Tv2 className="h-4 w-4" />
-                        {typeLine}
-                      </span>
-                    ) : null}
-
-                    {anime.year ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {anime.year}
-                      </span>
-                    ) : null}
-
-                    {durationLabel ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {durationLabel}
-                      </span>
-                    ) : null}
-
-                    {statusLabel ? (
-                      <span className="inline-flex items-center gap-1">
-                        <BadgeInfo className="h-4 w-4" />
-                        {statusLabel}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
+              {/* Título y score en la parte superior */}
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h1 className="text-lg md:text-3xl font-semibold leading-tight line-clamp-2 flex-1">
+                  {anime.title}
+                </h1>
 
                 {anime.score != null ? (
                   <div
-                    className="shrink-0 rounded-xl px-3 py-2 border backdrop-blur-sm"
+                    className="shrink-0 rounded-lg px-2 py-1.5 md:px-3 md:py-2 border backdrop-blur-sm"
                     style={{
-                      backgroundColor: scoreBg,
-                      borderColor: scoreBorder,
+                      backgroundColor: `${scoreColor}20`,
+                      borderColor: `${scoreColor}40`,
                     }}
                   >
-                    <div className="flex items-center gap-2">
-                      <Star className="h-4 w-4" style={{ color: pastel }} />
-                      <span className="font-semibold">{anime.score}</span>
+                    <div className="flex items-center gap-1 md:gap-2">
+                      <Star className="h-3 w-3 md:h-4 md:w-4" style={{ color: scoreColor }} />
+                      <span className="font-semibold text-sm md:text-base" style={{ color: scoreColor }}>
+                        {anime.score}
+                      </span>
                     </div>
-                    <div className="text-xs text-muted-foreground">{scoreLabel}</div>
+                    <div className="text-[10px] md:text-xs text-muted-foreground hidden md:block">
+                      {scoreLabel}
+                    </div>
                   </div>
                 ) : null}
               </div>
 
+              {/* Metadata compacta */}
+              <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">
+                {typeLine ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Tv2 className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="whitespace-nowrap">{typeLine}</span>
+                  </span>
+                ) : null}
+
+                {anime.year ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+                    {anime.year}
+                  </span>
+                ) : null}
+
+                {durationLabel ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="whitespace-nowrap">{durationLabel}</span>
+                  </span>
+                ) : null}
+
+                {statusLabel ? (
+                  <span className="inline-flex items-center gap-1">
+                    <BadgeInfo className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="whitespace-nowrap">{statusLabel}</span>
+                  </span>
+                ) : null}
+              </div>
+
+              {/* Géneros */}
               {genres.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
                   {genres.slice(0, 10).map((g) => (
                     <span
                       key={g.mal_id}
-                      className="text-xs px-3 py-1 rounded-full border text-foreground"
+                      className="text-xs px-2.5 py-1 md:px-3 md:py-1 rounded-full border text-foreground"
                       style={{
                         backgroundColor: chipBg,
                         borderColor: chipBorder,
@@ -429,9 +416,10 @@ function AnimeDetailPage() {
                 </div>
               ) : null}
 
+              {/* Sinopsis y estudios - en desktop van al lado del poster */}
               {synopsis ? (
-                <div className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  <p className="line-clamp-8">{synopsis}</p>
+                <div className="text-xs md:text-sm leading-relaxed text-muted-foreground">
+                  <p className="line-clamp-4 md:line-clamp-none">{synopsis}</p>
                 </div>
               ) : null}
 
@@ -448,15 +436,15 @@ function AnimeDetailPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <AnimeCharactersPanel animeId={animeId} />
+      <div className="grid gap-4 lg:grid-cols-2 items-start">
+        <AnimeCharactersPanel animeId={animeId} delay={500} />
 
         {/* ✅ US-15: Episodes Panel */}
-        <AnimeEpisodesPanel animeId={animeId} />
+        <AnimeEpisodesPanel animeId={animeId} delay={1000} />
       </div>
 
       {/* Abajo: Related full-width */}
-      <AnimeRecommendationsPanel animeId={animeId} />
+      <AnimeRecommendationsPanel animeId={animeId} delay={1500} />
     </div>
   );
 }

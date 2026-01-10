@@ -1,3 +1,5 @@
+import { rateLimiter } from "@/lib/rate-limiter";
+
 const BASE_URL = "https://api.jikan.moe/v4";
 
 export class ApiError extends Error {
@@ -32,11 +34,13 @@ export async function fetchJikan<T>(
 
   const cacheKey = url.toString();
 
+  // Check for duplicate requests first (before rate limiting)
   if (requestQueue.has(cacheKey)) {
     return requestQueue.get(cacheKey) as Promise<T>;
   }
 
-  const requestPromise = (async () => {
+  // Create the request promise wrapped with rate limiter
+  const requestPromise = rateLimiter.execute(async () => {
     let res: Response;
     try {
       res = await fetch(url.toString(), { signal: options?.signal });
@@ -50,7 +54,7 @@ export async function fetchJikan<T>(
     }
 
     return (await res.json()) as T;
-  })();
+  }) as Promise<T>;
 
   requestQueue.set(cacheKey, requestPromise);
 

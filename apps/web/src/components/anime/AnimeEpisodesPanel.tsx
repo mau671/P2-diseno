@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { useAnimeEpisodesInfinite, type AnimeEpisode } from "@/api/queries";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const CHUNK_SIZE = 50;
@@ -31,13 +30,33 @@ function getEpisodeNumber(ep: AnimeEpisode, fallbackIndex: number) {
   return ep.episode ?? ep.mal_id ?? fallbackIndex + 1;
 }
 
-export function AnimeEpisodesPanel({ animeId }: { animeId: number }) {
+type Props = {
+  animeId: number;
+  delay?: number; // Delay in milliseconds before enabling the query
+};
+
+export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
   const { t, i18n } = useTranslation();
-  const tAny = t as unknown as (key: string, options?: any) => string;
+  const tAny = t as (key: string, options?: Record<string, unknown>) => string;
 
   const isEn = (i18n.language || "").toLowerCase().startsWith("en");
 
-  const q = useAnimeEpisodesInfinite(animeId, true);
+  const [enabled, setEnabled] = React.useState(delay === 0);
+
+  React.useEffect(() => {
+    if (delay === 0) {
+      setEnabled(true);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setEnabled(true);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  const q = useAnimeEpisodesInfinite(animeId, enabled);
 
   // ✅ 50 de entrada, y se resetea al cambiar de anime
   const [visible, setVisible] = React.useState(CHUNK_SIZE);
@@ -98,40 +117,70 @@ export function AnimeEpisodesPanel({ animeId }: { animeId: number }) {
     return () => window.clearTimeout(timer);
   }, [q.isError, hasAny, q, animeId]);
 
-  const canRevealMoreLocal = shownCount < episodes.length;
-  const canFetchMoreRemote = !!q.hasNextPage;
-  const canLoadMore = canRevealMoreLocal || canFetchMoreRemote;
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const loadMoreRef = React.useRef<HTMLDivElement>(null);
+  const fetchNextPageRef = React.useRef(q.fetchNextPage);
 
-  const onLoadMore = React.useCallback(async () => {
-    if (!canLoadMore) return;
-    if (q.isFetchingNextPage) return;
+  React.useEffect(() => {
+    fetchNextPageRef.current = q.fetchNextPage;
+  }, [q.fetchNextPage]);
 
-    // 1) si ya hay más cargados pero ocultos, solo revelamos +50
-    if (canRevealMoreLocal) {
-      setVisible((v) => v + CHUNK_SIZE);
-      return;
-    }
+  // Auto-increase visible when scrolling near the end
+  React.useEffect(() => {
+    if (!scrollRef.current || !hasAny || showLoadingSkeleton) return;
 
-    // 2) si no hay más local, pedimos otra página y luego revelamos +50
-    if (canFetchMoreRemote) {
-      try {
-        await q.fetchNextPage();
-        setVisible((v) => v + CHUNK_SIZE);
-      } catch {
-        // el ErrorState ya lo cubre si falla, no hacemos nada extra
+    const checkScrollPosition = () => {
+      if (!scrollRef.current) return;
+
+      const container = scrollRef.current;
+      const { scrollTop, scrollHeight, clientHeight } = container;
+
+      // If near the end (within 200px), reveal more episodes
+      const isNearEnd = scrollTop + clientHeight >= scrollHeight - 200;
+
+      if (isNearEnd) {
+        const canRevealMoreLocal = shownCount < episodes.length;
+        const canFetchMoreRemote = !!q.hasNextPage && !q.isFetchingNextPage;
+
+        // 1) If there are more local episodes, reveal them
+        if (canRevealMoreLocal) {
+          setVisible((v) => Math.min(v + CHUNK_SIZE, episodes.length));
+          return;
+        }
+
+        // 2) If no more local, fetch next page
+        if (canFetchMoreRemote) {
+          fetchNextPageRef.current().then(() => {
+            // After fetching, reveal the new episodes
+            setVisible((v) => v + CHUNK_SIZE);
+          });
+        }
       }
+    };
+
+    const container = scrollRef.current;
+    if (container) {
+      container.addEventListener("scroll", checkScrollPosition, { passive: true });
+      checkScrollPosition(); // Check initial position
     }
-  }, [canLoadMore, canRevealMoreLocal, canFetchMoreRemote, q]);
+
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", checkScrollPosition);
+      }
+    };
+  }, [hasAny, showLoadingSkeleton, shownCount, episodes.length, q.hasNextPage, q.isFetchingNextPage]);
+
+  const title = tAny("anime.detail.sections.episodes", {
+    defaultValue: isEn ? "Episodes" : "Episodios",
+  });
 
   return (
-    <div className="rounded-2xl border p-5 bg-card min-h-[380px] max-w-xl mx-auto w-full">
+    <div className="rounded-2xl border p-5 bg-card w-full overflow-hidden">
       <div className="flex items-center justify-between gap-3">
-        <div className="font-semibold mb-2 text-lg">
-          {tAny("anime.detail.sections.episodes", {
-            defaultValue: isEn ? "Episodes" : "Episodios",
-          })}
-        </div>
+        <div className="font-semibold mb-2 text-lg truncate">{title}</div>
 
+        {/* Reserve space to avoid layout shifts when count appears/disappears */}
         {hasAny ? (
           <div className="text-xs text-muted-foreground tabular-nums">
             {tAny("anime.detail.episodes.countShown", {
@@ -139,65 +188,68 @@ export function AnimeEpisodesPanel({ animeId }: { animeId: number }) {
               defaultValue: isEn ? `${shownCount} shown` : `${shownCount} mostrados`,
             })}
           </div>
-        ) : null}
+        ) : (
+          <div className="h-4 w-16" aria-hidden />
+        )}
       </div>
 
-      {/* Loading */}
-      {showLoadingSkeleton ? (
-        <div className="mt-3 space-y-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 rounded-xl border px-3 py-3"
-            >
-              <Skeleton className="h-8 w-10 rounded-md" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          ))}
-        </div>
-      ) : null}
+      {/* Content area: keep the same height in loading/empty/data to avoid jumps */}
+      <div className="mt-3 h-[280px] pr-2">
+        {/* Loading */}
+        {showLoadingSkeleton ? (
+          <div className="h-full overflow-hidden space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-xl border px-3 py-3"
+              >
+                <Skeleton className="h-8 w-10 rounded-md" />
+                <Skeleton className="h-4 w-full" />
+              </div>
+            ))}
+          </div>
+        ) : null}
 
-      {/* Error */}
-      {q.isError && !showLoadingSkeleton ? (
-        <div className="mt-3">
-          <ErrorState
-            message={
-              q.error instanceof Error
-                ? q.error.message
-                : tAny("common.loadError", {
-                    defaultValue: isEn ? "Failed to load data." : "Error al cargar datos.",
-                  })
-            }
-            onRetry={() => q.refetch()}
-          />
-        </div>
-      ) : null}
+        {/* Error - only show if not retrying */}
+        {q.isError && !showLoadingSkeleton && !q.isFetching ? (
+          <div className="h-full">
+            <ErrorState
+              message={
+                q.error instanceof Error
+                  ? q.error.message
+                  : tAny("common.loadError", {
+                      defaultValue: isEn ? "Failed to load data." : "Error al cargar datos.",
+                    })
+              }
+              onRetry={() => q.refetch()}
+            />
+          </div>
+        ) : null}
 
-      {/* Empty */}
-      {!showLoadingSkeleton && !q.isError && !hasAny ? (
-        <div className="mt-3">
-          <EmptyState
-            message={tAny("anime.detail.episodes.empty", {
-              defaultValue: isEn
-                ? "No episodes available."
-                : "No hay episodios disponibles.",
-            })}
-          />
-        </div>
-      ) : null}
+        {/* Empty */}
+        {!showLoadingSkeleton && !q.isError && !hasAny ? (
+          <div className="h-full">
+            <EmptyState
+              message={tAny("anime.detail.episodes.empty", {
+                defaultValue: isEn
+                  ? "No episodes available."
+                  : "No hay episodios disponibles.",
+              })}
+            />
+          </div>
+        ) : null}
 
-      {/* List */}
-      {!showLoadingSkeleton && !q.isError && hasAny ? (
-        <>
-          {/* Scroll vertical: altura para ~6 items */}
+        {/* List */}
+        {!showLoadingSkeleton && !q.isError && hasAny ? (
           <div
             key={animeId} // ✅ resetea scroll al cambiar de anime
-            className="mt-3 h-[300px] overflow-y-auto pr-2 space-y-1.5"
+            ref={scrollRef}
+            className="h-full overflow-y-auto space-y-1.5 pr-2"
           >
             {shownEpisodes.map((ep, idx) => {
               const num = getEpisodeNumber(ep, idx);
 
-              const title =
+              const epTitle =
                 pickEpisodeTitle(ep) ||
                 tAny("anime.detail.episodes.fallbackTitle", {
                   number: num,
@@ -216,47 +268,33 @@ export function AnimeEpisodesPanel({ animeId }: { animeId: number }) {
                   <div className="min-w-0 flex-1">
                     {/* ajuste leve en Y para que se vea más centrado */}
                     <div className="text-sm font-medium leading-snug line-clamp-2 relative top-[1px]">
-                      {title}
+                      {epTitle}
                     </div>
                   </div>
                 </div>
               );
             })}
-          </div>
 
-          {/* Pagination */}
-          <div className="mt-3 flex items-center justify-between gap-2">
-            <div className="text-xs text-muted-foreground">
-              {canLoadMore
-                ? tAny("anime.detail.episodes.moreAvailable", {
-                    defaultValue: isEn
-                      ? "More episodes available."
-                      : "Hay más episodios disponibles.",
-                  })
-                : tAny("anime.detail.episodes.end", {
-                    defaultValue: isEn ? "End of list." : "Fin de la lista.",
-                  })}
-            </div>
+            {/* Loading skeleton for next page */}
+            {q.isFetchingNextPage && (
+              <div className="space-y-1.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div
+                    key={`loading-${i}`}
+                    className="flex items-center gap-3 rounded-xl border px-3 py-3"
+                  >
+                    <Skeleton className="h-8 w-10 rounded-md" />
+                    <Skeleton className="h-4 flex-1" />
+                  </div>
+                ))}
+              </div>
+            )}
 
-            {canLoadMore ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onLoadMore}
-                disabled={q.isFetchingNextPage || !canLoadMore}
-              >
-                {q.isFetchingNextPage
-                  ? tAny("common.loading", {
-                      defaultValue: isEn ? "Loading..." : "Cargando...",
-                    })
-                  : tAny("anime.detail.episodes.loadMore", {
-                      defaultValue: isEn ? "Load more" : "Cargar más",
-                    })}
-              </Button>
-            ) : null}
+            {/* Sentinel for infinite scroll */}
+            {q.hasNextPage && <div ref={loadMoreRef} className="h-1 w-full" />}
           </div>
-        </>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   );
 }

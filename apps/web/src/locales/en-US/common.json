@@ -34,6 +34,7 @@
   "tooManyRequests": "Too many requests. Please try again.",
   "addToFavorites": "Add to favorites",
   "removeFromFavorites": "Remove from favorites",
+  "favorite": "Favorite",
   "loadMore": "Load more"
 },
   "search": {
