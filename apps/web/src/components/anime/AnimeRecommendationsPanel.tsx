@@ -9,7 +9,9 @@ import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnimeHorizontalSkeleton } from "@/components/anime/AnimeCardSkeleton";
 import { cn } from "@/lib/utils";
+import { useAnimatedScroll } from "@/hooks/useAnimatedScroll";
 
 type RecommendationEntry = {
   mal_id: number;
@@ -88,72 +90,73 @@ function LazyAnimeCardWrapper({ recommendation }: LazyAnimeCardWrapperProps) {
 }
 
 function RecommendationsSkeleton() {
-  return (
-    <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="space-y-2">
-          <Skeleton className="aspect-[2/3] w-full rounded-lg" />
-          <Skeleton className="h-4 w-3/4" />
-        </div>
-      ))}
-    </div>
-  );
+  return <AnimeHorizontalSkeleton />;
 }
 
 type Props = {
   animeId: number;
   className?: string;
+  delay?: number; // Delay in milliseconds before enabling the query
 };
 
-export function AnimeRecommendationsPanel({ animeId, className }: Props) {
+export function AnimeRecommendationsPanel({ animeId, className, delay = 0 }: Props) {
   const { t } = useTranslation();
 
-  const recommendationsQuery = useAnimeRecommendations(animeId, true);
-
-  const all = recommendationsQuery.data ?? [];
-
-  const pageSize = 9;
-  const [page, setPage] = React.useState(0);
-
-  const maxPage = React.useMemo(() => {
-    const total = all.length;
-    return Math.max(0, Math.ceil(total / pageSize) - 1);
-  }, [all.length]);
+  const [enabled, setEnabled] = React.useState(delay === 0);
 
   React.useEffect(() => {
-    setPage((p) => Math.min(p, maxPage));
-  }, [maxPage, animeId]);
+    if (delay === 0) {
+      setEnabled(true);
+      return;
+    }
 
-  const canPrev = page > 0;
-  const canNext = page < maxPage;
+    const timer = setTimeout(() => {
+      setEnabled(true);
+    }, delay);
 
-  const pageItems = React.useMemo(() => {
-    const start = page * pageSize;
-    return all.slice(start, start + pageSize);
-  }, [all, page]);
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  const recommendationsQuery = useAnimeRecommendations(animeId, enabled);
+
+  const all = React.useMemo(() => recommendationsQuery.data ?? [], [recommendationsQuery.data]);
+
+  const { scrollRef, scrollPrev, scrollNext, canScrollPrev, canScrollNext } =
+    useAnimatedScroll({ axis: "x" });
 
   const title = t("anime.detail.sections.recommendations", { 
     defaultValue: "Recommendations" 
   });
 
-  if (recommendationsQuery.isError) {
+  // Only show error if query failed and is not retrying (isFetching = false)
+  // If it's retrying, show loading instead
+  if (recommendationsQuery.isError && !recommendationsQuery.isFetching) {
     const msg =
       recommendationsQuery.error instanceof Error
         ? recommendationsQuery.error.message
         : t("common.loadError", { defaultValue: "Error loading data." });
 
     return (
-      <div className={cn("rounded-2xl border p-5 bg-card min-h-[280px]", className)}>
-        <div className="font-semibold mb-2 text-lg">{title}</div>
+      <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="font-semibold text-lg">{title}</div>
+          <div className="h-8 w-[68px]" aria-hidden />
+        </div>
         <ErrorState message={msg} onRetry={() => recommendationsQuery.refetch()} />
       </div>
     );
   }
 
-  if (recommendationsQuery.isLoading) {
+  if (recommendationsQuery.isLoading || (recommendationsQuery.isError && recommendationsQuery.isFetching)) {
     return (
-      <div className={cn("rounded-2xl border p-5 bg-card min-h-[280px]", className)}>
-        <div className="font-semibold mb-2 text-lg">{title}</div>
+      <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="font-semibold text-lg">{title}</div>
+          <div className="flex items-center gap-1" aria-hidden>
+            <Skeleton className="h-8 w-8 rounded-md border" />
+            <Skeleton className="h-8 w-8 rounded-md border" />
+          </div>
+        </div>
         <RecommendationsSkeleton />
       </div>
     );
@@ -161,8 +164,11 @@ export function AnimeRecommendationsPanel({ animeId, className }: Props) {
 
   if (!recommendationsQuery.data || all.length === 0) {
     return (
-      <div className={cn("rounded-2xl border p-5 bg-card min-h-[280px]", className)}>
-        <div className="font-semibold mb-2 text-lg">{title}</div>
+      <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="font-semibold text-lg">{title}</div>
+          <div className="h-8 w-[68px]" aria-hidden />
+        </div>
         <EmptyState
           message={t("anime.recommendations.empty", {
             defaultValue: "No recommendations available.",
@@ -173,38 +179,47 @@ export function AnimeRecommendationsPanel({ animeId, className }: Props) {
   }
 
   return (
-    <div className={cn("rounded-2xl border p-5 bg-card min-h-[280px]", className)}>
+    <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
       <div className="flex items-center justify-between gap-3">
         <div className="font-semibold text-lg">{title}</div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={!canPrev}
-            className="h-9 w-9 rounded-full border"
-            aria-label={t("common.previous", { defaultValue: "Previous" })}
+            onClick={scrollPrev}
+            disabled={!canScrollPrev}
+            className="h-8 w-8 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label={t("common.scrollLeft")}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
 
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
-            onClick={() => setPage((p) => Math.min(maxPage, p + 1))}
-            disabled={!canNext}
-            className="h-9 w-9 rounded-full border"
-            aria-label={t("common.next", { defaultValue: "Next" })}
+            onClick={scrollNext}
+            disabled={!canScrollNext}
+            className="h-8 w-8 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label={t("common.scrollRight")}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      <div className="mt-4 relative overflow-hidden">
-        <div className="flex gap-4 flex-wrap">
-          {pageItems.map((rec) => (
+      <div className="mt-4 relative">
+        {canScrollPrev && (
+          <div className="absolute left-0 top-0 bottom-4 w-16 bg-gradient-to-r from-card to-transparent pointer-events-none z-10" />
+        )}
+        {canScrollNext && (
+          <div className="absolute right-0 top-0 bottom-4 w-16 bg-gradient-to-l from-card to-transparent pointer-events-none z-10" />
+        )}
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+        >
+          {all.map((rec) => (
             <LazyAnimeCardWrapper
               key={rec.entry.mal_id}
               recommendation={rec}
@@ -212,12 +227,6 @@ export function AnimeRecommendationsPanel({ animeId, className }: Props) {
           ))}
         </div>
       </div>
-
-      {maxPage > 0 && (
-        <div className="mt-3 text-xs text-muted-foreground">
-          {page + 1}/{maxPage + 1}
-        </div>
-      )}
     </div>
   );
 }

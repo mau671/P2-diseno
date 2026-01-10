@@ -166,21 +166,13 @@ type JikanRecommendationsResponse = {
 };
 
 async function fetchAnimeRecommendations(animeId: number, signal?: AbortSignal) {
-  const res = await fetch(
-    `https://api.jikan.moe/v4/anime/${animeId}/recommendations`,
+  const res = await fetchJikan<JikanRecommendationsResponse>(
+    `/anime/${animeId}/recommendations`,
+    {},
     { signal }
   );
-  
-  if (!res.ok) {
-    if (res.status === 429) {
-      throw new Error("Too many requests. Please try again in a moment.");
-    }
-    throw new Error(`Failed to fetch recommendations: ${res.status}`);
-  }
-  
-  const json = await res.json() as JikanRecommendationsResponse;
-  //Limitar a máximo 27 recomendaciones 
-  return { data: (json.data ?? []).slice(0, 27) };
+  // Limitar a máximo 27 recomendaciones
+  return { data: (res.data ?? []).slice(0, 27) };
 }
 
 export function useAnimeRecommendations(animeId: number, enabled = true) {

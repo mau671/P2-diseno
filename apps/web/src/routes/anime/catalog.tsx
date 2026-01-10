@@ -1,4 +1,3 @@
-import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -7,12 +6,14 @@ import { useSeasonAnime } from "@/api/queries";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { Button } from "@/components/ui/button";
-import {getCurrentSeason, getPreviousSeason, getNextSeason, isSeasonInFuture, type SeasonInfo} from "@/lib/season-utils";
+import {getCurrentSeason, getPreviousSeason, getNextSeason, isSeasonInFuture, type SeasonInfo, type SeasonType} from "@/lib/season-utils";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useQueryState, parseAsBoolean } from "nuqs";
+import { useQueryState, parseAsBoolean, parseAsInteger, parseAsStringLiteral } from "nuqs";
 import { AnimeCard } from "@/components/anime/AnimeCard";
 import { AnimeCardSkeleton } from "@/components/anime/AnimeCardSkeleton";
+
+const SEASON_VALUES = ["winter", "spring", "summer", "fall"] as const;
 
 function Pagination({
   currentPage,
@@ -106,42 +107,61 @@ function Pagination({
 
 function CatalogPage() {
   const { t } = useTranslation();
-  const [currentSeason, setCurrentSeason] = React.useState<SeasonInfo>(() => getCurrentSeason());
-  const [page, setPage] = React.useState(1);
-  const [allowNsfw, setAllowNsfw] = useQueryState("nsfw", parseAsBoolean.withDefault(false));
+  const defaultSeason = getCurrentSeason();
+
+  // Query params for back/forward navigation support
+  const [year, setYear] = useQueryState(
+    "year",
+    parseAsInteger.withDefault(defaultSeason.year).withOptions({ clearOnDefault: true })
+  );
+  const [season, setSeason] = useQueryState(
+    "season",
+    parseAsStringLiteral(SEASON_VALUES).withDefault(defaultSeason.season).withOptions({ clearOnDefault: true })
+  );
+  const [page, setPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true })
+  );
+  const [allowNsfw, setAllowNsfw] = useQueryState(
+    "nsfw",
+    parseAsBoolean.withDefault(false).withOptions({ clearOnDefault: true })
+  );
+
+  const currentSeason: SeasonInfo = { year, season };
 
   const { data, isLoading, isError, error, refetch } = useSeasonAnime(
-    currentSeason.year,
-    currentSeason.season,
+    year,
+    season,
     page,
     !allowNsfw
   );
 
-  React.useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [page, currentSeason]);
-
   const isEmpty = !isLoading && !isError && (data?.data?.length ?? 0) === 0;
   const totalPages = data?.pagination?.last_visible_page ?? 1;
 
-  const nextSeason = getNextSeason(currentSeason.year, currentSeason.season);
+  const nextSeason = getNextSeason(year, season);
   const hasNextSeason = !isSeasonInFuture(nextSeason.year, nextSeason.season);
 
   const handlePreviousSeason = () => {
-    const prev = getPreviousSeason(currentSeason.year, currentSeason.season);
-    setCurrentSeason(prev);
+    const prev = getPreviousSeason(year, season);
+    setYear(prev.year);
+    setSeason(prev.season);
     setPage(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleNextSeason = () => {
     if (hasNextSeason) {
-      setCurrentSeason(nextSeason);
+      setYear(nextSeason.year);
+      setSeason(nextSeason.season as SeasonType);
       setPage(1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const seasonName = t(`seasons.${currentSeason.season}`);

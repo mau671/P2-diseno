@@ -79,9 +79,42 @@ function SearchAnimePage() {
     return selectedGenres.map(id => genreList.find(g => g.mal_id === id)).filter((g): g is Genre => g !== undefined);
   }, [selectedGenres, genres]);
 
-  const trending = useSeasonsNow(true, query.trim().length === 0 && !hasActiveFilters);
-  const upcoming = useSeasonsUpcoming(true, query.trim().length === 0 && !hasActiveFilters);
-  const allTimePopular = useTopAnimeByPopularity(20, query.trim().length === 0 && !hasActiveFilters);
+  // Staggered queries: enable with delays to respect rate limits
+  const shouldLoadSections = query.trim().length === 0 && !hasActiveFilters;
+  const [trendingEnabled, setTrendingEnabled] = React.useState(false);
+  const [upcomingEnabled, setUpcomingEnabled] = React.useState(false);
+  const [popularEnabled, setPopularEnabled] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!shouldLoadSections) {
+      setTrendingEnabled(false);
+      setUpcomingEnabled(false);
+      setPopularEnabled(false);
+      return;
+    }
+
+    // Enable trending immediately (0ms)
+    setTrendingEnabled(true);
+    
+    // Enable upcoming after 500ms
+    const timer1 = setTimeout(() => {
+      setUpcomingEnabled(true);
+    }, 500);
+
+    // Enable popular after 1000ms
+    const timer2 = setTimeout(() => {
+      setPopularEnabled(true);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [shouldLoadSections]);
+
+  const trending = useSeasonsNow(true, shouldLoadSections && trendingEnabled);
+  const upcoming = useSeasonsUpcoming(true, shouldLoadSections && upcomingEnabled);
+  const allTimePopular = useTopAnimeByPopularity(20, shouldLoadSections && popularEnabled);
 
   const [showMoreFilters, setShowMoreFilters] = React.useState(false);
 

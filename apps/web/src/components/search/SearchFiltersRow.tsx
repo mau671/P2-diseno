@@ -6,6 +6,7 @@ import { SearchMultiSelectFilter } from "./SearchMultiSelectFilter";
 import { SearchFilterDropdown } from "./SearchFilterDropdown";
 import { Button } from "@/components/ui/button";
 import { Settings2 } from "lucide-react";
+import { translateGenre } from "@/lib/translate-genre";
 
 type SearchFiltersRowProps = {
   genres: Genre[];
@@ -56,7 +57,7 @@ function SearchFiltersRow({
         options={genres}
         selected={selectedGenres}
         onChange={setSelectedGenres}
-        getOptionLabel={(g) => g.name}
+        getOptionLabel={(g) => translateGenre(t, g)}
         getOptionValue={(g) => g.mal_id}
       />
 

@@ -6,13 +6,14 @@ import { useCardTooltip } from "@/hooks/useCardTooltip";
 import { useAnimeCardData } from "@/hooks/useAnimeCardData";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserProfile } from "@/hooks/use-user-profile";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Heart } from "lucide-react";
+import { translateGenre } from "@/lib/translate-genre";
 
 type AnimeCardProps = {
   anime: AnimeBase;
@@ -37,7 +38,7 @@ function AnimeCard({ anime }: AnimeCardProps) {
   const title = anime.title || anime.name || anime.titles?.[0]?.title;
   const { t } = useTranslation();
   const { pastelColor } = useStablePastelColor(anime.mal_id);
-  const cardRef = React.useRef<HTMLDivElement>(null);
+  const cardRef = React.useRef<HTMLAnchorElement>(null);
   const [isButtonVisible, setIsButtonVisible] = React.useState(false);
   
   const { user } = useAuth();
@@ -59,6 +60,7 @@ function AnimeCard({ anime }: AnimeCardProps) {
 
   const handleHeartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     
     if (!user) {
       navigate({ to: "/auth/login" });
@@ -68,19 +70,14 @@ function AnimeCard({ anime }: AnimeCardProps) {
     toggleFavorite(anime.mal_id);
   };
 
-  const handleCardClick = () => {
-    const slug = slugifyLocal(title || "anime") || "anime";
-    navigate({
-      to: "/anime/$id/$slug",
-      params: { id: String(anime.mal_id), slug },
-    });
-  };
+  const slug = slugifyLocal(title || "anime") || "anime";
 
   return (
-    <div 
-      className="flex-shrink-0 w-36 md:w-44 cursor-pointer group relative"
+    <Link 
+      to="/anime/$id/$slug"
+      params={{ id: String(anime.mal_id), slug }}
+      className="flex-shrink-0 w-36 md:w-44 cursor-pointer group relative block"
       ref={cardRef}
-      onClick={handleCardClick}
       onMouseEnter={handleCardMouseEnter}
       onMouseLeave={handleCardMouseLeave}
     >
@@ -154,7 +151,7 @@ function AnimeCard({ anime }: AnimeCardProps) {
                     color: pastelColor || '#a855f7' 
                   }}
                 >
-                  {genre.name}
+                  {translateGenre(t, genre)}
                 </span>
               ))}
             </div>
@@ -170,7 +167,7 @@ function AnimeCard({ anime }: AnimeCardProps) {
       >
         {title}
       </span>
-    </div>
+    </Link>
   );
 }
 
