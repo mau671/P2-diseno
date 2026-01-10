@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { userProfileService, type UserProfile } from '@/services/user-profile.service';
 
@@ -7,18 +7,7 @@ export function useUserProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    loadProfile();
-  }, [user]);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -40,7 +29,18 @@ export function useUserProfile() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    loadProfile();
+  }, [user, loadProfile]);
 
   const toggleFavorite = async (animeId: number) => {
     if (!user || !profile) return;

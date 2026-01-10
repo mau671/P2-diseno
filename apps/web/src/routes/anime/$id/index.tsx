@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
+import { fetchJikan, ApiError } from "@/api/jikan";
 
 type AnimeDetail = {
   mal_id: number;
@@ -14,10 +15,21 @@ type AnimeDetail = {
 };
 
 async function fetchAnimeDetail(id: number, signal?: AbortSignal): Promise<AnimeDetail | null> {
-  const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/full`, { signal });
-  if (!res.ok) return null;
-  const json = (await res.json()) as { data?: AnimeDetail };
-  return json?.data ?? null;
+  try {
+    const json = await fetchJikan<{ data?: AnimeDetail }>(
+      `/anime/${id}/full`,
+      undefined,
+      { signal }
+    );
+    return json?.data ?? null;
+  } catch (error) {
+    // Re-throw ApiError so React Query can handle retries
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    // For other errors, throw a generic ApiError
+    throw new ApiError("Error al cargar datos del anime.");
+  }
 }
 
 function slugifyLocal(input: string) {
@@ -72,24 +84,27 @@ function AnimeDetailRedirectPage() {
     return <EmptyState message={t("common.notFound")} />;
   }
 
-  if (detail.isLoading) {
+  // If we have cached data, the useEffect will handle navigation
+  // So we can show skeleton while waiting for navigation
+  if (anime) {
+    // Continue to show skeleton while navigation happens
+  } else if (detail.isLoading || (detail.isError && detail.isFetching)) {
+    // Show loading state while loading or retrying
     return (
       <div className="space-y-6">
         <Skeleton className="h-56 md:h-64 w-full rounded-2xl border" />
       </div>
     );
-  }
-
-  if (detail.isError) {
+  } else if (detail.isError && !detail.isFetching) {
+    // Only show error if query failed, is not retrying, and we have no cached data
     return (
       <ErrorState
         message={detail.error instanceof Error ? detail.error.message : t("common.loadError")}
         onRetry={() => detail.refetch()}
       />
     );
-  }
-
-  if (!anime) {
+  } else if (!detail.isLoading && !detail.isError) {
+    // Show not found only if we have no data, no error, and not loading
     return <EmptyState message={t("common.notFound")} />;
   }
 

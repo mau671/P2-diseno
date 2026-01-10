@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useMatches, Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -117,6 +117,7 @@ function shouldIncludeRoute(routeId: string, pathname: string): boolean {
 export function AppBreadcrumbs() {
   const { t } = useTranslation();
   const matches = useMatches();
+  const queryClient = useQueryClient();
 
   // Extract anime ID from route matches if on anime detail page
   const animeIdFromRoute = React.useMemo(() => {
@@ -131,12 +132,38 @@ export function AppBreadcrumbs() {
     return null;
   }, [matches]);
 
-  // Subscribe to anime detail data using useQuery
-  // This ensures the component re-renders when data arrives
-  const { data: animeData } = useQuery<AnimeDetail>({
-    queryKey: ["animeDetail", animeIdFromRoute],
-    enabled: false, // Don't fetch, just subscribe to cache updates
-  });
+  // Get anime data from cache and subscribe to updates
+  const [animeData, setAnimeData] = React.useState<AnimeDetail | undefined>(
+    animeIdFromRoute
+      ? queryClient.getQueryData<AnimeDetail>(["animeDetail", animeIdFromRoute])
+      : undefined
+  );
+
+  // Subscribe to cache updates to re-render when data arrives
+  React.useEffect(() => {
+    if (!animeIdFromRoute) {
+      setAnimeData(undefined);
+      return;
+    }
+
+    const queryCache = queryClient.getQueryCache();
+    const query = queryCache.find({ queryKey: ["animeDetail", animeIdFromRoute] });
+
+    // Set initial data
+    setAnimeData(query?.state.data as AnimeDetail | undefined);
+
+    // Subscribe to cache updates
+    const unsubscribe = queryCache.subscribe((event) => {
+      if (
+        event?.query?.queryKey[0] === "animeDetail" &&
+        event?.query?.queryKey[1] === animeIdFromRoute
+      ) {
+        setAnimeData(event.query.state.data as AnimeDetail | undefined);
+      }
+    });
+
+    return unsubscribe;
+  }, [animeIdFromRoute, queryClient]);
 
   const breadcrumbs = React.useMemo(() => {
     const items: BreadcrumbCrumb[] = [];

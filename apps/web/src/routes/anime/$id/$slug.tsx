@@ -19,6 +19,7 @@ import { useStablePastelColor } from "@/hooks/useStablePastelColor";
 import { AnimeCharactersPanel } from "@/components/anime/AnimeCharactersPanel";
 import { AnimeEpisodesPanel } from "@/components/anime/AnimeEpisodesPanel";
 import { AnimeRecommendationsPanel } from "@/components/anime/AnimeRecommendationsPanel";
+import { fetchJikan, ApiError } from "@/api/jikan";
 
 type JikanGenre = { mal_id: number; name: string };
 type JikanStudio = { mal_id: number; name: string };
@@ -48,10 +49,21 @@ async function fetchAnimeDetail(
   id: number,
   signal?: AbortSignal
 ): Promise<AnimeDetail | null> {
-  const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/full`, { signal });
-  if (!res.ok) return null;
-  const json = (await res.json()) as { data?: AnimeDetail };
-  return json?.data ?? null;
+  try {
+    const json = await fetchJikan<{ data?: AnimeDetail }>(
+      `/anime/${id}/full`,
+      undefined,
+      { signal }
+    );
+    return json?.data ?? null;
+  } catch (error) {
+    // Re-throw ApiError so React Query can handle retries
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    // For other errors, throw a generic ApiError
+    throw new ApiError("Error al cargar datos del anime.");
+  }
 }
 
 function slugifyLocal(input: string) {
@@ -260,9 +272,15 @@ function AnimeDetailPage() {
     return <EmptyState message={tAny("common.notFound")} />;
   }
 
-  if (detail.isLoading) return <AnimeDetailSkeleton />;
-
-  if (detail.isError) {
+  // If we have cached data, always show it (even if there's an error)
+  // This ensures users see data from previous visits even if the API is temporarily unavailable
+  if (anime) {
+    // Continue to render the anime detail page with cached data
+  } else if (detail.isLoading || (detail.isError && detail.isFetching)) {
+    // Show loading state while loading or retrying
+    return <AnimeDetailSkeleton />;
+  } else if (detail.isError && !detail.isFetching) {
+    // Only show error if query failed, is not retrying, and we have no cached data
     return (
       <ErrorState
         message={
@@ -273,10 +291,12 @@ function AnimeDetailPage() {
         onRetry={() => detail.refetch()}
       />
     );
-  }
-
-  if (!anime) {
+  } else if (!detail.isLoading && !detail.isError) {
+    // Show not found only if we have no data, no error, and not loading
     return <EmptyState message={tAny("common.notFound")} />;
+  } else {
+    // Fallback: show skeleton if we're still waiting for initial load
+    return <AnimeDetailSkeleton />;
   }
 
   const poster =
