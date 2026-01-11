@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useQuery } from "@tanstack/react-query";
 import { AnimeCard } from "@/components/anime/AnimeCard";
+import { EmptyState } from "@/components/network/EmptyState";
 import { Heart } from "lucide-react";
 
 //Función helper para esperar
@@ -101,10 +102,7 @@ function FavoritesPage() {
         <div className="flex items-center justify-center min-h-[40vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">{t("favorites.loadingAnimes")}</p>
-            <p className="text-xs text-muted-foreground mt-2">
-              {t("common.loading")}...
-            </p>
+            <p className="text-muted-foreground">{t("common.loading")}</p>
           </div>
         </div>
       </div>
@@ -126,15 +124,13 @@ function FavoritesPage() {
       </div>
 
       {favoriteAnimes && favoriteAnimes.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
           {favoriteAnimes.map((anime) => (
             <AnimeCard key={anime.mal_id} anime={anime} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">{t("common.error")}</p>
-        </div>
+        <EmptyState message={t("favorites.empty")} />
       )}
     </div>
   );

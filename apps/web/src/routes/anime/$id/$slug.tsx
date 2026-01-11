@@ -19,6 +19,7 @@ import { useStablePastelColor } from "@/hooks/useStablePastelColor";
 import { AnimeCharactersPanel } from "@/components/anime/AnimeCharactersPanel";
 import { AnimeEpisodesPanel } from "@/components/anime/AnimeEpisodesPanel";
 import { AnimeRecommendationsPanel } from "@/components/anime/AnimeRecommendationsPanel";
+import { WatchTimeCalculator } from "@/components/anime/WatchTimeCalculator";
 import { fetchJikan, ApiError } from "@/api/jikan";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserProfile } from "@/hooks/use-user-profile";
@@ -209,12 +210,102 @@ function AnimeDetailSkeleton() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Skeleton className="h-56 rounded-2xl border" />
-        <Skeleton className="h-56 rounded-2xl border" />
+      {/* Characters and Episodes panels skeleton */}
+      <div className="grid gap-4 lg:grid-cols-2 items-start">
+        {/* Characters Panel Skeleton */}
+        <div className="rounded-2xl border p-5 bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-3">
+            <Skeleton className="h-6 w-24" />
+            <div className="flex items-center gap-1">
+              <Skeleton className="h-8 w-8 rounded-md border" />
+              <Skeleton className="h-8 w-8 rounded-md border" />
+            </div>
+          </div>
+          <div className="mt-4 flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex-shrink-0 w-36 md:w-44">
+                <Skeleton className="aspect-[3/4] w-full rounded-xl border" />
+                <Skeleton className="h-4 w-full mt-2" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Episodes Panel Skeleton */}
+        <div className="rounded-2xl border p-5 bg-card w-full overflow-hidden">
+          <div className="flex items-center justify-between gap-3">
+            <Skeleton className="h-6 w-20 mb-2" />
+            <div className="flex items-center gap-1">
+              <Skeleton className="h-8 w-8 rounded-md border" />
+              <Skeleton className="h-8 w-8 rounded-md border" />
+            </div>
+          </div>
+          <div className="mt-3 h-[280px] pr-2">
+            <div className="h-full overflow-hidden space-y-1.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-xl border px-3 py-3"
+                >
+                  <Skeleton className="h-8 w-10 rounded-md" />
+                  <Skeleton className="h-4 flex-1" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Skeleton className="h-56 rounded-2xl border" />
+      {/* Watch Time Calculator Skeleton */}
+      <div className="rounded-2xl border p-5 bg-card overflow-hidden">
+        <div className="mb-4">
+          <Skeleton className="h-6 w-48 mb-2" />
+          <Skeleton className="h-8 w-32 mb-1" />
+          <Skeleton className="h-3 w-40" />
+        </div>
+        <div className="pt-4 border-t space-y-4">
+          <div>
+            <Skeleton className="h-4 w-40 mb-3" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-9 w-full rounded-md" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-9 w-full rounded-md" />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-24" />
+            <ul className="space-y-1.5">
+              <Skeleton className="h-3 w-48" />
+              <Skeleton className="h-3 w-52" />
+              <Skeleton className="h-3 w-44" />
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Recommendations Panel Skeleton */}
+      <div className="rounded-2xl border p-5 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-3">
+          <Skeleton className="h-6 w-32" />
+          <div className="flex items-center gap-1">
+            <Skeleton className="h-8 w-8 rounded-md border" />
+            <Skeleton className="h-8 w-8 rounded-md border" />
+          </div>
+        </div>
+        <div className="mt-4 flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="flex-shrink-0 w-36 md:w-44">
+              <Skeleton className="w-full rounded-lg mb-2 aspect-[2/3]" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -475,14 +566,17 @@ function AnimeDetailPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 items-start">
-        <AnimeCharactersPanel animeId={animeId} delay={500} />
+        <AnimeCharactersPanel animeId={animeId} delay={0} />
 
         {/* ✅ US-15: Episodes Panel */}
-        <AnimeEpisodesPanel animeId={animeId} delay={1000} />
+        <AnimeEpisodesPanel animeId={animeId} delay={0} />
       </div>
 
+      {/* Watch Time Calculator - Always below episodes and characters */}
+      <WatchTimeCalculator episodes={anime.episodes} duration={anime.duration} />
+
       {/* Abajo: Related full-width */}
-      <AnimeRecommendationsPanel animeId={animeId} delay={1500} />
+      <AnimeRecommendationsPanel animeId={animeId} delay={0} />
     </div>
   );
 }

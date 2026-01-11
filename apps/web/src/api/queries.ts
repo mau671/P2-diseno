@@ -79,6 +79,7 @@ export function useAnimeCharacters(animeId: number, enabled = true) {
     enabled: enabled && Number.isFinite(animeId) && animeId > 0,
     select: (data) => data?.data ?? [],
     staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60,
   });
 }
 /* ================================ */
@@ -138,6 +139,7 @@ export function useAnimeEpisodesInfinite(animeId: number, enabled = true) {
     },
 
     staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60,
   });
 }
 
@@ -182,6 +184,7 @@ export function useAnimeRecommendations(animeId: number, enabled = true) {
     enabled: enabled && Number.isFinite(animeId) && animeId > 0,
     select: (data) => data?.data ?? [],
     staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 60,
     retry: false,
   });
 }

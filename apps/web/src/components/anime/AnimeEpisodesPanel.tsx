@@ -1,10 +1,13 @@
 import * as React from "react";
 import { useTranslation } from "react-i18next";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 import { useAnimeEpisodesInfinite, type AnimeEpisode } from "@/api/queries";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { useAnimatedScroll } from "@/hooks/useAnimatedScroll";
 
 const CHUNK_SIZE = 50;
 
@@ -95,9 +98,6 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
     [episodes, shownCount]
   );
 
-  // ✅ evita “flash” de vacío cuando todavía está trayendo data (o al entrar por primera vez)
-  const showLoadingSkeleton = q.isLoading || (q.isFetching && !hasAny && !q.isError);
-
   // Auto-retry on error - keeps retrying until data is loaded
   const [retryCount, setRetryCount] = React.useState(0);
   const maxRetries = 10;
@@ -126,9 +126,22 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
   // Show loading skeleton while retrying
   const isRetrying = q.isError && q.isFetching;
 
+  // ✅ Show skeleton if: not enabled yet (delay), loading, retrying, or error but still trying
+  const showLoadingSkeleton = !enabled ||
+    q.isLoading || 
+    isRetrying ||
+    (q.isError && retryCount < maxRetries);
+
+  const { scrollRef: animatedScrollRef, canScrollPrev, canScrollNext, scrollPrev, scrollNext } = useAnimatedScroll({ axis: "y" });
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
   const fetchNextPageRef = React.useRef(q.fetchNextPage);
+
+  // Combine refs: use both the animated scroll ref and our internal ref
+  const combinedScrollRef = React.useCallback((node: HTMLDivElement | null) => {
+    animatedScrollRef(node);
+    scrollRef.current = node;
+  }, [animatedScrollRef]);
 
   React.useEffect(() => {
     fetchNextPageRef.current = q.fetchNextPage;
@@ -189,16 +202,32 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
       <div className="flex items-center justify-between gap-3">
         <div className="font-semibold mb-2 text-lg truncate">{title}</div>
 
-        {/* Reserve space to avoid layout shifts when count appears/disappears */}
         {hasAny ? (
-          <div className="text-xs text-muted-foreground tabular-nums">
-            {tAny("anime.detail.episodes.countShown", {
-              count: shownCount,
-              defaultValue: isEn ? `${shownCount} shown` : `${shownCount} mostrados`,
-            })}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={scrollPrev}
+              disabled={!canScrollPrev}
+              className="h-8 w-8 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={t("common.scrollUp", { defaultValue: "Desplazar hacia arriba" })}
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={scrollNext}
+              disabled={!canScrollNext}
+              className="h-8 w-8 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={t("common.scrollDown", { defaultValue: "Desplazar hacia abajo" })}
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
           </div>
         ) : (
-          <div className="h-4 w-16" aria-hidden />
+          <div className="h-8 w-[68px]" aria-hidden />
         )}
       </div>
 
@@ -235,8 +264,8 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
           </div>
         ) : null}
 
-        {/* Empty */}
-        {!showLoadingSkeleton && !q.isError && !hasAny ? (
+        {/* Empty - only show if enabled, no error, and truly no data */}
+        {enabled && !showLoadingSkeleton && !q.isError && !hasAny ? (
           <div className="h-full">
             <EmptyState
               message={tAny("anime.detail.episodes.empty", {
@@ -248,13 +277,21 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
           </div>
         ) : null}
 
-        {/* List */}
-        {!showLoadingSkeleton && !q.isError && hasAny ? (
-          <div
-            key={animeId} // ✅ resetea scroll al cambiar de anime
-            ref={scrollRef}
-            className="h-full overflow-y-auto space-y-1.5 pr-2"
-          >
+        {/* List - only show if enabled, not in skeleton state, and has data */}
+        {enabled && !showLoadingSkeleton && !q.isError && hasAny ? (
+          <div className="h-full relative">
+            {/* Gradient fade effects - top and bottom */}
+            {canScrollPrev && (
+              <div className="absolute top-0 left-0 right-2 h-16 bg-gradient-to-b from-card to-transparent pointer-events-none z-10" />
+            )}
+            {canScrollNext && (
+              <div className="absolute bottom-0 left-0 right-2 h-16 bg-gradient-to-t from-card to-transparent pointer-events-none z-10" />
+            )}
+            <div
+              key={animeId} // ✅ resetea scroll al cambiar de anime
+              ref={combinedScrollRef}
+              className="h-full overflow-y-auto space-y-1.5 pr-2"
+            >
             {shownEpisodes.map((ep, idx) => {
               const num = getEpisodeNumber(ep, idx);
 
@@ -301,6 +338,7 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
 
             {/* Sentinel for infinite scroll */}
             {q.hasNextPage && <div ref={loadMoreRef} className="h-1 w-full" />}
+            </div>
           </div>
         ) : null}
       </div>

@@ -9,7 +9,6 @@ import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AnimeHorizontalSkeleton } from "@/components/anime/AnimeCardSkeleton";
 import { cn } from "@/lib/utils";
 import { useAnimatedScroll } from "@/hooks/useAnimatedScroll";
 
@@ -90,7 +89,16 @@ function LazyAnimeCardWrapper({ recommendation }: LazyAnimeCardWrapperProps) {
 }
 
 function RecommendationsSkeleton() {
-  return <AnimeHorizontalSkeleton />;
+  return (
+    <div className="mt-4 flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="flex-shrink-0 w-36 md:w-44">
+          <Skeleton className="w-full rounded-lg mb-2 aspect-[2/3]" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 type Props = {
@@ -157,6 +165,12 @@ export function AnimeRecommendationsPanel({ animeId, className, delay = 0 }: Pro
   // Show loading skeleton while retrying
   const isRetrying = recommendationsQuery.isError && recommendationsQuery.isFetching;
 
+  // Show skeleton if loading, retrying, or if there's an error but we're still trying
+  const showLoadingSkeleton = !enabled ||
+    recommendationsQuery.isLoading || 
+    isRetrying ||
+    (recommendationsQuery.isError && retryCount < maxRetries);
+
   // Only show error if query failed, not retrying, and exceeded max retries
   if (recommendationsQuery.isError && !recommendationsQuery.isFetching && retryCount >= maxRetries) {
     const msg =
@@ -175,7 +189,7 @@ export function AnimeRecommendationsPanel({ animeId, className, delay = 0 }: Pro
     );
   }
 
-  if (recommendationsQuery.isLoading || isRetrying) {
+  if (showLoadingSkeleton) {
     return (
       <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
         <div className="flex items-center justify-between gap-3">
@@ -190,7 +204,8 @@ export function AnimeRecommendationsPanel({ animeId, className, delay = 0 }: Pro
     );
   }
 
-  if (!recommendationsQuery.data || all.length === 0) {
+  // Only show empty state if enabled, query succeeded, and truly no data
+  if (enabled && (!recommendationsQuery.data || all.length === 0) && !recommendationsQuery.isError) {
     return (
       <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
         <div className="flex items-center justify-between gap-3">
