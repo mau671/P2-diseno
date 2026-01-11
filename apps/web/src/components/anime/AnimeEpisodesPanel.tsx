@@ -98,24 +98,33 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
   // ✅ evita “flash” de vacío cuando todavía está trayendo data (o al entrar por primera vez)
   const showLoadingSkeleton = q.isLoading || (q.isFetching && !hasAny && !q.isError);
 
-  // ✅ auto-retry 1 vez si falla la primera carga (suele pasar por rate limit / primer fetch)
-  const didAutoRetryRef = React.useRef(false);
+  // Auto-retry on error - keeps retrying until data is loaded
+  const [retryCount, setRetryCount] = React.useState(0);
+  const maxRetries = 10;
+  
   React.useEffect(() => {
-    didAutoRetryRef.current = false;
+    setRetryCount(0);
   }, [animeId]);
 
   React.useEffect(() => {
     if (!q.isError) return;
-    if (didAutoRetryRef.current) return;
-    if (hasAny) return; // si ya hay data, no lo hagas
+    if (hasAny) return; // Don't retry if we already have data
+    if (retryCount >= maxRetries) return;
+    if (q.isFetching) return;
 
-    didAutoRetryRef.current = true;
+    // Exponential backoff: 2s, 4s, 6s, 8s... up to 20s
+    const delay = Math.min(2000 + retryCount * 2000, 20000);
+    
     const timer = window.setTimeout(() => {
+      setRetryCount(prev => prev + 1);
       q.refetch();
-    }, 700);
+    }, delay);
 
     return () => window.clearTimeout(timer);
-  }, [q.isError, hasAny, q, animeId]);
+  }, [q.isError, hasAny, retryCount, q.isFetching, q, animeId]);
+
+  // Show loading skeleton while retrying
+  const isRetrying = q.isError && q.isFetching;
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
@@ -196,7 +205,7 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
       {/* Content area: keep the same height in loading/empty/data to avoid jumps */}
       <div className="mt-3 h-[280px] pr-2">
         {/* Loading */}
-        {showLoadingSkeleton ? (
+        {showLoadingSkeleton || isRetrying ? (
           <div className="h-full overflow-hidden space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
@@ -210,8 +219,8 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
           </div>
         ) : null}
 
-        {/* Error - only show if not retrying */}
-        {q.isError && !showLoadingSkeleton && !q.isFetching ? (
+        {/* Error - only show if not retrying and exceeded max retries */}
+        {q.isError && !showLoadingSkeleton && !q.isFetching && retryCount >= maxRetries ? (
           <div className="h-full">
             <ErrorState
               message={
