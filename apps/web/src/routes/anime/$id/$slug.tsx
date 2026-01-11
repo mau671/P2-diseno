@@ -566,17 +566,17 @@ function AnimeDetailPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 items-start">
-        <AnimeCharactersPanel animeId={animeId} delay={500} />
+        <AnimeCharactersPanel animeId={animeId} delay={0} />
 
         {/* ✅ US-15: Episodes Panel */}
-        <AnimeEpisodesPanel animeId={animeId} delay={1000} />
+        <AnimeEpisodesPanel animeId={animeId} delay={0} />
       </div>
 
       {/* Watch Time Calculator - Always below episodes and characters */}
       <WatchTimeCalculator episodes={anime.episodes} duration={anime.duration} />
 
       {/* Abajo: Related full-width */}
-      <AnimeRecommendationsPanel animeId={animeId} delay={1500} />
+      <AnimeRecommendationsPanel animeId={animeId} delay={0} />
     </div>
   );
 }
