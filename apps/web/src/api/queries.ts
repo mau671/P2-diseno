@@ -10,6 +10,7 @@ type JikanListResponse<T> = {
   };
 };
 
+
 export type AnimeBase = {
   mal_id: number;
   title?: string;
@@ -141,6 +142,50 @@ export function useAnimeEpisodesInfinite(animeId: number, enabled = true) {
 }
 
 /* ================================ */
+
+
+
+// anime recommendations
+
+export type RecommendationEntry = {
+  mal_id: number;
+  entry: {
+    mal_id: number;
+    url: string;
+    images: {
+      jpg?: { image_url?: string; large_image_url?: string };
+      webp?: { image_url?: string; large_image_url?: string };
+    };
+    title: string;
+  };
+  votes: number;
+};
+
+type JikanRecommendationsResponse = {
+  data: RecommendationEntry[];
+};
+
+async function fetchAnimeRecommendations(animeId: number, signal?: AbortSignal) {
+  const res = await fetchJikan<JikanRecommendationsResponse>(
+    `/anime/${animeId}/recommendations`,
+    {},
+    { signal }
+  );
+  // Limitar a máximo 27 recomendaciones
+  return { data: (res.data ?? []).slice(0, 27) };
+}
+
+export function useAnimeRecommendations(animeId: number, enabled = true) {
+  return useQuery({
+    queryKey: ["animeRecommendations", animeId],
+    queryFn: ({ signal }) => fetchAnimeRecommendations(animeId, signal),
+    enabled: enabled && Number.isFinite(animeId) && animeId > 0,
+    select: (data) => data?.data ?? [],
+    staleTime: 1000 * 60 * 10,
+    retry: false,
+  });
+}
+
 
 
 async function fetchTopAnime(page = 1, signal?: AbortSignal) {

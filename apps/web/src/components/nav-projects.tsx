@@ -7,6 +7,7 @@ import {
   Trash2,
   type LucideIcon,
 } from "lucide-react"
+import { Link } from "@tanstack/react-router"
 
 import {
   DropdownMenu,
@@ -24,6 +25,13 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useSidebar } from "@/hooks/use-sidebar"
+
+/**
+ * Checks if a URL is internal (starts with "/") and not a placeholder "#".
+ */
+function isInternalRoute(url: string): boolean {
+  return url.startsWith("/") && url !== "#"
+}
 
 export function NavProjects({
   projects,
@@ -43,10 +51,17 @@ export function NavProjects({
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon />
-                <span>{item.name}</span>
-              </a>
+              {isInternalRoute(item.url) ? (
+                <Link to={item.url}>
+                  <item.icon />
+                  <span>{item.name}</span>
+                </Link>
+              ) : (
+                <a href={item.url}>
+                  <item.icon />
+                  <span>{item.name}</span>
+                </a>
+              )}
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Genre } from "@/api/queries";
 import type { Season, Format, Status } from "@/lib/search-constants";
 import { X, Tags } from "lucide-react";
+import { translateGenre } from "@/lib/translate-genre";
 
 type SearchTagsProps = {
   query: string;
@@ -66,7 +67,7 @@ function SearchTags({
           key={genre.mal_id}
           className="group/tag relative inline-flex items-center gap-0 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-1 rounded-md text-sm transition-colors cursor-pointer overflow-hidden"
         >
-          <span className="max-w-[200px] truncate">{genre.name}</span>
+          <span className="max-w-[200px] truncate">{translateGenre(t, genre)}</span>
           <button
             onClick={() => onClearGenre(genre.mal_id)}
             className="opacity-0 group-hover/tag:opacity-100 w-0 group-hover/tag:w-auto group-hover/tag:ml-2 overflow-hidden transition-all hover:text-destructive flex-shrink-0 cursor-pointer"

@@ -31,10 +31,16 @@
   "loadError": "Failed to load data.",
   "scrollLeft": "Scroll left",
   "scrollRight": "Scroll right",
+  "scrollUp": "Scroll up",
+  "scrollDown": "Scroll down",
   "tooManyRequests": "Too many requests. Please try again.",
   "addToFavorites": "Add to favorites",
   "removeFromFavorites": "Remove from favorites",
-  "loadMore": "Load more"
+    "favorite": "Favorite",
+    "back": "Back",
+    "forward": "Forward",
+    "loadMore": "Load more",
+    "cancel": "Cancel"
 },
   "search": {
     "placeholder": "Search anime...",
@@ -112,6 +118,21 @@
     "dark": "Dark",
     "system": "System"
   },
+  "themeColors": {
+    "default": "Default",
+    "blue": "Blue",
+    "green": "Green",
+    "red": "Red",
+    "purple": "Purple",
+    "orange": "Orange",
+    "pink": "Pink",
+    "cyan": "Cyan",
+    "amber": "Amber",
+    "emerald": "Emerald",
+    "indigo": "Indigo",
+    "violet": "Violet",
+    "rose": "Rose"
+  },
   "language": {
     "toggle": "Change language",
     "es": "Spanish (Latin America)",
@@ -126,11 +147,29 @@
       "noSynopsis": "No synopsis available",
       "studiosLabel": "Studios",
       "minPerEp": "{{minutes}} min per ep",
+      "watchTime": {
+        "title": "Watch Time",
+        "total": "{{episodes}} episodes × {{minutesPerEpisode}} min/ep",
+        "minutes": "{{count}} {{minText}}",
+        "hours": "{{count}} {{hourText}}",
+        "hoursMinutes": "{{hours}}h {{minutes}}m",
+        "days": "{{count}} {{dayText}}",
+        "daysHours": "{{days}}d {{hours}}h",
+        "customize": "Customize estimate:",
+        "episodesPerDay": "Episodes/day",
+        "hoursPerDay": "Hours/day",
+        "estimates": "Estimates:",
+        "daysAtEpisodes": "{{count}} {{dayText}} watching {{episodesPerDay}} {{episodeText}}/day",
+        "daysAtHours": "{{count}} {{dayText}} watching {{hoursPerDay}} {{hourText}}/day",
+        "sessions1Hour": "{{count}} {{sessionText}} of 1 hour",
+        "sessions2Hours": "{{count}} {{sessionText}} of 2 hours"
+      },
       "sections": {
         "characters": "Characters",
         "related": "Related",
         "episodes": "Episodes",
-        "moreInfo": "More information"
+        "moreInfo": "More information",
+        "recommendations": "Recommendations"
       },
       "episodes": {
         "countShown": "{{count}} shown",
@@ -284,6 +323,54 @@
   "loginToView": "Sign in to view your favorite anime",
   "empty": "No favorites yet",
   "emptyDescription": "Start adding anime to your favorites!",
-  "count": "{{count}} favorite anime"
+  "count": "{{count}} favorite anime",
+  "error": "Error updating favorites"
+  },
+  "recommendations": {
+      "empty": "No recommendations available."
+  },
+  "profile": {
+    "title": "My Profile",
+    "profileTab": "Profile",
+    "securityTab": "Security",
+    "appearanceTab": "Appearance",
+    "userInfo": "User Information",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Enter your name",
+    "avatar": "Profile Picture",
+    "avatarURLHint": "Enter your profile picture URL (leave empty to remove)",
+    "preferences": "Preferences",
+    "language": "Language",
+    "theme": "Theme",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Changes saved",
+    "error": "Error saving",
+    "invalidURL": "Invalid URL. Must be a valid URL (http:// or https://)",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "currentPasswordPlaceholder": "Enter your current password",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter your new password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your new password",
+    "passwordRequired": "All password fields are required",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "incorrectPassword": "Incorrect password",
+    "passwordChanged": "Password changed successfully",
+    "twoFactorAuth": "Two-Factor Authentication",
+    "twoFactorAuthHint": "Coming soon",
+    "enable": "Enable",
+    "deleteAccount": "Delete Account",
+    "deleteAccountWarning": "This action cannot be undone. This will permanently delete your account and all your data.",
+    "deleteAccountConfirm": "Are you sure?",
+    "deleteAccountConfirmDescription": "This action cannot be undone. This will permanently delete your account and all associated data.",
+    "deleting": "Deleting...",
+    "themeColor": "Theme Color",
+    "themeColorHint": "Select a color to customize buttons and primary elements",
+    "selectedTheme": "Selected theme",
+    "currentTheme": "Current theme",
+    "reset": "Reset"
   }
 }

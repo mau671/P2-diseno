@@ -1,4 +1,4 @@
-{
+﻿{
   "nav": {
     "home": "Inicio",
     "anime": "Anime",
@@ -31,14 +31,19 @@
   "loadError": "Error al cargar datos.",
   "scrollLeft": "Desplazar a la izquierda",
   "scrollRight": "Desplazar a la derecha",
+  "scrollUp": "Desplazar hacia arriba",
+  "scrollDown": "Desplazar hacia abajo",
   "tooManyRequests": "Demasiadas solicitudes. Intenta de nuevo.",
   "addToFavorites": "Agregar a favoritos",
   "removeFromFavorites": "Quitar de favoritos",
-  "back": "Volver",
-  "notFound": "No encontrado",
+  "favorite": "Favorito",
+    "back": "Volver",
+    "forward": "Adelante",
+    "notFound": "No encontrado",
   "comingSoon": "Próximamente",
   "na": "N/A",
-  "loadMore": "Cargar más"
+  "loadMore": "Cargar más",
+  "cancel": "Cancelar"
   },
   "search": {
     "placeholder": "Buscar anime...",
@@ -116,6 +121,21 @@
     "dark": "Oscuro",
     "system": "Sistema"
   },
+  "themeColors": {
+    "default": "Por defecto",
+    "blue": "Azul",
+    "green": "Verde",
+    "red": "Rojo",
+    "purple": "Morado",
+    "orange": "Naranja",
+    "pink": "Rosa",
+    "cyan": "Cian",
+    "amber": "Ámbar",
+    "emerald": "Esmeralda",
+    "indigo": "Índigo",
+    "violet": "Violeta",
+    "rose": "Rosa"
+  },
   "language": {
     "toggle": "Cambiar idioma",
     "es": "Español (LatAm)",
@@ -130,11 +150,29 @@
       "noSynopsis": "Sin sinopsis disponible",
       "studiosLabel": "Estudios",
       "minPerEp": "{{minutes}} min por ep",
+      "watchTime": {
+        "title": "Tiempo de visualización",
+        "total": "{{episodes}} episodios × {{minutesPerEpisode}} min/ep",
+        "minutes": "{{count}} {{minText}}",
+        "hours": "{{count}} {{hourText}}",
+        "hoursMinutes": "{{hours}}h {{minutes}}m",
+        "days": "{{count}} {{dayText}}",
+        "daysHours": "{{days}}d {{hours}}h",
+        "customize": "Personalizar estimación:",
+        "episodesPerDay": "Episodios/día",
+        "hoursPerDay": "Horas/día",
+        "estimates": "Estimaciones:",
+        "daysAtEpisodes": "{{count}} {{dayText}} viendo {{episodesPerDay}} {{episodeText}}/día",
+        "daysAtHours": "{{count}} {{dayText}} viendo {{hoursPerDay}} {{hourText}}/día",
+        "sessions1Hour": "{{count}} {{sessionText}} de 1 hora",
+        "sessions2Hours": "{{count}} {{sessionText}} de 2 horas"
+      },
       "sections": {
         "characters": "Personajes",
         "related": "Relacionados",
         "episodes": "Episodios",
-        "moreInfo": "Más información"
+        "moreInfo": "Más información",
+        "recommendations": "Recomendaciones"
       },
       "episodes": {
         "countShown": "{{count}} mostrados",
@@ -288,6 +326,54 @@
   "loginToView": "Inicia sesión para ver tus anime favoritos",
   "empty": "Aún no tienes favoritos",
   "emptyDescription": "¡Comienza a agregar anime a tus favoritos!",
-  "count": "{{count}} anime favoritos"
+  "count": "{{count}} anime favoritos",
+  "error": "Error al actualizar favoritos"
+  },
+  "recommendations": {
+      "empty": "No hay recomendaciones disponibles."
+  },
+  "profile": {
+    "title": "Mi Perfil",
+    "profileTab": "Perfil",
+    "securityTab": "Seguridad",
+    "appearanceTab": "Apariencia",
+    "userInfo": "Información del usuario",
+    "displayName": "Nombre de usuario",
+    "displayNamePlaceholder": "Ingresa tu nombre",
+    "avatar": "Foto de perfil",
+    "avatarURLHint": "Ingresa la URL de tu foto de perfil (deja vacío para eliminar)",
+    "preferences": "Preferencias",
+    "language": "Idioma",
+    "theme": "Tema",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "saved": "Cambios guardados",
+    "error": "Error al guardar",
+    "invalidURL": "URL inválida. Debe ser una URL válida (http:// o https://)",
+    "changePassword": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "currentPasswordPlaceholder": "Ingresa tu contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "newPasswordPlaceholder": "Ingresa tu nueva contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "confirmPasswordPlaceholder": "Confirma tu nueva contraseña",
+    "passwordRequired": "Todos los campos de contraseña son requeridos",
+    "passwordsDoNotMatch": "Las contraseñas no coinciden",
+    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+    "incorrectPassword": "Contraseña incorrecta",
+    "passwordChanged": "Contraseña cambiada exitosamente",
+    "twoFactorAuth": "Autenticación de dos factores",
+    "twoFactorAuthHint": "Próximamente disponible",
+    "enable": "Habilitar",
+    "deleteAccount": "Eliminar cuenta",
+    "deleteAccountWarning": "Esta acción no se puede deshacer. Esto eliminará permanentemente tu cuenta y todos tus datos.",
+    "deleteAccountConfirm": "¿Estás seguro?",
+    "deleteAccountConfirmDescription": "Esta acción no se puede deshacer. Esto eliminará permanentemente tu cuenta y todos tus datos asociados.",
+    "deleting": "Eliminando...",
+    "themeColor": "Color del tema",
+    "themeColorHint": "Selecciona un color para personalizar los botones y elementos principales",
+    "selectedTheme": "Tema seleccionado",
+    "currentTheme": "Tema actual",
+    "reset": "Restablecer"
   }
 }

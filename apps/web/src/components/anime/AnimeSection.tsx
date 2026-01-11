@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimeCard } from "./AnimeCard";
 import { AnimeCardSkeleton, AnimeHorizontalSkeleton } from "./AnimeCardSkeleton";
+import { useAnimatedScroll } from "@/hooks/useAnimatedScroll";
 
 type AnimeSectionProps = {
   title: string;
@@ -17,9 +18,11 @@ function AnimeSection({
   infiniteQuery 
 }: AnimeSectionProps) {
   const { t } = useTranslation();
-  const scrollRef = React.useRef<HTMLDivElement>(null);
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
   const fetchNextPageRef = React.useRef(infiniteQuery.fetchNextPage);
+
+  const { scrollRef, scrollElement, scrollPrev, scrollNext, canScrollPrev, canScrollNext } =
+    useAnimatedScroll({ axis: "x" });
 
   const allItems = React.useMemo(() => {
     return infiniteQuery.data?.pages.flatMap((page) => page.data ?? []) ?? [];
@@ -29,9 +32,6 @@ function AnimeSection({
     return Array.from(new Map(allItems.map((anime) => [anime.mal_id, anime])).values());
   }, [allItems]);
 
-  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
-  const [canScrollRight, setCanScrollRight] = React.useState(false);
-
   React.useEffect(() => {
     fetchNextPageRef.current = infiniteQuery.fetchNextPage;
   }, [infiniteQuery.fetchNextPage]);
@@ -40,9 +40,9 @@ function AnimeSection({
     if (!infiniteQuery.hasNextPage || infiniteQuery.isFetchingNextPage) return;
 
     const checkScrollPosition = () => {
-      if (!scrollRef.current || !loadMoreRef.current) return;
+      if (!scrollElement || !loadMoreRef.current) return;
       
-      const container = scrollRef.current;
+      const container = scrollElement;
       const { scrollLeft, scrollWidth, clientWidth } = container;
       const loadMoreElement = loadMoreRef.current;
       
@@ -56,71 +56,18 @@ function AnimeSection({
       }
     };
 
-    const container = scrollRef.current;
-    if (container) {
-      container.addEventListener('scroll', checkScrollPosition, { passive: true });
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', checkScrollPosition, { passive: true });
       checkScrollPosition();
     }
 
     return () => {
-      if (container) {
-        container.removeEventListener('scroll', checkScrollPosition);
+      if (scrollElement) {
+        scrollElement.removeEventListener('scroll', checkScrollPosition);
       }
     };
-  }, [infiniteQuery.hasNextPage, infiniteQuery.isFetchingNextPage, uniqueItems.length]);
+  }, [infiniteQuery.hasNextPage, infiniteQuery.isFetchingNextPage, uniqueItems.length, scrollElement]);
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (!scrollRef.current) return;
-    const scrollAmount = scrollRef.current.clientWidth * 0.6;
-    
-      const startScroll = scrollRef.current.scrollLeft;
-      const targetScroll = direction === 'left' 
-        ? startScroll - scrollAmount 
-        : startScroll + scrollAmount;
-      const startTime = performance.now();
-      const duration = 400;
-
-    const animateScroll = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      const ease = 1 - Math.pow(1 - progress, 3);
-      
-      if (scrollRef.current) {
-        scrollRef.current.scrollLeft = startScroll + (targetScroll - startScroll) * ease;
-        
-        if (progress < 1) {
-          requestAnimationFrame(animateScroll);
-        }
-      }
-    };
-
-    requestAnimationFrame(animateScroll);
-  };
-
-  const updateScrollButtons = () => {
-    if (!scrollRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
-  };
-
-  React.useEffect(() => {
-    const ref = scrollRef.current;
-    if (ref) {
-      ref.addEventListener('scroll', updateScrollButtons, { passive: true });
-      updateScrollButtons();
-    }
-    return () => {
-      if (ref) {
-        ref.removeEventListener('scroll', updateScrollButtons);
-      }
-    };
-  }, [uniqueItems]);
-
-  React.useEffect(() => {
-    updateScrollButtons();
-  }, [uniqueItems]);
 
   const isLoading = infiniteQuery.isLoading;
   const isFetchingNextPage = infiniteQuery.isFetchingNextPage;
@@ -134,8 +81,8 @@ function AnimeSection({
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={() => scroll('left')} 
-            disabled={!canScrollLeft}
+            onClick={scrollPrev} 
+            disabled={!canScrollPrev}
             className="h-8 w-8 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label={t("common.scrollLeft")}
           >
@@ -144,8 +91,8 @@ function AnimeSection({
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={() => scroll('right')} 
-            disabled={!canScrollRight}
+            onClick={scrollNext} 
+            disabled={!canScrollNext}
             className="h-8 w-8 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label={t("common.scrollRight")}
           >
@@ -157,7 +104,7 @@ function AnimeSection({
         <AnimeHorizontalSkeleton />
       ) : (
         <div className="relative">
-          {canScrollRight && (
+          {canScrollNext && (
             <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
           )}
           <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth">

@@ -45,6 +45,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Lockfiles (prefer Bun)
+package-lock.json
+
 # Environment files
 .env
 .env.*

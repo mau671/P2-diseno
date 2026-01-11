@@ -2,12 +2,11 @@ import * as React from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft } from "lucide-react";
 
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { fetchJikan, ApiError } from "@/api/jikan";
 
 type AnimeDetail = {
   mal_id: number;
@@ -16,10 +15,21 @@ type AnimeDetail = {
 };
 
 async function fetchAnimeDetail(id: number, signal?: AbortSignal): Promise<AnimeDetail | null> {
-  const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/full`, { signal });
-  if (!res.ok) return null;
-  const json = (await res.json()) as { data?: AnimeDetail };
-  return json?.data ?? null;
+  try {
+    const json = await fetchJikan<{ data?: AnimeDetail }>(
+      `/anime/${id}/full`,
+      undefined,
+      { signal }
+    );
+    return json?.data ?? null;
+  } catch (error) {
+    // Re-throw ApiError so React Query can handle retries
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    // For other errors, throw a generic ApiError
+    throw new ApiError("Error al cargar datos del anime.");
+  }
 }
 
 function slugifyLocal(input: string) {
@@ -32,6 +42,7 @@ function slugifyLocal(input: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const Route = createFileRoute("/anime/$id/" as any)({
   component: AnimeDetailRedirectPage,
 });
@@ -54,11 +65,6 @@ function AnimeDetailRedirectPage() {
 
   const anime = detail.data ?? null;
 
-  const goBack = React.useCallback(() => {
-    if (window.history.length > 1) window.history.back();
-    else navigate({ to: "/anime/catalog" });
-  }, [navigate]);
-
   React.useEffect(() => {
     if (!enabled) return;
     if (!anime) return;
@@ -66,65 +72,45 @@ function AnimeDetailRedirectPage() {
     const title = (anime.title_english || anime.title || "anime").trim();
     const slug = slugifyLocal(title) || "anime";
 
-    // 🔥 OJO: sin params tipados para evitar los errores de TS
+    // Navigate with dynamic path (type cast required for dynamic routes)
     navigate({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       to: `/anime/${animeId}/${slug}` as any,
       replace: true,
     });
   }, [enabled, anime, animeId, navigate]);
 
   if (!enabled) {
-    return (
-      <div className="space-y-4">
-        <Button variant="outline" size="sm" onClick={goBack}>
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          {t("common.back")}
-        </Button>
-        <EmptyState message={t("common.notFound")} />
-      </div>
-    );
+    return <EmptyState message={t("common.notFound")} />;
   }
 
-  if (detail.isLoading) {
+  // If we have cached data, the useEffect will handle navigation
+  // So we can show skeleton while waiting for navigation
+  if (anime) {
+    // Continue to show skeleton while navigation happens
+  } else if (detail.isLoading || (detail.isError && detail.isFetching)) {
+    // Show loading state while loading or retrying
     return (
       <div className="space-y-6">
-        <Skeleton className="h-9 w-28" />
         <Skeleton className="h-56 md:h-64 w-full rounded-2xl border" />
       </div>
     );
-  }
-
-  if (detail.isError) {
+  } else if (detail.isError && !detail.isFetching) {
+    // Only show error if query failed, is not retrying, and we have no cached data
     return (
-      <div className="space-y-4">
-        <Button variant="outline" size="sm" onClick={goBack}>
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          {t("common.back")}
-        </Button>
-        <ErrorState
-          message={detail.error instanceof Error ? detail.error.message : t("common.loadError")}
-          onRetry={() => detail.refetch()}
-        />
-      </div>
+      <ErrorState
+        message={detail.error instanceof Error ? detail.error.message : t("common.loadError")}
+        onRetry={() => detail.refetch()}
+      />
     );
-  }
-
-  if (!anime) {
-    return (
-      <div className="space-y-4">
-        <Button variant="outline" size="sm" onClick={goBack}>
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          {t("common.back")}
-        </Button>
-        <EmptyState message={t("common.notFound")} />
-      </div>
-    );
+  } else if (!detail.isLoading && !detail.isError) {
+    // Show not found only if we have no data, no error, and not loading
+    return <EmptyState message={t("common.notFound")} />;
   }
 
   // Si por alguna razón no navegó aún, dejamos skeleton
   return (
     <div className="space-y-6">
-      <Skeleton className="h-9 w-28" />
       <Skeleton className="h-56 md:h-64 w-full rounded-2xl border" />
     </div>
   );

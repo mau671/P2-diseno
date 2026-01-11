@@ -1,6 +1,6 @@
 import * as React from "react";
 
-function useCardTooltip(cardRef: React.RefObject<HTMLDivElement | null>) {
+function useCardTooltip(cardRef: React.RefObject<HTMLElement | null>) {
   const [placement, setPlacement] = React.useState<'left' | 'right'>('right');
   const [isHovered, setIsHovered] = React.useState(false);
 
