@@ -20,6 +20,8 @@ import { AnimeCharactersPanel } from "@/components/anime/AnimeCharactersPanel";
 import { AnimeEpisodesPanel } from "@/components/anime/AnimeEpisodesPanel";
 import { AnimeRecommendationsPanel } from "@/components/anime/AnimeRecommendationsPanel";
 import { fetchJikan, ApiError } from "@/api/jikan";
+import { useAuth } from "@/hooks/use-auth";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
 type JikanGenre = { mal_id: number; name: string };
 type JikanStudio = { mal_id: number; name: string };
@@ -222,6 +224,8 @@ function AnimeDetailPage() {
   const tAny = t as TranslateFn;
 
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useUserProfile();
 
   const params = Route.useParams() as { id?: string; slug?: string };
   const rawId = params?.id ?? "";
@@ -229,6 +233,7 @@ function AnimeDetailPage() {
 
   const animeId = React.useMemo(() => Number(rawId), [rawId]);
   const enabled = Number.isFinite(animeId) && animeId > 0;
+  const isFavorited = isFavorite(animeId);
 
   const pastelRaw = useStablePastelColor(enabled ? animeId : 0);
   const pastel = React.useMemo(() => getPastelBaseColor(pastelRaw), [pastelRaw]);
@@ -348,11 +353,24 @@ function AnimeDetailPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full h-8 md:h-10 text-xs md:text-sm"
-                  onClick={(e) => e.preventDefault()}
+                  className={`w-full h-8 md:h-10 text-xs md:text-sm transition-colors ${
+                    isFavorited ? 'border-red-500/50 bg-red-500/10 hover:bg-red-500/20' : ''
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!user) {
+                      navigate({ to: "/auth/login" });
+                      return;
+                    }
+                    toggleFavorite(animeId);
+                  }}
                 >
-                  <Heart className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
-                  <span className="hidden md:inline">{tAny("common.addToFavorites")}</span>
+                  <Heart className={`h-3 w-3 md:h-4 md:w-4 md:mr-2 transition-colors ${
+                    isFavorited ? 'fill-red-500 text-red-500' : ''
+                  }`} />
+                  <span className="hidden md:inline">
+                    {isFavorited ? tAny("common.removeFromFavorites") : tAny("common.addToFavorites")}
+                  </span>
                   <span className="md:hidden">{tAny("common.favorite")}</span>
                 </Button>
               </div>

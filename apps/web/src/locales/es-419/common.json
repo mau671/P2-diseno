@@ -304,7 +304,8 @@
   "loginToView": "Inicia sesión para ver tus anime favoritos",
   "empty": "Aún no tienes favoritos",
   "emptyDescription": "¡Comienza a agregar anime a tus favoritos!",
-  "count": "{{count}} anime favoritos"
+  "count": "{{count}} anime favoritos",
+  "error": "Error al actualizar favoritos"
   },
   "recommendations": {
       "empty": "No hay recomendaciones disponibles."

@@ -9,6 +9,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { ModeToggle } from "@/components/mode-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 import { Toaster } from "@/components/ui/sonner";
+import { NavigationHistoryProvider } from "@/context/navigation-history-context";
 
 function RootLayout() {
   const location = useLocation();
@@ -51,7 +52,9 @@ function RootLayout() {
 export const Route = createRootRoute({
   component: () => (
     <NuqsAdapter>
-      <RootLayout />
+      <NavigationHistoryProvider>
+        <RootLayout />
+      </NavigationHistoryProvider>
     </NuqsAdapter>
   ),
 });
