@@ -119,6 +119,21 @@
     "dark": "Oscuro",
     "system": "Sistema"
   },
+  "themeColors": {
+    "default": "Por defecto",
+    "blue": "Azul",
+    "green": "Verde",
+    "red": "Rojo",
+    "purple": "Morado",
+    "orange": "Naranja",
+    "pink": "Rosa",
+    "cyan": "Cian",
+    "amber": "Ámbar",
+    "emerald": "Esmeralda",
+    "indigo": "Índigo",
+    "violet": "Violeta",
+    "rose": "Rosa"
+  },
   "language": {
     "toggle": "Cambiar idioma",
     "es": "Español (Latinoamérica)",
@@ -332,9 +347,10 @@
     "deleteAccountConfirm": "¿Estás seguro?",
     "deleteAccountConfirmDescription": "Esta acción no se puede deshacer. Esto eliminará permanentemente tu cuenta y todos tus datos asociados.",
     "deleting": "Eliminando...",
-    "accentColor": "Color de acento",
-    "accentColorHint": "Personaliza el color de acento de la aplicación",
-    "reset": "Restablecer",
-    "currentColor": "Color actual"
+    "themeColor": "Color del tema",
+    "themeColorHint": "Selecciona un color para personalizar los botones y elementos principales",
+    "selectedTheme": "Tema seleccionado",
+    "currentTheme": "Tema actual",
+    "reset": "Restablecer"
   }
 }

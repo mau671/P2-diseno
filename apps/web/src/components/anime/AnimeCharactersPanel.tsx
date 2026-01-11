@@ -33,26 +33,23 @@ export function AnimeCharactersPanel({ animeId, className, delay = 0 }: Props) {
   const { t } = useTranslation();
   const tAny = t as (key: string, options?: Record<string, unknown>) => string;
 
-  const [queryEnabled, setQueryEnabled] = React.useState(delay === 0);
+  // Same pattern as AnimeEpisodesPanel - simple delay handling
+  const [enabled, setEnabled] = React.useState(delay === 0);
 
-  // Only handle delay logic here - don't reset on animeId changes
-  // This matches AnimeRecommendationsPanel behavior and ensures cached data works
   React.useEffect(() => {
     if (delay === 0) {
-      setQueryEnabled(true);
+      setEnabled(true);
       return;
     }
 
-    setQueryEnabled(false);
-
     const timer = setTimeout(() => {
-      setQueryEnabled(true);
+      setEnabled(true);
     }, delay);
 
     return () => clearTimeout(timer);
   }, [delay]);
 
-  const charactersQuery = useAnimeCharacters(animeId, queryEnabled);
+  const charactersQuery = useAnimeCharacters(animeId, enabled);
 
   // ✅ normalizamos a { id, name, img }
   const characters = React.useMemo(() => {
@@ -74,30 +71,18 @@ export function AnimeCharactersPanel({ animeId, className, delay = 0 }: Props) {
       .filter((x) => x.name);
   }, [charactersQuery.data, tAny]);
 
+  const hasCharacters = characters.length > 0;
+
   const { scrollRef, scrollPrev, scrollNext, canScrollPrev, canScrollNext } =
     useAnimatedScroll({ axis: "x" });
 
   const title = tAny("anime.detail.sections.characters", { defaultValue: "Characters" });
 
-  // While we're waiting for the staggered delay, keep layout stable by rendering the same
-  // header structure + skeleton instead of an EmptyState.
-  if (!queryEnabled) {
-    return (
-      <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
-        <div className="flex items-center justify-between gap-3">
-          <div className="font-semibold text-lg">{title}</div>
-          <div className="flex items-center gap-1" aria-hidden>
-            <Skeleton className="h-8 w-8 rounded-md border" />
-            <Skeleton className="h-8 w-8 rounded-md border" />
-          </div>
-        </div>
-        <CharactersSkeleton />
-      </div>
-    );
-  }
+  // Same pattern as AnimeEpisodesPanel - show skeleton only if loading AND no data
+  const showLoadingSkeleton = charactersQuery.isLoading || 
+    (charactersQuery.isFetching && !hasCharacters && !charactersQuery.isError);
 
   // Only show error if query failed and is not retrying (isFetching = false)
-  // If it's retrying, show loading instead
   if (charactersQuery.isError && !charactersQuery.isFetching) {
     const msg =
       charactersQuery.error instanceof Error
@@ -115,7 +100,7 @@ export function AnimeCharactersPanel({ animeId, className, delay = 0 }: Props) {
     );
   }
 
-  if (charactersQuery.isLoading || (charactersQuery.isError && charactersQuery.isFetching)) {
+  if (showLoadingSkeleton) {
     return (
       <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
         <div className="flex items-center justify-between gap-3">

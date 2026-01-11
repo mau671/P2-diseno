@@ -11,6 +11,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { RouterProvider } from "@tanstack/react-router"
 import { router } from "./router"
 import { ThemeProvider } from "./components/theme-provider"
+import { ThemeColorInitializer } from "./components/theme-color-initializer"
 import { AuthProvider } from "./context/auth-context"
 import { ApiError } from "./api/jikan"
 
@@ -46,6 +47,7 @@ const persister = createSyncStoragePersister({
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <ThemeColorInitializer />
       <AuthProvider> 
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
           <RouterProvider router={router} />
