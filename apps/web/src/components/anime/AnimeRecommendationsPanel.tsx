@@ -120,6 +120,32 @@ export function AnimeRecommendationsPanel({ animeId, className, delay = 0 }: Pro
   const recommendationsQuery = useAnimeRecommendations(animeId, enabled);
 
   const all = React.useMemo(() => recommendationsQuery.data ?? [], [recommendationsQuery.data]);
+  const hasData = all.length > 0;
+
+  // Auto-retry on error - keeps retrying until data is loaded
+  const [retryCount, setRetryCount] = React.useState(0);
+  const maxRetries = 10;
+  
+  React.useEffect(() => {
+    setRetryCount(0);
+  }, [animeId]);
+
+  React.useEffect(() => {
+    if (!recommendationsQuery.isError) return;
+    if (hasData) return; // Don't retry if we already have data
+    if (retryCount >= maxRetries) return;
+    if (recommendationsQuery.isFetching) return;
+
+    // Exponential backoff: 2s, 4s, 6s, 8s... up to 20s
+    const delay = Math.min(2000 + retryCount * 2000, 20000);
+    
+    const timer = window.setTimeout(() => {
+      setRetryCount(prev => prev + 1);
+      recommendationsQuery.refetch();
+    }, delay);
+
+    return () => window.clearTimeout(timer);
+  }, [recommendationsQuery.isError, hasData, retryCount, recommendationsQuery.isFetching, recommendationsQuery, animeId]);
 
   const { scrollRef, scrollPrev, scrollNext, canScrollPrev, canScrollNext } =
     useAnimatedScroll({ axis: "x" });
@@ -128,9 +154,11 @@ export function AnimeRecommendationsPanel({ animeId, className, delay = 0 }: Pro
     defaultValue: "Recommendations" 
   });
 
-  // Only show error if query failed and is not retrying (isFetching = false)
-  // If it's retrying, show loading instead
-  if (recommendationsQuery.isError && !recommendationsQuery.isFetching) {
+  // Show loading skeleton while retrying
+  const isRetrying = recommendationsQuery.isError && recommendationsQuery.isFetching;
+
+  // Only show error if query failed, not retrying, and exceeded max retries
+  if (recommendationsQuery.isError && !recommendationsQuery.isFetching && retryCount >= maxRetries) {
     const msg =
       recommendationsQuery.error instanceof Error
         ? recommendationsQuery.error.message
@@ -147,7 +175,7 @@ export function AnimeRecommendationsPanel({ animeId, className, delay = 0 }: Pro
     );
   }
 
-  if (recommendationsQuery.isLoading || (recommendationsQuery.isError && recommendationsQuery.isFetching)) {
+  if (recommendationsQuery.isLoading || isRetrying) {
     return (
       <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
         <div className="flex items-center justify-between gap-3">

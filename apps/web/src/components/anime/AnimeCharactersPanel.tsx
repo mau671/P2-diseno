@@ -73,17 +73,45 @@ export function AnimeCharactersPanel({ animeId, className, delay = 0 }: Props) {
 
   const hasCharacters = characters.length > 0;
 
+  // Auto-retry on error - keeps retrying until data is loaded
+  const [retryCount, setRetryCount] = React.useState(0);
+  const maxRetries = 10;
+  
+  React.useEffect(() => {
+    setRetryCount(0);
+  }, [animeId]);
+
+  React.useEffect(() => {
+    if (!charactersQuery.isError) return;
+    if (hasCharacters) return; // Don't retry if we already have data
+    if (retryCount >= maxRetries) return;
+    if (charactersQuery.isFetching) return;
+
+    // Exponential backoff: 2s, 4s, 6s, 8s... up to 20s
+    const delay = Math.min(2000 + retryCount * 2000, 20000);
+    
+    const timer = window.setTimeout(() => {
+      setRetryCount(prev => prev + 1);
+      charactersQuery.refetch();
+    }, delay);
+
+    return () => window.clearTimeout(timer);
+  }, [charactersQuery.isError, hasCharacters, retryCount, charactersQuery.isFetching, charactersQuery, animeId]);
+
   const { scrollRef, scrollPrev, scrollNext, canScrollPrev, canScrollNext } =
     useAnimatedScroll({ axis: "x" });
 
   const title = tAny("anime.detail.sections.characters", { defaultValue: "Characters" });
 
+  // Show loading skeleton while retrying
+  const isRetrying = charactersQuery.isError && charactersQuery.isFetching;
+
   // Same pattern as AnimeEpisodesPanel - show skeleton only if loading AND no data
   const showLoadingSkeleton = charactersQuery.isLoading || 
     (charactersQuery.isFetching && !hasCharacters && !charactersQuery.isError);
 
-  // Only show error if query failed and is not retrying (isFetching = false)
-  if (charactersQuery.isError && !charactersQuery.isFetching) {
+  // Only show error if query failed, not retrying, and exceeded max retries
+  if (charactersQuery.isError && !charactersQuery.isFetching && retryCount >= maxRetries) {
     const msg =
       charactersQuery.error instanceof Error
         ? charactersQuery.error.message
@@ -100,7 +128,7 @@ export function AnimeCharactersPanel({ animeId, className, delay = 0 }: Props) {
     );
   }
 
-  if (showLoadingSkeleton) {
+  if (showLoadingSkeleton || isRetrying) {
     return (
       <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
         <div className="flex items-center justify-between gap-3">
