@@ -51,6 +51,9 @@ function getRouteLabel(
   }
 
   // User routes
+  if (routeId.includes("/user/profile")) {
+    return t("profile.title");
+  }
   if (routeId.includes("/user/favorites")) {
     return t("sections.favorites");
   }
@@ -169,6 +172,7 @@ export function AppBreadcrumbs() {
     const items: BreadcrumbCrumb[] = [];
     let hasAnimeDetail = false;
     let hasAnimeParent = false;
+    let hasUserParent = false;
 
     matches.forEach((match, index) => {
       if (!shouldIncludeRoute(match.routeId, match.pathname)) {
@@ -182,6 +186,26 @@ export function AppBreadcrumbs() {
       // Check if this is an anime route (but not root)
       const isAnimeRoute =
         match.routeId.includes("/anime/") && match.routeId !== "__root__";
+      
+      // Check if this is a user route (but not root)
+      const isUserRoute =
+        match.routeId.includes("/user/") && match.routeId !== "__root__";
+
+      // Add "Usuario" parent breadcrumb for user routes (only once)
+      if (isUserRoute && !hasUserParent) {
+        const isUserSubRoute =
+          match.routeId.includes("/user/profile") ||
+          match.routeId.includes("/user/favorites");
+
+        if (isUserSubRoute) {
+          items.push({
+            label: t("sections.user"),
+            href: "/user/profile",
+            isLast: false,
+          });
+          hasUserParent = true;
+        }
+      }
 
       // Add "Anime" parent breadcrumb for anime routes (only once)
       if (isAnimeRoute && !hasAnimeParent) {

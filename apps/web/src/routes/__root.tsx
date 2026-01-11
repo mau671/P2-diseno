@@ -4,9 +4,11 @@ import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppBreadcrumbs } from "@/components/navigation/AppBreadcrumbs";
 import { BackButton } from "@/components/navigation/BackButton";
+import { ForwardButton } from "@/components/navigation/ForwardButton";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { ModeToggle } from "@/components/mode-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
+import { Toaster } from "@/components/ui/sonner";
 
 function RootLayout() {
   const location = useLocation();
@@ -25,6 +27,7 @@ function RootLayout() {
             <div className="flex items-center rounded-lg border bg-muted/40 p-0.5 gap-0.5">
               <SidebarTrigger className="size-8 rounded-md" />
               <BackButton className="size-8 rounded-md" />
+              <ForwardButton className="size-8 rounded-md" />
             </div>
             <AppBreadcrumbs />
           </div>
@@ -40,6 +43,7 @@ function RootLayout() {
           </div>
         </div>
       </SidebarInset>
+      <Toaster />
     </SidebarProvider>
   );
 }

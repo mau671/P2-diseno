@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { userProfileService, type UserProfile } from '@/services/user-profile.service';
 
 export function useUserProfile() {
-  const { user } = useAuth();
+  const { user, updateAuthProfile } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -102,6 +102,50 @@ export function useUserProfile() {
     return profile?.[listName].includes(animeId) ?? false;
   };
 
+  const updateDisplayName = async (displayName: string) => {
+    if (!user || !profile) return;
+
+    try {
+      // Update Firestore
+      await userProfileService.updateDisplayName(user.uid, displayName);
+      
+      // Update Firebase Auth
+      await updateAuthProfile({ displayName });
+      
+      // Update local state
+      setProfile({
+        ...profile,
+        displayName,
+      });
+    } catch (error) {
+      console.error('Error updating display name:', error);
+      throw error;
+    }
+  };
+
+  const updatePhotoURL = async (photoURL: string | null) => {
+    if (!user || !profile) return;
+
+    try {
+      const urlToSave = photoURL || "";
+      
+      // Update Firestore
+      await userProfileService.updatePhotoURL(user.uid, urlToSave);
+      
+      // Update Firebase Auth (convert null to undefined)
+      await updateAuthProfile({ photoURL: photoURL || undefined });
+      
+      // Update local state
+      setProfile({
+        ...profile,
+        photoURL: photoURL || null,
+      });
+    } catch (error) {
+      console.error('Error updating photo URL:', error);
+      throw error;
+    }
+  };
+
   return {
     profile,
     loading,
@@ -110,6 +154,8 @@ export function useUserProfile() {
     removeFromList,
     isFavorite,
     isInList,
-    refreshProfile: loadProfile
+    refreshProfile: loadProfile,
+    updateDisplayName,
+    updatePhotoURL
   };
 }

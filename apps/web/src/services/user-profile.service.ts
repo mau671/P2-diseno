@@ -103,6 +103,24 @@ export const userProfileService = {
     });
   },
 
+  //Actualiza el displayName
+  async updateDisplayName(uid: string, displayName: string) {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+      displayName,
+      updatedAt: new Date(),
+    });
+  },
+
+  //Actualiza el photoURL
+  async updatePhotoURL(uid: string, photoURL: string) {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+      photoURL,
+      updatedAt: new Date(),
+    });
+  },
+
   //Verifica si un anime está en favoritos
   async isFavorite(uid: string, animeId: number): Promise<boolean> {
     const profile = await this.getProfile(uid);
