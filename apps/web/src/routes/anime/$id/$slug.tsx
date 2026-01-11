@@ -19,6 +19,7 @@ import { useStablePastelColor } from "@/hooks/useStablePastelColor";
 import { AnimeCharactersPanel } from "@/components/anime/AnimeCharactersPanel";
 import { AnimeEpisodesPanel } from "@/components/anime/AnimeEpisodesPanel";
 import { AnimeRecommendationsPanel } from "@/components/anime/AnimeRecommendationsPanel";
+import { WatchTimeCalculator } from "@/components/anime/WatchTimeCalculator";
 import { fetchJikan, ApiError } from "@/api/jikan";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserProfile } from "@/hooks/use-user-profile";
@@ -480,6 +481,9 @@ function AnimeDetailPage() {
         {/* ✅ US-15: Episodes Panel */}
         <AnimeEpisodesPanel animeId={animeId} delay={1000} />
       </div>
+
+      {/* Watch Time Calculator - Always below episodes and characters */}
+      <WatchTimeCalculator episodes={anime.episodes} duration={anime.duration} />
 
       {/* Abajo: Related full-width */}
       <AnimeRecommendationsPanel animeId={animeId} delay={1500} />
