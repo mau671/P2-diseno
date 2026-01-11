@@ -119,7 +119,10 @@
   "language": {
     "toggle": "Cambiar idioma",
     "es": "Español (LatAm)",
-    "en": "Inglés (Estados Unidos)"
+    "en": "Inglés (Estados Unidos)",
+    "pt": "Portugués",
+    "fr": "Francés",
+    "it": "Italiano"
   },
   "anime": {
     "detail": {

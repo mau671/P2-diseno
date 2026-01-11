@@ -24,12 +24,26 @@ export function LanguageToggle() {
           <span className="sr-only">{t("language.toggle")}</span>
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => changeLanguage("es-419")}>
           {t("language.es")}
         </DropdownMenuItem>
+
         <DropdownMenuItem onClick={() => changeLanguage("en-US")}>
           {t("language.en")}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => changeLanguage("pt-BR")}>
+          {t("language.pt")}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => changeLanguage("fr-FR")}>
+          {t("language.fr")}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => changeLanguage("it-IT")}>
+          {t("language.it")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
