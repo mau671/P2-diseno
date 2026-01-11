@@ -53,11 +53,21 @@ export function NavigationHistoryProvider({ children }: { children: React.ReactN
       // This is a heuristic - we can't know for sure if it was back or forward
       // But we track our own index to make this work
       isNavigatingRef.current = true;
+      
+      // Update button states after the route change is complete
+      requestAnimationFrame(() => {
+        const stateIndex = window.history.state?.__navIndex;
+        if (typeof stateIndex === "number") {
+          historyIndexRef.current = stateIndex;
+          saveToSessionStorage();
+          updateButtonStates();
+        }
+      });
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
+  }, [saveToSessionStorage, updateButtonStates]);
 
   // Track navigation changes
   React.useEffect(() => {
@@ -106,7 +116,10 @@ export function NavigationHistoryProvider({ children }: { children: React.ReactN
     }
 
     saveToSessionStorage();
-    updateButtonStates();
+    // Use requestAnimationFrame to ensure state is updated after DOM changes
+    requestAnimationFrame(() => {
+      updateButtonStates();
+    });
   }, [location.pathname, location.search, saveToSessionStorage, updateButtonStates]);
 
   // Initialize the first history entry with index 0
