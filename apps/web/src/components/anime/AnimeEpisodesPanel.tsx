@@ -98,9 +98,6 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
     [episodes, shownCount]
   );
 
-  // ✅ evita “flash” de vacío cuando todavía está trayendo data (o al entrar por primera vez)
-  const showLoadingSkeleton = q.isLoading || (q.isFetching && !hasAny && !q.isError);
-
   // Auto-retry on error - keeps retrying until data is loaded
   const [retryCount, setRetryCount] = React.useState(0);
   const maxRetries = 10;
@@ -128,6 +125,12 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
 
   // Show loading skeleton while retrying
   const isRetrying = q.isError && q.isFetching;
+
+  // ✅ Show skeleton if: not enabled yet (delay), loading, retrying, or error but still trying
+  const showLoadingSkeleton = !enabled ||
+    q.isLoading || 
+    isRetrying ||
+    (q.isError && retryCount < maxRetries);
 
   const { scrollRef: animatedScrollRef, canScrollPrev, canScrollNext, scrollPrev, scrollNext } = useAnimatedScroll({ axis: "y" });
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -261,8 +264,8 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
           </div>
         ) : null}
 
-        {/* Empty */}
-        {!showLoadingSkeleton && !q.isError && !hasAny ? (
+        {/* Empty - only show if enabled, no error, and truly no data */}
+        {enabled && !showLoadingSkeleton && !q.isError && !hasAny ? (
           <div className="h-full">
             <EmptyState
               message={tAny("anime.detail.episodes.empty", {
@@ -274,8 +277,8 @@ export function AnimeEpisodesPanel({ animeId, delay = 0 }: Props) {
           </div>
         ) : null}
 
-        {/* List */}
-        {!showLoadingSkeleton && !q.isError && hasAny ? (
+        {/* List - only show if enabled, not in skeleton state, and has data */}
+        {enabled && !showLoadingSkeleton && !q.isError && hasAny ? (
           <div className="h-full relative">
             {/* Gradient fade effects - top and bottom */}
             {canScrollPrev && (
