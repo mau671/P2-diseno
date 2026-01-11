@@ -1,30 +1,29 @@
-import { useRouter, useCanGoBack, useLocation } from "@tanstack/react-router";
+import { useRouter } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useNavigationHistory } from "@/hooks/use-navigation-history";
 
 type BackButtonProps = {
   className?: string;
 };
 
 /**
- * Global back button that uses router history when available,
- * otherwise navigates to a context-appropriate fallback.
+ * Global back button that uses the navigation history context.
+ * Navigates back in browser history when available.
  */
 function BackButton({ className }: BackButtonProps) {
   const { t } = useTranslation();
   const router = useRouter();
-  const canGoBack = useCanGoBack();
-  const location = useLocation();
+  const { canGoBack, goBack } = useNavigationHistory();
 
   const handleBack = () => {
     if (canGoBack) {
-      router.history.back();
+      goBack();
     } else {
-      // Context-aware fallback navigation
-      const fallback = getFallbackRoute(location.pathname);
-      router.navigate({ to: fallback });
+      // Fallback: navigate to home if no history
+      router.navigate({ to: "/" });
     }
   };
 
@@ -41,21 +40,4 @@ function BackButton({ className }: BackButtonProps) {
   );
 }
 
-/**
- * Determines the appropriate fallback route based on current pathname.
- */
-function getFallbackRoute(pathname: string): string {
-  if (pathname.startsWith("/anime/")) {
-    return "/anime/catalog";
-  }
-  if (pathname.startsWith("/user/")) {
-    return "/";
-  }
-  if (pathname.startsWith("/auth/")) {
-    return "/";
-  }
-  return "/";
-}
-
 export { BackButton };
-

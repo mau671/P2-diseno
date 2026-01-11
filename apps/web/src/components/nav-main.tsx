@@ -52,16 +52,20 @@ export function NavMain({
     }[]
   }[]
 }) {
-  const savedSections = React.useMemo(() => getSavedSections(), []);
+  // Use state instead of useMemo so sections update reactively
+  const [openSections, setOpenSections] = React.useState<Set<string>>(() => getSavedSections());
 
   const handleOpenChange = React.useCallback((isOpen: boolean, title: string) => {
-    const currentSections = getSavedSections();
-    if (isOpen) {
-      currentSections.add(title);
-    } else {
-      currentSections.delete(title);
-    }
-    saveSections(currentSections);
+    setOpenSections((prev) => {
+      const newSections = new Set(prev);
+      if (isOpen) {
+        newSections.add(title);
+      } else {
+        newSections.delete(title);
+      }
+      saveSections(newSections);
+      return newSections;
+    });
   }, []);
 
   return (
@@ -72,7 +76,7 @@ export function NavMain({
           <Collapsible
             key={item.title}
             asChild
-            open={savedSections.has(item.title) || item.isActive}
+            open={openSections.has(item.title) || item.isActive}
             onOpenChange={(open) => handleOpenChange(open, item.title)}
           >
             <SidebarMenuItem>

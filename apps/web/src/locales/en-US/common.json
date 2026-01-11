@@ -301,7 +301,8 @@
   "loginToView": "Sign in to view your favorite anime",
   "empty": "No favorites yet",
   "emptyDescription": "Start adding anime to your favorites!",
-  "count": "{{count}} favorite anime"
+  "count": "{{count}} favorite anime",
+  "error": "Error updating favorites"
   },
   "recommendations": {
       "empty": "No recommendations available."
