@@ -143,6 +143,7 @@ export function SecuritySection() {
           <Button
             onClick={handleChangePassword}
             disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
+            className="cursor-pointer"
           >
             {isChangingPassword ? (
               <>
@@ -183,7 +184,7 @@ export function SecuritySection() {
         </p>
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" type="button">
+            <Button variant="destructive" type="button" className="cursor-pointer">
               {t("profile.deleteAccount")}
             </Button>
           </AlertDialogTrigger>
@@ -211,7 +212,7 @@ export function SecuritySection() {
               <AlertDialogAction
                 onClick={handleDeleteAccount}
                 disabled={isDeletingAccount || !deletePassword}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer disabled:cursor-not-allowed"
               >
                 {isDeletingAccount ? (
                   <>

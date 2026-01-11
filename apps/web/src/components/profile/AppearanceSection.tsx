@@ -9,8 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/hooks/use-theme";
-import { Languages, Moon, Sun } from "lucide-react";
-import { AccentColorPicker } from "./AccentColorPicker";
+import { Languages, Moon, Sun, Monitor } from "lucide-react";
+import { ThemeColorSelector } from "./ThemeColorSelector";
 
 export function AppearanceSection() {
   const { t, i18n } = useTranslation();
@@ -37,16 +37,16 @@ export function AppearanceSection() {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="cursor-pointer">
                 <Languages className="mr-2 h-4 w-4" />
                 {currentLanguage === "es" ? t("language.es") : t("language.en")}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleLanguageChange("es-419")}>
+              <DropdownMenuItem onClick={() => handleLanguageChange("es-419")} className="cursor-pointer">
                 {t("language.es")}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleLanguageChange("en-US")}>
+              <DropdownMenuItem onClick={() => handleLanguageChange("en-US")} className="cursor-pointer">
                 {t("language.en")}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -69,11 +69,13 @@ export function AppearanceSection() {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="cursor-pointer">
                 {theme === "light" ? (
                   <Sun className="mr-2 h-4 w-4" />
-                ) : (
+                ) : theme === "dark" ? (
                   <Moon className="mr-2 h-4 w-4" />
+                ) : (
+                  <Monitor className="mr-2 h-4 w-4" />
                 )}
                 {theme === "light"
                   ? t("theme.light")
@@ -83,15 +85,16 @@ export function AppearanceSection() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme("light")}>
+              <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">
                 <Sun className="mr-2 h-4 w-4" />
                 {t("theme.light")}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>
+              <DropdownMenuItem onClick={() => setTheme("dark")} className="cursor-pointer">
                 <Moon className="mr-2 h-4 w-4" />
                 {t("theme.dark")}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>
+              <DropdownMenuItem onClick={() => setTheme("system")} className="cursor-pointer">
+                <Monitor className="mr-2 h-4 w-4" />
                 {t("theme.system")}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -99,9 +102,9 @@ export function AppearanceSection() {
         </div>
       </div>
 
-      {/* Accent Color */}
+      {/* Theme Color */}
       <div className="space-y-4 rounded-lg border bg-card p-6">
-        <AccentColorPicker />
+        <ThemeColorSelector />
       </div>
     </div>
   );

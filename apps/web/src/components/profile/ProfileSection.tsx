@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -132,6 +131,7 @@ export function ProfileSection() {
               <Button
                 onClick={handleSavePhotoURL}
                 disabled={isSavingAvatar || photoURL === (profile?.photoURL || user?.photoURL || "")}
+                className="cursor-pointer disabled:cursor-not-allowed"
               >
                 {isSavingAvatar ? (
                   <>
@@ -139,10 +139,7 @@ export function ProfileSection() {
                     {t("profile.saving")}
                   </>
                 ) : (
-                  <>
-                    <LinkIcon className="mr-2 h-4 w-4" />
-                    {t("profile.save")}
-                  </>
+                  t("profile.save")
                 )}
               </Button>
             </div>
@@ -166,19 +163,20 @@ export function ProfileSection() {
             placeholder={t("profile.displayNamePlaceholder")}
             className="flex-1"
           />
-          <Button
-            onClick={handleSaveDisplayName}
-            disabled={isSaving || displayName.trim() === currentDisplayName}
-          >
-            {isSaving ? (
-              <>
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                {t("profile.saving")}
-              </>
-            ) : (
-              t("profile.save")
-            )}
-          </Button>
+            <Button
+              onClick={handleSaveDisplayName}
+              disabled={isSaving || displayName.trim() === currentDisplayName}
+              className="cursor-pointer disabled:cursor-not-allowed"
+            >
+              {isSaving ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  {t("profile.saving")}
+                </>
+              ) : (
+                t("profile.save")
+              )}
+            </Button>
         </div>
       </div>
     </div>

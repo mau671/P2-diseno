@@ -116,6 +116,21 @@
     "dark": "Dark",
     "system": "System"
   },
+  "themeColors": {
+    "default": "Default",
+    "blue": "Blue",
+    "green": "Green",
+    "red": "Red",
+    "purple": "Purple",
+    "orange": "Orange",
+    "pink": "Pink",
+    "cyan": "Cyan",
+    "amber": "Amber",
+    "emerald": "Emerald",
+    "indigo": "Indigo",
+    "violet": "Violet",
+    "rose": "Rose"
+  },
   "language": {
     "toggle": "Change language",
     "es": "Spanish (Latin America)",
@@ -329,9 +344,10 @@
     "deleteAccountConfirm": "Are you sure?",
     "deleteAccountConfirmDescription": "This action cannot be undone. This will permanently delete your account and all associated data.",
     "deleting": "Deleting...",
-    "accentColor": "Accent Color",
-    "accentColorHint": "Customize the accent color of the application",
-    "reset": "Reset",
-    "currentColor": "Current color"
+    "themeColor": "Theme Color",
+    "themeColorHint": "Select a color to customize buttons and primary elements",
+    "selectedTheme": "Selected theme",
+    "currentTheme": "Current theme",
+    "reset": "Reset"
   }
 }
