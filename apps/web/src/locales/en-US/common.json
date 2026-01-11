@@ -135,11 +135,11 @@
   },
   "language": {
     "toggle": "Change language",
-    "es": "Spanish (Latin America)",
+    "es": "Español (Latin America)",
     "en": "English (United States)",
-    "pt": "Portuguese",
-    "fr": "French",
-    "it": "Italian"
+    "pt": "Português (Brazil)",
+    "fr": "Français (France)",
+    "it": "Italiano (Italy)"
   },
   "anime": {
     "detail": {
