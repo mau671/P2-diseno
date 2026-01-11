@@ -374,6 +374,23 @@
     "themeColorHint": "Selecione uma cor para personalizar botões e elementos principais",
     "selectedTheme": "Tema selecionado",
     "currentTheme": "Tema atual",
-    "reset": "Restaurar"
+    "reset": "Restaurar",
+    "addPassword": "Adicionar senha",
+    "addPasswordHint": "Adicione uma senha para poder fazer login com seu endereço de e-mail.",
+    "linkGoogle": "Vincular com Google",
+    "linkGoogleHint": "Vincule seu conta do Google para ter mais opções de login.",
+    "linkWithGoogle": "Vincular com Google",
+    "googleLinked": "Conta Google vinculada com sucesso",
+    "googleAlreadyInUse": "Esta conta Google já está em uso",
+    "passwordAdded": "Senha adicionada com sucesso",
+    "adding": "Adicionando...",
+    "linking": "Vinculando...",
+    "unlinkGoogle": "Dissociar Google",
+    "unlinkGoogleHint": "Dissociez sua conta do Google. Você poderá continuar a fazer login com seu endereço de e-mail e senha.",
+    "unlinkGoogleConfirm": "Confirmar a dissociação",
+    "unlinkGoogleConfirmDescription": "Tem certeza de que deseja dissociar sua conta do Google? Você ainda poderá fazer login com seu endereço de e-mail e senha.",
+    "unlinking": "Dissociação em andamento...",
+    "googleUnlinked": "Conta Google dissociada com sucesso",
+    "cannotUnlinkOnlyMethod": "Você não pode dissociar a única forma de autenticação"
   }
 }
