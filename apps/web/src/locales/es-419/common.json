@@ -352,6 +352,23 @@
     "themeColorHint": "Selecciona un color para personalizar los botones y elementos principales",
     "selectedTheme": "Tema seleccionado",
     "currentTheme": "Tema actual",
-    "reset": "Restablecer"
+    "reset": "Restablecer",
+    "addPassword": "Agregar Contraseña",
+    "addPasswordHint": "Agrega una contraseña para poder iniciar sesión con correo electrónico.",
+    "linkGoogle": "Vincular con Google",
+    "linkGoogleHint": "Vincula tu cuenta de Google para tener más opciones de inicio de sesión.",
+    "linkWithGoogle": "Vincular con Google",
+    "googleLinked": "Cuenta de Google vinculada exitosamente",
+    "googleAlreadyInUse": "Esta cuenta de Google ya está en uso",
+    "passwordAdded": "Contraseña agregada exitosamente",
+    "adding": "Agregando...",
+    "linking": "Vinculando...",
+    "unlinkGoogle": "Desvincular Google",
+    "unlinkGoogleHint": "Desvincula tu cuenta de Google. Podrás seguir iniciando sesión con tu correo y contraseña.",
+    "unlinkGoogleConfirm": "¿Desvincular cuenta de Google?",
+    "unlinkGoogleConfirmDescription": "Después de desvincular, ya no podrás iniciar sesión con Google. Asegúrate de recordar tu contraseña.",
+    "unlinking": "Desvinculando...",
+    "googleUnlinked": "Cuenta de Google desvinculada exitosamente",
+    "cannotUnlinkOnlyMethod": "No puedes desvincular el único método de autenticación"
   }
 }

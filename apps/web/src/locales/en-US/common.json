@@ -349,6 +349,23 @@
     "themeColorHint": "Select a color to customize buttons and primary elements",
     "selectedTheme": "Selected theme",
     "currentTheme": "Current theme",
-    "reset": "Reset"
+    "reset": "Reset",
+    "addPassword": "Add Password",
+    "addPasswordHint": "Add a password to be able to log in with email.",
+    "linkGoogle": "Link with Google",
+    "linkGoogleHint": "Link your Google account for more login options.",
+    "linkWithGoogle": "Link with Google",
+    "googleLinked": "Google account linked successfully",
+    "googleAlreadyInUse": "This Google account is already in use",
+    "passwordAdded": "Password added successfully",
+    "adding": "Adding...",
+    "linking": "Linking...",
+    "unlinkGoogle": "Unlink Google",
+    "unlinkGoogleHint": "Unlink your Google account from your profile.",
+    "unlinkGoogleConfirm": "Unlink Google account?",
+    "unlinkGoogleConfirmDescription": "After unlinking, you will no longer be able to log in with Google. Make sure you remember your password.",
+    "unlinking": "Unlinking...",
+    "googleUnlinked": "Google account unlinked successfully",
+    "cannotUnlinkOnlyMethod": "You cannot unlink the only authentication method"
   }
 }
