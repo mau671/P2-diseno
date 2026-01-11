@@ -106,9 +106,11 @@ export function AnimeCharactersPanel({ animeId, className, delay = 0 }: Props) {
   // Show loading skeleton while retrying
   const isRetrying = charactersQuery.isError && charactersQuery.isFetching;
 
-  // Same pattern as AnimeEpisodesPanel - show skeleton only if loading AND no data
-  const showLoadingSkeleton = charactersQuery.isLoading || 
-    (charactersQuery.isFetching && !hasCharacters && !charactersQuery.isError);
+  // Show skeleton if loading, retrying, or if there's an error but we're still trying
+  const showLoadingSkeleton = !enabled ||
+    charactersQuery.isLoading || 
+    isRetrying ||
+    (charactersQuery.isError && retryCount < maxRetries);
 
   // Only show error if query failed, not retrying, and exceeded max retries
   if (charactersQuery.isError && !charactersQuery.isFetching && retryCount >= maxRetries) {
@@ -128,7 +130,7 @@ export function AnimeCharactersPanel({ animeId, className, delay = 0 }: Props) {
     );
   }
 
-  if (showLoadingSkeleton || isRetrying) {
+  if (showLoadingSkeleton) {
     return (
       <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
         <div className="flex items-center justify-between gap-3">
@@ -143,7 +145,8 @@ export function AnimeCharactersPanel({ animeId, className, delay = 0 }: Props) {
     );
   }
 
-  if (!charactersQuery.data || characters.length === 0) {
+  // Only show empty state if enabled, query succeeded, and truly no data
+  if (enabled && (!charactersQuery.data || characters.length === 0) && !charactersQuery.isError) {
     return (
       <div className={cn("rounded-2xl border p-5 bg-card overflow-hidden", className)}>
         <div className="flex items-center justify-between gap-3">
