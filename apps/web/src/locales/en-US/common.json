@@ -136,7 +136,10 @@
   "language": {
     "toggle": "Change language",
     "es": "Spanish (Latin America)",
-    "en": "English (United States)"
+    "en": "English (United States)",
+    "pt": "Portuguese",
+    "fr": "French",
+    "it": "Italian"
   },
   "anime": {
     "detail": {

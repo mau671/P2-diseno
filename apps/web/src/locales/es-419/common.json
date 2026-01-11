@@ -138,8 +138,11 @@
   },
   "language": {
     "toggle": "Cambiar idioma",
-    "es": "Español (Latinoamérica)",
-    "en": "Inglés (Estados Unidos)"
+    "es": "Español (LatAm)",
+    "en": "Inglés (Estados Unidos)",
+    "pt": "Portugués",
+    "fr": "Francés",
+    "it": "Italiano"
   },
   "anime": {
     "detail": {

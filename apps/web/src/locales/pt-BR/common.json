@@ -1,0 +1,289 @@
+{
+  "nav": {
+    "home": "Início",
+    "anime": "Anime",
+    "support": "Suporte",
+    "catalog": "Catálogo"
+  },
+  "home": {
+    "title": "Início",
+    "description": "Visão principal com SidebarInset (shadcn) e navegação com TanStack Router."
+  },
+  "sections": {
+    "label": "Seção",
+    "topAnime": "Top Anime",
+    "topAnimeDescription": "Os melhores animes classificados pela comunidade",
+    "search": "Buscar",
+    "searchDescription": "Encontre seu anime favorito",
+    "favorites": "Favoritos",
+    "catalog": "Catálogo",
+    "catalogDescription": "Navegue pelo catálogo de animes",
+    "trendingNow": "Em alta agora",
+    "upcomingNextSeason": "Próxima temporada",
+    "allTimePopular": "Mais populares de todos os tempos",
+    "user": "Usuário"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Algo deu errado",
+    "retry": "Tentar novamente",
+    "noInternet": "Sem conexão. Verifique sua internet.",
+    "loadError": "Falha ao carregar dados.",
+    "scrollLeft": "Rolar para a esquerda",
+    "scrollRight": "Rolar para a direita",
+    "tooManyRequests": "Muitas solicitações. Tente novamente.",
+    "addToFavorites": "Adicionar aos favoritos",
+    "removeFromFavorites": "Remover dos favoritos",
+    "loadMore": "Carregar mais"
+  },
+  "search": {
+    "placeholder": "Buscar anime...",
+    "button": "Buscar",
+    "hint": "Digite algo e pressione Buscar.",
+    "error": "A busca falhou.",
+    "empty": "Sem resultados.",
+    "allowNsfw": "Permitir conteúdo NSFW",
+    "moreFilters": "Mais filtros",
+    "clearAll": "limpar tudo",
+    "episodes": "episódios",
+    "unknown": "Desconhecido",
+    "filters": {
+      "genres": "Gêneros",
+      "year": "Ano",
+      "season": "Temporada",
+      "format": "Formato",
+      "status": "Status",
+      "streamingOn": "Disponível em",
+      "countryOfOrigin": "País de origem",
+      "sourceMaterial": "Material de origem",
+      "nsfw": "Conteúdo NSFW"
+    },
+    "seasons": {
+      "winter": "Inverno",
+      "spring": "Primavera",
+      "summer": "Verão",
+      "fall": "Outono"
+    },
+    "formats": {
+      "tv": "TV",
+      "movie": "Filme",
+      "ova": "OVA",
+      "special": "Especial",
+      "ona": "ONA",
+      "music": "Música",
+      "cm": "CM",
+      "pv": "PV",
+      "tv_special": "Especial de TV"
+    },
+    "statuses": {
+      "airing": "Em exibição",
+      "complete": "Completo",
+      "upcoming": "Em breve"
+    },
+    "types": {
+      "anime": "Anime",
+      "manga": "Mangá",
+      "characters": "Personagens",
+      "people": "Pessoas",
+      "studios": "Estúdios"
+    }
+  },
+  "topAnime": {
+    "empty": "Nenhum item."
+  },
+  "catalog": {
+    "title": "Catálogo de anime",
+    "description": "Explore os melhores animes.",
+    "loadMore": "Carregar mais animes",
+    "empty": "Nenhum anime encontrado",
+    "endOfList": "Você chegou ao fim do catálogo",
+    "previousSeason": "Temporada anterior",
+    "nextSeason": "Próxima temporada"
+  },
+  "seasons": {
+    "winter": "Inverno",
+    "spring": "Primavera",
+    "summer": "Verão",
+    "fall": "Outono"
+  },
+  "theme": {
+    "toggle": "Alternar tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "language": {
+    "toggle": "Mudar idioma",
+    "es": "Espanhol (América Latina)",
+    "en": "Inglês (Estados Unidos)",
+    "pt": "Português",
+    "fr": "Francês",
+    "it": "Italiano"
+  },
+  "anime": {
+    "detail": {
+      "scoreLabel": "Nota",
+      "noSynopsis": "Nenhuma sinopse disponível",
+      "studiosLabel": "Estúdios",
+      "minPerEp": "{{minutes}} min por ep",
+      "sections": {
+        "characters": "Personagens",
+        "related": "Relacionados",
+        "episodes": "Episódios",
+        "moreInfo": "Mais informações"
+      },
+      "episodes": {
+        "countShown": "{{count}} exibidos",
+        "empty": "Nenhum episódio disponível.",
+        "fallbackTitle": "Episódio {{number}}",
+        "moreAvailable": "Mais episódios disponíveis.",
+        "end": "Fim da lista."
+      }
+    },
+    "status": {
+      "finished_airing": "Finalizado",
+      "currently_airing": "Em exibição",
+      "not_yet_aired": "Ainda não estreou",
+      "unknown": "Desconhecido"
+    }
+  },
+  "genres": {
+    "1": "Ação",
+    "2": "Aventura",
+    "4": "Comédia",
+    "7": "Mistério",
+    "8": "Drama",
+    "10": "Fantasia",
+    "11": "Romance",
+    "14": "Terror",
+    "17": "Artes marciais",
+    "18": "Mecha",
+    "19": "Música",
+    "20": "Paródia",
+    "22": "Subtexto romântico",
+    "23": "Escolar",
+    "24": "Ficção científica",
+    "25": "Shoujo",
+    "27": "Shounen",
+    "29": "Espaço",
+    "30": "Esportes",
+    "31": "Superpoder",
+    "36": "Slice of Life",
+    "37": "Sobrenatural",
+    "38": "Militar",
+    "39": "Policial",
+    "40": "Psicológico",
+    "41": "Suspense",
+    "42": "Seinen",
+    "43": "Josei",
+    "46": "Premiado",
+    "47": "Gourmet",
+    "48": "Ambiente de trabalho",
+    "49": "Erótica",
+    "50": "Elenco adulto",
+    "51": "Antropomórfico",
+    "52": "CGDCT",
+    "53": "Cuidados infantis",
+    "54": "Esportes de combate",
+    "55": "Delinquentes",
+    "56": "Detetive",
+    "57": "Educacional",
+    "58": "Humor nonsense",
+    "59": "Gore",
+    "60": "Harém",
+    "61": "Jogo de alto risco",
+    "62": "Histórico",
+    "63": "Isekai",
+    "64": "Iyashikei",
+    "65": "Polígono amoroso",
+    "66": "Mudança mágica de sexo",
+    "67": "Mahou Shoujo",
+    "68": "Médico",
+    "69": "Memórias",
+    "70": "Mitologia",
+    "71": "Crime organizado",
+    "72": "Cultura otaku",
+    "73": "Artes performáticas",
+    "74": "Animais de estimação",
+    "75": "Reencarnação",
+    "76": "Harém reverso",
+    "77": "Samurai",
+    "78": "Showbiz",
+    "79": "Jogo de estratégia",
+    "80": "Sobrevivência",
+    "81": "Esportes de equipe"
+  },
+  "auth": {
+    "logout": "Sair",
+    "login": {
+      "title": "Entrar",
+      "welcomeBack": "Bem-vindo de volta",
+      "accessAccount": "Acesse sua conta",
+      "signIn": "Entrar",
+      "socialLogin": "Entre com sua conta Apple ou Google",
+      "loginWithApple": "Entrar com Apple",
+      "loginWithGoogle": "Entrar com Google",
+      "orContinueWith": "Ou continue com",
+      "email": "E-mail",
+      "emailPlaceholder": "m@exemplo.com",
+      "password": "Senha",
+      "forgotPassword": "Esqueceu sua senha?",
+      "submit": "Entrar",
+      "loading": "Entrando...",
+      "noAccount": "Não tem uma conta?",
+      "registerLink": "Cadastrar-se"
+    },
+    "register": {
+      "title": "Criar conta",
+      "createYourAccount": "Crie sua conta",
+      "enterEmailToCreate": "Digite seu e-mail abaixo para criar sua conta",
+      "fullName": "Nome completo",
+      "fullNamePlaceholder": "João Silva",
+      "email": "E-mail",
+      "emailPlaceholder": "m@exemplo.com",
+      "password": "Senha",
+      "confirmPassword": "Confirmar senha",
+      "passwordMinLength": "Deve ter pelo menos 6 caracteres.",
+      "createAccount": "Criar conta",
+      "submit": "Criar conta",
+      "loading": "Criando conta...",
+      "hasAccount": "Já tem uma conta?",
+      "loginLink": "Entrar",
+      "passwordMismatch": "As senhas não coincidem",
+      "passwordTooShort": "A senha deve ter pelo menos 6 caracteres"
+    },
+    "forgot": {
+      "title": "Recuperar senha",
+      "description": "Digite seu e-mail e enviaremos um link para redefinir sua senha",
+      "email": "E-mail",
+      "submit": "Enviar link",
+      "loading": "Enviando...",
+      "success": "E-mail enviado! Verifique sua caixa de entrada.",
+      "backToLogin": "Voltar para entrar"
+    },
+    "errors": {
+      "loginFailed": "Falha no login",
+      "registerFailed": "Falha no cadastro",
+      "resetFailed": "Falha ao enviar e-mail"
+    },
+    "legal": {
+      "byClickingContinue": "Ao clicar em continuar, você concorda com nossos",
+      "termsOfService": "Termos de serviço",
+      "and": "e",
+      "privacyPolicy": "Política de privacidade"
+    }
+  },
+  "user": {
+    "defaultName": "Usuário",
+    "myProfile": "Meu perfil",
+    "favorites": "Favoritos",
+    "myLists": "Minhas listas"
+  },
+  "favorites": {
+    "notLoggedIn": "Você não está logado",
+    "loginToView": "Entre para ver seus animes favoritos",
+    "empty": "Ainda sem favoritos",
+    "emptyDescription": "Comece adicionando animes aos favoritos!",
+    "count": "{{count}} anime favorito"
+  }
+}
