@@ -13,6 +13,8 @@
   "common": {
     "loading": "Cargando...",
     "error": "Error",
+    "loadError": "Error al cargar datos.",
+    "retry": "Reintentar",
     "save": "Guardar",
     "cancel": "Cancelar",
     "close": "Cerrar",
@@ -60,7 +62,13 @@
   },
   "calendar": {
     "title": "Calendario",
-    "noEvents": "No hay eventos programados"
+    "noEvents": "No hay eventos programados",
+    "empty": "No hay eventos programados",
+    "today": "Hoy",
+    "prevDay": "Día anterior",
+    "nextDay": "Día siguiente",
+    "prevWeek": "Semana anterior",
+    "nextWeek": "Semana siguiente"
   },
   "auth": {
     "logout": "Cerrar sesión",
