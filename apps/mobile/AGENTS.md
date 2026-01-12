@@ -1,99 +1,187 @@
-# Guía para Agentes - Aplicación Móvil
+# Agent Guide - Mobile Application
 
-## Información del Proyecto
+## Project Information
 
-Esta es una aplicación móvil desarrollada con:
+This is a mobile application built with:
 - **Framework**: React Native + Expo
-- **Entorno de ejecución**: Bun
-- **Navegación**: Expo Router con navegación por tabs
-- **Lenguaje**: TypeScript
-- **Gestión de estado**: TanStack Query (React Query)
+- **Runtime**: Bun
+- **Navigation**: Expo Router with tab navigation
+- **Language**: TypeScript
+- **State Management**: TanStack Query (React Query)
+- **Internationalization**: i18next + react-i18next
 - **Backend**: Firebase
+- **Storage**: AsyncStorage
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 apps/mobile/
-├── app/                        # Rutas y pantallas (file-based routing)
-│   ├── (tabs)/                # Grupo de navegación por tabs
-│   │   ├── _layout.tsx        # Layout de navegación tabs
-│   │   ├── inicio.tsx         # Pantalla de inicio
-│   │   ├── calendario.tsx     # Pantalla de calendario
-│   │   └── configuracion.tsx  # Pantalla de configuración
-│   ├── _layout.tsx            # Layout raíz
-│   ├── config/               # Configuraciones
-│   │   └── firebase.ts       # Configuración de Firebase
-│   └── modal.tsx             # Pantalla modal de ejemplo
-├── components/               # Componentes reutilizables
-│   ├── ui/                   # Componentes UI básicos
+├── app/                        # Routes and screens (file-based routing)
+│   ├── (tabs)/                # Tab navigation group
+│   │   ├── _layout.tsx        # Tab navigation layout
+│   │   ├── index.tsx          # Home screen
+│   │   ├── calendar.tsx       # Calendar screen
+│   │   └── settings.tsx       # Settings screen
+│   ├── _layout.tsx            # Root layout
+│   ├── i18n.ts                # i18next configuration
+│   ├── locales/               # Translation files
+│   │   ├── en-US/
+│   │   │   └── common.json    # English translations
+│   │   └── es-419/
+│   │       └── common.json    # Spanish translations
+│   ├── config/                # Configurations
+│   │   └── firebase.ts        # Firebase configuration
+│   └── modal.tsx              # Example modal screen
+├── components/                # Reusable components
+│   ├── ui/                    # Basic UI components
 │   │   ├── collapsible.tsx
 │   │   └── icon-symbol.tsx
 │   ├── themed-text.tsx
 │   ├── themed-view.tsx
 │   └── ...
-├── hooks/                    # Custom hooks
+├── hooks/                     # Custom hooks
 │   ├── use-color-scheme.ts
 │   └── use-theme-color.ts
-├── constants/                # Constantes y temas
+├── constants/                 # Constants and themes
 │   └── theme.ts
-└── assets/                   # Imágenes y recursos estáticos
+└── assets/                    # Images and static resources
     └── images/
 ```
 
-## Navegación Principal
+## Main Navigation
 
-La aplicación utiliza 3 pantallas principales en la navegación de tabs:
+The app uses 3 main screens in the tab navigation:
 
-1. **Inicio** (`inicio.tsx`)
-   - Icono: `house.fill`
-   - Ruta: `/inicio`
+1. **Home** (`index.tsx`)
+   - Icon: `house.fill`
+   - Route: `/`
 
-2. **Calendario** (`calendario.tsx`)
-   - Icono: `calendar`
-   - Ruta: `/calendario`
+2. **Calendar** (`calendar.tsx`)
+   - Icon: `calendar`
+   - Route: `/calendar`
 
-3. **Configuración** (`configuracion.tsx`)
-   - Icono: `gearshape.fill`
-   - Ruta: `/configuracion`
+3. **Settings** (`settings.tsx`)
+   - Icon: `gearshape.fill`
+   - Route: `/settings`
 
-## Comandos Útiles
+## Internationalization (i18n)
+
+### Configuration
+
+The app uses **i18next** for internationalization, configured in `app/i18n.ts`:
+
+- **Supported Languages**: 
+  - `es-419` - Spanish (Latin America) - Default/Fallback
+  - `en-US` - English (United States)
+- **Namespace**: `common` (single namespace)
+- **Storage**: AsyncStorage (persists user language preference)
+- **Detection Order**:
+  1. Saved language in AsyncStorage (key: `lng`)
+  2. Device locale via `expo-localization`
+  3. Fallback to `es-419`
+
+### Translation Files
+
+Located in `app/locales/[locale]/common.json`:
+
+```json
+{
+  "nav": {
+    "home": "Home",
+    "calendar": "Calendar",
+    "settings": "Settings"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "title": "Language",
+      "es-419": "Spanish (Latin America)",
+      "en-US": "English (United States)"
+    }
+  }
+}
+```
+
+### Usage in Components
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+export default function MyScreen() {
+  const { t, i18n } = useTranslation();
+
+  // Get translation
+  const title = t('settings.title');
+
+  // Change language
+  const changeLanguage = async (lang: string) => {
+    await i18n.changeLanguage(lang);
+  };
+
+  // Get current language
+  const currentLang = i18n.language;
+
+  return (
+    <ThemedView>
+      <ThemedText>{title}</ThemedText>
+    </ThemedView>
+  );
+}
+```
+
+### Language Detection
+
+The app automatically detects the user's language:
+1. Checks AsyncStorage for saved preference
+2. Falls back to device locale (via `expo-localization`)
+3. Maps device locale to supported locales (es → es-419, en → en-US)
+4. Uses es-419 as final fallback
+
+## Useful Commands
 
 ```bash
-# Iniciar servidor de desarrollo
+# Start development server
 bun start
 
-# Ejecutar en Android
+# Run on Android
 bun android
 
-# Ejecutar en iOS
+# Run on iOS
 bun ios
 
-# Ejecutar en web
+# Run on web
 bun web
 
 # Linting
 bun lint
 
-# Resetear proyecto
+# Reset project
 bun reset-project
 ```
 
-## Patrones de Código
+## Code Patterns
 
-### Componentes de Pantalla
+### Screen Components
 
-Los componentes de pantalla deben seguir este patrón:
+Screen components should follow this pattern:
 
 ```tsx
 import { StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
-export default function NombrePantallaScreen() {
+export default function MyScreen() {
+  const { t } = useTranslation();
+
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Título</ThemedText>
+        <ThemedText type="title">{t('myscreen.title')}</ThemedText>
       </ThemedView>
     </ThemedView>
   );
@@ -112,15 +200,15 @@ const styles = StyleSheet.create({
 });
 ```
 
-### Componentes Temáticos
+### Themed Components
 
-- Usar `ThemedView` en lugar de `View` para soporte de temas
-- Usar `ThemedText` en lugar de `Text` para soporte de temas
-- Los componentes temáticos se adaptan automáticamente al modo claro/oscuro
+- Use `ThemedView` instead of `View` for theme support
+- Use `ThemedText` instead of `Text` for theme support
+- Themed components automatically adapt to light/dark mode
 
-### Iconos
+### Icons
 
-Los iconos usan el componente `IconSymbol` que soporta:
+Icons use the `IconSymbol` component which supports:
 - iOS SF Symbols
 - Android Material Icons
 - Web fallback icons
@@ -129,29 +217,43 @@ Los iconos usan el componente `IconSymbol` que soporta:
 <IconSymbol size={28} name="calendar" color={color} />
 ```
 
-## Configuración de Firebase
+## Firebase Configuration
 
-La configuración de Firebase se encuentra en `app/config/firebase.ts`. Asegúrate de tener las variables de entorno correctas configuradas.
+Firebase configuration is located in `app/config/firebase.ts`. Make sure you have the correct environment variables configured.
 
-## Hooks Personalizados
+## Custom Hooks
 
-- `useColorScheme()`: Detecta el esquema de color del sistema (light/dark)
-- `useThemeColor()`: Obtiene colores del tema actual
+- `useColorScheme()`: Detects system color scheme (light/dark)
+- `useThemeColor()`: Gets colors from current theme
 
-## Notas Importantes
+## Important Notes
 
-1. **File-based Routing**: Expo Router usa el sistema de archivos para definir rutas. Los archivos en `app/` se convierten automáticamente en rutas.
+1. **File-based Routing**: Expo Router uses the file system to define routes. Files in `app/` automatically become routes.
 
-2. **Grupos de Rutas**: Los paréntesis `(tabs)` indican un grupo de rutas que no afecta la URL pero agrupa componentes relacionados.
+2. **Route Groups**: Parentheses `(tabs)` indicate a route group that doesn't affect the URL but groups related components.
 
-3. **Layouts**: Los archivos `_layout.tsx` definen el layout para las rutas en ese directorio.
+3. **Layouts**: `_layout.tsx` files define the layout for routes in that directory.
 
-4. **Alias de Importación**: Se usa `@/` como alias para la raíz del proyecto.
+4. **Import Alias**: `@/` is used as an alias for the project root.
 
-## Próximos Pasos Sugeridos
+5. **i18n Initialization**: The i18n configuration must be imported in `app/_layout.tsx` before rendering any components.
 
-- Implementar contenido real en las pantallas de Inicio, Calendario y Configuración
-- Conectar con Firebase para autenticación y datos
-- Añadir navegación adicional según sea necesario
-- Implementar gestión de estado global si es necesario
-- Agregar tests unitarios y de integración
+6. **Locale Codes**: Use BCP 47 language tags (`es-419`, `en-US`) consistent with the web app.
+
+## Dependencies
+
+Key packages:
+- `i18next` - Internationalization framework
+- `react-i18next` - React bindings for i18next
+- `expo-localization` - Device locale detection
+- `@react-native-async-storage/async-storage` - Persistent storage
+
+## Next Steps Suggestions
+
+- Implement real content in Home, Calendar, and Settings screens
+- Connect to Firebase for authentication and data
+- Add more translations as features are developed
+- Add additional navigation as needed
+- Implement global state management if necessary
+- Add unit and integration tests
+- Sync translation keys with web app for consistency

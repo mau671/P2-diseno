@@ -5,48 +5,25 @@
 
 import { Platform } from 'react-native';
 
+const tintColorLight = '#0a7ea4';
+const tintColorDark = '#fff';
+
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    tint: '#000000',
-    icon: '#666666',
-    tabIconDefault: '#666666',
-    tabIconSelected: '#000000',
-    card: '#ffffff',
-    cardBorder: '#cccccc',
-    inputBackground: '#ffffff',
-    inputBorder: '#cccccc',
-    primary: '#000000',
-    primaryText: '#ffffff',
-    secondary: '#f5f5f5',
-    secondaryText: '#333333',
-    error: '#ff0000',
-    success: '#00aa00',
-    warning: '#ffaa00',
-    overlay: 'rgba(0, 0, 0, 0.5)',
-    divider: '#cccccc',
+    text: '#11181C',
+    background: '#fff',
+    tint: tintColorLight,
+    icon: '#687076',
+    tabIconDefault: '#687076',
+    tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    tint: '#ffffff',
-    icon: '#aaaaaa',
-    tabIconDefault: '#aaaaaa',
-    tabIconSelected: '#ffffff',
-    card: '#1a1a1a',
-    cardBorder: '#333333',
-    inputBackground: '#1a1a1a',
-    inputBorder: '#333333',
-    primary: '#ffffff',
-    primaryText: '#000000',
-    secondary: '#2a2a2a',
-    secondaryText: '#cccccc',
-    error: '#ff4444',
-    success: '#44ff44',
-    warning: '#ffbb00',
-    overlay: 'rgba(255, 255, 255, 0.5)',
-    divider: '#333333',
+    text: '#ECEDEE',
+    background: '#151718',
+    tint: tintColorDark,
+    icon: '#9BA1A6',
+    tabIconDefault: '#9BA1A6',
+    tabIconSelected: tintColorDark,
   },
 };
 
