@@ -1,6 +1,6 @@
-// apps/mobile/components/calendar/ScheduleCard.tsx
 import * as React from "react";
 import { Image, StyleSheet, View } from "react-native";
+
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { ThemedText } from "@/components/themed-text";
@@ -11,7 +11,7 @@ export function ScheduleCard({ item }: { item: ScheduleItem }) {
   const c = Colors[scheme];
 
   return (
-    <View style={[styles.wrap]}>
+    <View style={styles.wrap}>
       {/* timeline */}
       <View style={styles.timelineCol}>
         <View style={[styles.dot, { backgroundColor: c.tint }]} />
@@ -51,60 +51,63 @@ export function ScheduleCard({ item }: { item: ScheduleItem }) {
 const styles = StyleSheet.create({
   wrap: {
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
     paddingVertical: 10,
   },
   timelineCol: {
-    width: 16,
+    width: 18,
     alignItems: "center",
   },
   dot: {
-    width: 8,
-    height: 8,
+    width: 9,
+    height: 9,
     borderRadius: 999,
-    marginTop: 6,
+    marginTop: 8,
   },
   line: {
     width: 2,
     flex: 1,
     borderRadius: 999,
-    marginTop: 6,
+    marginTop: 8,
   },
   card: {
     flex: 1,
     borderWidth: 1,
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 18,
+    padding: 14,
+    minHeight: 104,
   },
   topRow: {
-    marginBottom: 6,
+    marginBottom: 8,
   },
   time: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 13,
+    fontWeight: "900",
+    letterSpacing: 0.2,
   },
   contentRow: {
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
     alignItems: "center",
   },
   poster: {
-    width: 54,
-    height: 54,
-    borderRadius: 12,
+    width: 72,
+    height: 72,
+    borderRadius: 16,
   },
   textCol: {
     flex: 1,
     minWidth: 0,
   },
   title: {
-    fontSize: 14,
-    fontWeight: "700",
-    lineHeight: 18,
+    fontSize: 16,
+    fontWeight: "900",
+    lineHeight: 20,
   },
   meta: {
-    marginTop: 3,
-    fontSize: 12,
+    marginTop: 6,
+    fontSize: 13,
+    fontWeight: "700",
     opacity: 0.9,
   },
 });

@@ -1,131 +1,144 @@
-// apps/mobile/components/calendar/ScheduleColumn.tsx
 import * as React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
+
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { ThemedText } from "@/components/themed-text";
-import { useAnimeSchedule } from "@/hooks/use-anime-schedule";
-import { ScheduleCard } from "./ScheduleCard";
 
-function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+import { fetchScheduleForCRDate, getDateKeyCR, type ScheduleItem } from "@/app/api/schedule";
+import { ScheduleCard } from "@/components/calendar/ScheduleCard";
+
+function isSameCRDay(a: Date, b: Date) {
+  return getDateKeyCR(a) === getDateKeyCR(b);
 }
 
-function prettyDayLabel(date: Date, locale: string) {
-  // Ej: "Sun Jan 11" / "dom 11 ene" (depende del locale)
-  // Luego lo dejamos más “bonito” con capitalización ligera.
-  const fmt = new Intl.DateTimeFormat(locale, {
+function formatDayTitle(date: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: "America/Costa_Rica",
     weekday: "short",
+    day: "2-digit",
     month: "short",
-    day: "numeric",
-  });
-  const raw = fmt.format(date);
-
-  // capitaliza cada palabra (simple)
-  return raw
-    .split(" ")
-    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
-    .join(" ");
+  }).format(date);
 }
 
-export function ScheduleColumn(props: {
-  date: Date;
-  maxPages?: number; // por ahora 3 default
-}) {
-  const { t, i18n } = useTranslation();
+export function ScheduleColumn({ date }: { date: Date }) {
+  const { i18n, t } = useTranslation();
   const scheme = useColorScheme() ?? "light";
   const c = Colors[scheme];
 
-  const now = new Date();
-  const today = isSameDay(props.date, now);
+  const locale =
+    i18n.language?.startsWith("es") ? "es-CR" : i18n.language?.startsWith("en") ? "en-US" : i18n.language;
 
-  const q = useAnimeSchedule(props.date, {
-    enabled: true,
-    sfw: true,
-    maxPages: props.maxPages ?? 3,
-  });
+  const [items, setItems] = React.useState<ScheduleItem[]>([]);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const title = prettyDayLabel(props.date, i18n.language || "en-US");
+  const dateKey = React.useMemo(() => getDateKeyCR(date), [date]);
+
+  React.useEffect(() => {
+    const ac = new AbortController();
+    let alive = true;
+
+    setLoading(true);
+    setError(null);
+
+    fetchScheduleForCRDate(date, ac.signal)
+      .then((res) => {
+        if (!alive) return;
+        setItems(res);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (!alive) return;
+        if (e?.name === "AbortError") return;
+        setError(e instanceof Error ? e.message : "Error");
+        setLoading(false);
+      });
+
+    return () => {
+      alive = false;
+      ac.abort();
+    };
+  }, [dateKey]);
+
+  const today = React.useMemo(() => isSameCRDay(date, new Date()), [dateKey]);
 
   return (
-    <View style={[styles.col, { borderColor: c.divider }]}>
+    <ThemedView
+      style={[
+        styles.container,
+        { borderColor: c.cardBorder, backgroundColor: c.background },
+      ]}
+    >
       <View style={styles.header}>
-        <ThemedText style={[styles.headerText, { color: today ? c.tint : c.text }]}>
-          {title}
+        <ThemedText
+          style={[
+            styles.headerText,
+            { color: today ? c.tint : c.text },
+          ]}
+        >
+          {formatDayTitle(date, locale)}
         </ThemedText>
       </View>
 
-      {q.isLoading ? (
+      {loading ? (
         <View style={styles.center}>
           <ActivityIndicator />
-          <ThemedText style={{ marginTop: 8, opacity: 0.8 }}>
-            {t("common.loading", { defaultValue: "Loading..." })}
+          <ThemedText style={[styles.helper, { color: c.icon }]}>
+            {t("common.loading", { defaultValue: "Cargando..." })}
           </ThemedText>
         </View>
-      ) : null}
-
-      {q.isError ? (
+      ) : error ? (
         <View style={styles.center}>
-          <ThemedText style={{ color: c.error, fontWeight: "700" }}>
-            {t("common.loadError", { defaultValue: "Failed to load data." })}
-          </ThemedText>
-          <ThemedText style={{ marginTop: 6, opacity: 0.8 }}>
-            {q.error?.message ?? ""}
-          </ThemedText>
-          <ThemedText
-            onPress={q.refetch}
-            style={{ marginTop: 10, color: c.tint, fontWeight: "700" }}
-          >
-            {t("common.retry", { defaultValue: "Retry" })}
+          <ThemedText style={[styles.helper, { color: c.icon }]}>
+            {t("common.error", { defaultValue: "Error" })}: {error}
           </ThemedText>
         </View>
-      ) : null}
-
-      {!q.isLoading && !q.isError && q.data.length === 0 ? (
+      ) : items.length === 0 ? (
         <View style={styles.center}>
-          <ThemedText style={{ opacity: 0.8 }}>
-            {t("calendar.empty", { defaultValue: "No items." })}
+          <ThemedText style={[styles.helper, { color: c.icon }]}>
+            {t("calendar.noEvents", { defaultValue: "No hay eventos programados" })}
           </ThemedText>
         </View>
-      ) : null}
-
-      {!q.isLoading && !q.isError && q.data.length > 0 ? (
+      ) : (
         <View style={styles.list}>
-          {q.data.map((it) => (
-            <ScheduleCard key={it.id} item={it} />
+          {items.map((it) => (
+            <ScheduleCard key={String(it.id)} item={it} />
           ))}
         </View>
-      ) : null}
-    </View>
+      )}
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  col: {
-    flex: 1,
+  container: {
     borderWidth: 1,
     borderRadius: 18,
     padding: 14,
-    minWidth: 0,
   },
   header: {
-    marginBottom: 6,
+    marginBottom: 10,
   },
   headerText: {
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  list: {
-    marginTop: 4,
+    fontSize: 22,
+    fontWeight: "900",
+    textTransform: "capitalize",
   },
   center: {
     paddingVertical: 18,
     alignItems: "center",
     justifyContent: "center",
+    gap: 8,
+  },
+  helper: {
+    fontSize: 13,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  list: {
+    gap: 10,
   },
 });
