@@ -4,6 +4,12 @@
     "calendar": "Calendar",
     "settings": "Settings"
   },
+  "user": {
+    "myProfile": "My Profile"
+  },
+  "favorites": {
+    "notLoggedIn": "Sign in to access your favorites"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
@@ -22,7 +28,9 @@
     },
     "security": {
       "title": "Security",
-      "subtitle": "Manage your account security"
+      "subtitle": "Manage your account security",
+      "changePassword": "Change Password",
+      "deleteAccount": "Delete Account"
     },
     "appearance": {
       "title": "Appearance",
@@ -53,5 +61,56 @@
   "calendar": {
     "title": "Calendar",
     "noEvents": "No events scheduled"
+  },
+  "auth": {
+    "logout": "Sign out",
+    "continueWithoutSignIn": "Continue without signing in",
+    "continueWithoutSignUp": "Continue without signing up",
+    "login": {
+      "title": "Sign In",
+      "welcomeBack": "Welcome back",
+      "accessAccount": "Access your account",
+      "signIn": "Sign in",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Sign in",
+      "loading": "Signing in...",
+      "orContinueWith": "Or continue with",
+      "loginWithGoogle": "Sign in with Google",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up"
+    },
+    "register": {
+      "title": "Create Account",
+      "createYourAccount": "Create your account",
+      "enterEmailToCreate": "Enter your email below to create your account",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "passwordMinLength": "Must be at least 6 characters long.",
+      "submit": "Create Account",
+      "loading": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 6 characters"
+    },
+    "forgot": {
+      "title": "Recover Password",
+      "description": "Enter your email and we'll send you a link to reset your password",
+      "email": "Email",
+      "submit": "Send Link",
+      "loading": "Sending...",
+      "success": "Email sent! Check your inbox.",
+      "backToLogin": "Back to sign in"
+    },
+    "errors": {
+      "loginFailed": "Login failed",
+      "registerFailed": "Registration failed",
+      "resetFailed": "Failed to send email"
+    }
   }
 }

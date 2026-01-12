@@ -4,6 +4,12 @@
     "calendar": "Calendario",
     "settings": "Configuración"
   },
+  "user": {
+    "myProfile": "Mi perfil"
+  },
+  "favorites": {
+    "notLoggedIn": "Inicia sesión para ver tus favoritos"
+  },
   "common": {
     "loading": "Cargando...",
     "error": "Error",
@@ -22,7 +28,9 @@
     },
     "security": {
       "title": "Seguridad",
-      "subtitle": "Gestiona la seguridad de tu cuenta"
+      "subtitle": "Gestiona la seguridad de tu cuenta",
+      "changePassword": "Cambiar contraseña",
+      "deleteAccount": "Eliminar cuenta"
     },
     "appearance": {
       "title": "Apariencia",
@@ -53,5 +61,56 @@
   "calendar": {
     "title": "Calendario",
     "noEvents": "No hay eventos programados"
+  },
+  "auth": {
+    "logout": "Cerrar sesión",
+    "continueWithoutSignIn": "Continuar sin iniciar sesión",
+    "continueWithoutSignUp": "Continuar sin registrarse",
+    "login": {
+      "title": "Iniciar Sesión",
+      "welcomeBack": "Qué bueno verte de nuevo",
+      "accessAccount": "Accede a tu cuenta",
+      "signIn": "Iniciar sesión",
+      "email": "Correo",
+      "emailPlaceholder": "m@ejemplo.com",
+      "password": "Contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "submit": "Ingresar",
+      "loading": "Ingresando...",
+      "orContinueWith": "O continúa con",
+      "loginWithGoogle": "Ingresar con Google",
+      "noAccount": "¿No tienes cuenta?",
+      "registerLink": "Crear cuenta"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "createYourAccount": "Crea tu cuenta",
+      "enterEmailToCreate": "Ingresa tu correo para crear tu cuenta",
+      "email": "Correo",
+      "emailPlaceholder": "m@ejemplo.com",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "passwordMinLength": "Debe tener al menos 6 caracteres.",
+      "submit": "Crear cuenta",
+      "loading": "Creando cuenta...",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "loginLink": "Iniciar sesión",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "passwordTooShort": "La contraseña debe tener al menos 6 caracteres"
+    },
+    "forgot": {
+      "title": "Recuperar contraseña",
+      "description": "Ingresa tu correo y te enviaremos un link para restablecer tu contraseña",
+      "email": "Correo",
+      "submit": "Enviar link",
+      "loading": "Enviando...",
+      "success": "¡Correo enviado! Revisa tu bandeja de entrada.",
+      "backToLogin": "Volver a iniciar sesión"
+    },
+    "errors": {
+      "loginFailed": "Falló el inicio de sesión",
+      "registerFailed": "Falló el registro",
+      "resetFailed": "No se pudo enviar el correo"
+    }
   }
 }
