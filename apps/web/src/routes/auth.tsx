@@ -3,7 +3,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 function AuthLayout() {
   return (
-    <div className="bg-muted min-h-screen flex items-center justify-center p-6 md:p-10">
+    <div className="min-h-screen w-full flex items-center justify-center p-6 md:p-10 bg-background">
       <Outlet />
     </div>
   );

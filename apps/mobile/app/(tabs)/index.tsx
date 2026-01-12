@@ -7,17 +7,13 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
-import { Colors } from '@/constants/theme';
-import { useThemePreference } from '@/context/theme-preference';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const { resolvedScheme } = useThemePreference();
-  const colors = Colors[resolvedScheme];
 
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: colors.card, dark: colors.card }}
+      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
         <Image
           source={require('@/assets/images/partial-react-logo.png')}
