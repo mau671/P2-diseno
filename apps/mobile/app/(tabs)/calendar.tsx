@@ -23,5 +23,6 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     paddingTop: 60,
+    paddingBottom: 16,
   },
 });
