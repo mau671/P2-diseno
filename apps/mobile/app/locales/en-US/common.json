@@ -13,6 +13,8 @@
   "common": {
     "loading": "Loading...",
     "error": "Error",
+    "loadError": "Failed to load data.",
+    "retry": "Retry",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
@@ -60,7 +62,13 @@
   },
   "calendar": {
     "title": "Calendar",
-    "noEvents": "No events scheduled"
+    "noEvents": "No events scheduled",
+    "empty": "No events scheduled",
+    "today": "Today",
+    "prevDay": "Previous day",
+    "nextDay": "Next day",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week"
   },
   "auth": {
     "logout": "Sign out",
