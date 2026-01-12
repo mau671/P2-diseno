@@ -24,7 +24,8 @@ function LoadingScreen() {
   );
 }
 
-function ThemeInitializer({ children }: { children: React.ReactNode }) {
+// ✅ Fix: children opcional para que <ThemeInitializer /> no obligue a pasar hijos
+function ThemeInitializer({ children }: React.PropsWithChildren) {
   const { resolvedScheme, loaded } = useThemePreference();
 
   if (!loaded) {
