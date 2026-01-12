@@ -33,7 +33,8 @@ export function ScheduleCard({ item }: { item: ScheduleItem }) {
           )}
 
           <View style={styles.textCol}>
-            <ThemedText numberOfLines={2} style={[styles.title, { color: c.text }]}>
+            {/* ✅ más grande y más líneas para que se lea el nombre */}
+            <ThemedText numberOfLines={3} style={[styles.title, { color: c.text }]}>
               {item.title}
             </ThemedText>
 
@@ -55,27 +56,26 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   timelineCol: {
-    width: 18,
+    width: 16,
     alignItems: "center",
   },
   dot: {
-    width: 9,
-    height: 9,
+    width: 8,
+    height: 8,
     borderRadius: 999,
-    marginTop: 8,
+    marginTop: 10,
   },
   line: {
     width: 2,
     flex: 1,
     borderRadius: 999,
-    marginTop: 8,
+    marginTop: 6,
   },
   card: {
     flex: 1,
     borderWidth: 1,
     borderRadius: 18,
     padding: 14,
-    minHeight: 104,
   },
   topRow: {
     marginBottom: 8,
@@ -83,7 +83,6 @@ const styles = StyleSheet.create({
   time: {
     fontSize: 13,
     fontWeight: "900",
-    letterSpacing: 0.2,
   },
   contentRow: {
     flexDirection: "row",
@@ -106,8 +105,7 @@ const styles = StyleSheet.create({
   },
   meta: {
     marginTop: 6,
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 12,
     opacity: 0.9,
   },
 });

@@ -1,6 +1,7 @@
 // apps/mobile/hooks/use-anime-schedule.ts
 import * as React from "react";
-import { fetchScheduleAll, weekdayFilterFromDate, type ScheduleItem } from "@/app/api/schedule";
+
+import { fetchScheduleForDate, isHttpError, type ScheduleItem } from "@/app/api/schedule";
 
 type State = {
   data: ScheduleItem[];
@@ -9,69 +10,179 @@ type State = {
   error: Error | null;
 };
 
-const cache = new Map<string, { at: number; data: ScheduleItem[] }>();
-const CACHE_TTL_MS = 1000 * 60 * 10; // 10 min
+const TZ_CR = "America/Costa_Rica";
 
-function keyFor(date: Date, sfw: boolean, maxPages: number) {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}|sfw=${sfw}|pages=${maxPages}`;
+// cache simple para no spamear Jikan al navegar
+const cache = new Map<string, { at: number; data: ScheduleItem[] }>();
+const CACHE_TTL_MS = 1000 * 60 * 5; // 5 min
+
+function safeWeekdayKeyCR(date: Date) {
+  try {
+    // Monday, Tuesday, ...
+    const day = new Intl.DateTimeFormat("en-US", {
+      timeZone: TZ_CR,
+      weekday: "long",
+    })
+      .format(date)
+      .toLowerCase();
+
+    // monday..sunday
+    return day;
+  } catch {
+    const names = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    return names[date.getDay()] ?? "monday";
+  }
 }
 
-export function useAnimeSchedule(date: Date, opts?: { enabled?: boolean; sfw?: boolean; maxPages?: number }) {
-  const enabled = opts?.enabled ?? true;
-  const sfw = opts?.sfw ?? true;
-  const maxPages = Math.max(1, opts?.maxPages ?? 3);
+function buildCacheKey(date: Date, sfw: boolean, maxPages: number) {
+  // OJO: el schedule de Jikan es por día de semana (no histórico),
+  // así que cachear por weekday es lo más correcto.
+  const weekday = safeWeekdayKeyCR(date);
+  return `${weekday}::sfw=${sfw ? 1 : 0}::maxPages=${maxPages}`;
+}
 
+function uniqSchedule(items: ScheduleItem[]) {
+  // Evita el error de "two children with the same key"
+  // (malId se repite a veces, o pueden venir duplicados por paginación).
+  const seen = new Set<string>();
+  const out: ScheduleItem[] = [];
+
+  for (const it of items) {
+    const key = `${it.malId ?? "na"}|${it.timeLabel ?? ""}|${it.title ?? ""}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(it);
+  }
+
+  return out;
+}
+
+export function useAnimeSchedule({
+  date,
+  enabled = true,
+  sfw = true,
+  maxPages = 2,
+}: {
+  date: Date;
+  enabled?: boolean;
+  sfw?: boolean;
+  maxPages?: number; // se mantiene por compatibilidad, aunque fetchScheduleForDate maneja su propia lógica
+}) {
   const [state, setState] = React.useState<State>({
     data: [],
-    isLoading: enabled,
+    isLoading: false,
     isError: false,
     error: null,
   });
 
-  const dateKey = React.useMemo(() => keyFor(date, sfw, maxPages), [date, sfw, maxPages]);
+  const refreshNonce = React.useRef(0);
 
-  const run = React.useCallback(async (signal?: AbortSignal) => {
-    if (!enabled) return;
+  const refetch = React.useCallback(() => {
+    refreshNonce.current += 1;
+    // forzamos re-render para que el effect se dispare
+    setState((s) => ({ ...s }));
+  }, []);
 
-    // Cache
-    const c = cache.get(dateKey);
-    if (c && Date.now() - c.at < CACHE_TTL_MS) {
-      setState({ data: c.data, isLoading: false, isError: false, error: null });
+  React.useEffect(() => {
+    if (!enabled) {
+      setState((s) => ({ ...s, isLoading: false }));
       return;
     }
 
-    setState((s) => ({ ...s, isLoading: true, isError: false, error: null }));
+    let mounted = true;
+    const ac = new AbortController();
 
-    try {
-      const filter = weekdayFilterFromDate(date);
-      const data = await fetchScheduleAll(filter, { sfw, maxPages, signal });
+    const dateKey = buildCacheKey(date, sfw, maxPages);
 
-      cache.set(dateKey, { at: Date.now(), data });
-      setState({ data, isLoading: false, isError: false, error: null });
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error("Unknown error");
-      setState({ data: [], isLoading: false, isError: true, error: err });
+    // 1) pintar cache primero (si existe y está fresco)
+    const cached = cache.get(dateKey);
+    if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
+      setState({
+        data: cached.data,
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+    } else {
+      // si no hay cache, mostramos loading pero sin “romper” si ya había data
+      setState((s) => ({
+        ...s,
+        isLoading: true,
+        isError: false,
+        error: null,
+      }));
     }
-  }, [enabled, date, sfw, maxPages, dateKey]);
 
-  React.useEffect(() => {
-    if (!enabled) return;
+    const run = async () => {
+      // ✅ debounce para cuando el mae aprieta flechas rapidísimo
+      const debounceMs = 300;
+      await new Promise((r) => setTimeout(r, debounceMs));
+      if (!mounted || ac.signal.aborted) return;
 
-    const ctrl = new AbortController();
-    run(ctrl.signal);
+      const minLoadMs = 450; // evita flicker
+      const started = Date.now();
 
-    return () => ctrl.abort();
-  }, [run, enabled, dateKey]);
+      let attempt = 0;
 
-  const refetch = React.useCallback(() => {
-    // invalida cache para esta key y vuelve a correr
-    cache.delete(dateKey);
-    const ctrl = new AbortController();
-    run(ctrl.signal);
-  }, [dateKey, run]);
+      while (attempt < 2) {
+        try {
+          // Nota: usamos la API que SÍ existe
+          const data = await fetchScheduleForDate(date, ac.signal);
 
-  return { ...state, refetch };
+          if (!mounted || ac.signal.aborted) return;
+
+          const clean = uniqSchedule(Array.isArray(data) ? data : []);
+
+          cache.set(dateKey, { at: Date.now(), data: clean });
+
+          setState({
+            data: clean,
+            isLoading: false,
+            isError: false,
+            error: null,
+          });
+
+          return;
+        } catch (e: any) {
+          if (!mounted || ac.signal.aborted) return;
+
+          // ✅ 429: esperamos suave y reintentamos 1 vez (sin mostrar error feo)
+          if (isHttpError && isHttpError(e, 429) && attempt === 0) {
+            attempt += 1;
+            await new Promise((r) => setTimeout(r, 1100));
+            continue;
+          }
+
+          const err = e instanceof Error ? e : new Error("Unknown error");
+
+          // si ya había data (cache o anterior), no “rompemos” la UI con pantalla vacía
+          setState((s) => ({
+            data: s.data ?? [],
+            isLoading: false,
+            isError: true,
+            error: err,
+          }));
+
+          return;
+        } finally {
+          const elapsed = Date.now() - started;
+          const waitMore = Math.max(0, minLoadMs - elapsed);
+          if (waitMore) await new Promise((r) => setTimeout(r, waitMore));
+        }
+      }
+    };
+
+    run();
+
+    return () => {
+      mounted = false;
+      ac.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, date, sfw, maxPages, refreshNonce.current]);
+
+  return {
+    ...state,
+    refetch,
+  };
 }
