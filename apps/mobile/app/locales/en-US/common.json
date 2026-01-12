@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "home": "Home",
+    "calendar": "Calendar",
+    "settings": "Settings"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Manage your profile information"
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Manage your account security"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Customize the app appearance",
+      "language": {
+        "title": "Language",
+        "subtitle": "Choose your preferred language",
+        "es-419": "Spanish (Latin America)",
+        "en-US": "English (United States)"
+      },
+      "theme": {
+        "title": "Theme",
+        "subtitle": "Choose your preferred theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      }
+    },
+    "about": {
+      "title": "About",
+      "version": "Version"
+    }
+  },
+  "home": {
+    "title": "Home",
+    "welcome": "Welcome"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "noEvents": "No events scheduled"
+  }
+}
