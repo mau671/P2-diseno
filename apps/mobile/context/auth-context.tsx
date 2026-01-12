@@ -17,10 +17,14 @@ import {
   unlink
 } from 'firebase/auth';
 import { auth } from '@/app/config/firebase';
-import * as AuthSession from 'expo-auth-session';
+import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 
 WebBrowser.maybeCompleteAuthSession();
+
+// Client IDs
+const EXPO_CLIENT_ID = '661319432288-0voa3ej7ue91mudjeiu3uj61hus4cpe5.apps.googleusercontent.com';
+const WEB_CLIENT_ID = '661319432288-f4e0tfd3cha0h8p10pc0utk18fe3o71q.apps.googleusercontent.com';
 
 interface AuthContextType {
   user: User | null;
@@ -47,6 +51,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: EXPO_CLIENT_ID,
+    webClientId: WEB_CLIENT_ID,
+  });
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -56,37 +65,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      const credential = GoogleAuthProvider.credential(id_token);
+      signInWithCredential(auth, credential);
+    }
+  }, [response]);
+
   const login = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   const loginWithGoogle = async () => {
-    const redirectUri = AuthSession.makeRedirectUri({
-      scheme: 'diseno-verano2025'
-    });
-
-    const provider = new GoogleAuthProvider();
-    provider.addScope('profile');
-    provider.addScope('email');
-
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
-      client_id: '661319432288.apps.googleusercontent.com',
-      redirect_uri: redirectUri,
-      response_type: 'id_token',
-      scope: 'profile email',
-      nonce: Math.random().toString(36).substring(7)
-    }).toString()}`;
-
-    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
-
-    if (result.type === 'success') {
-      const params = new URLSearchParams(result.url.split('#')[1]);
-      const idToken = params.get('id_token');
-
-      if (idToken) {
-        const credential = GoogleAuthProvider.credential(idToken);
-        await signInWithCredential(auth, credential);
-      }
+    try {
+      await promptAsync();
+    } catch (error) {
+      console.error('Google login error:', error);
+      throw error;
     }
   };
 
@@ -158,28 +154,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error("No user signed in");
     }
 
-    const redirectUri = AuthSession.makeRedirectUri({
-      scheme: 'diseno-verano2025'
-    });
-
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
-      client_id: '661319432288.apps.googleusercontent.com',
-      redirect_uri: redirectUri,
-      response_type: 'id_token',
-      scope: 'profile email',
-      nonce: Math.random().toString(36).substring(7)
-    }).toString()}`;
-
-    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
-
-    if (result.type === 'success') {
-      const params = new URLSearchParams(result.url.split('#')[1]);
-      const idToken = params.get('id_token');
-
-      if (idToken) {
-        const credential = GoogleAuthProvider.credential(idToken);
-        await linkWithCredential(auth.currentUser, credential);
-      }
+    try {
+      await promptAsync();
+      // El useEffect manejará la vinculación cuando reciba la respuesta
+    } catch (error) {
+      console.error('Link Google error:', error);
+      throw error;
     }
   };
 
@@ -188,7 +168,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error("No user signed in");
     }
 
-    // Verificar que el usuario tenga al menos otro método de autenticación
     const providers = auth.currentUser.providerData.map((p) => p.providerId);
     if (providers.length <= 1) {
       throw new Error("Cannot unlink the only authentication method");
