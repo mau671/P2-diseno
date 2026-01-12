@@ -374,23 +374,6 @@
     "themeColorHint": "Seleziona un colore per personalizzare i pulsanti e gli elementi principali",
     "selectedTheme": "Tema selezionato",
     "currentTheme": "Tema attuale",
-    "reset": "Ripristina",
-    "addPassword": "Aggiungi Password",
-    "addPasswordHint": "Aggiungi una password per poter accedere con il tuo indirizzo email.",
-    "linkGoogle": "Collega con Google",
-    "linkGoogleHint": "Collega il tuo account Google per avere più opzioni di accesso.",
-    "linkWithGoogle": "Collega con Google",
-    "googleLinked": "Account Google collegato con successo",
-    "googleAlreadyInUse": "L'account Google è già in uso",
-    "passwordAdded": "Password aggiunta con successo",
-    "adding": "Aggiunta in corso...",
-    "linking": "Collegamento in corso...",
-    "unlinkGoogle": "Dissocia Google",
-    "unlinkGoogleHint": "Dissocia il tuo account Google. Potrai continuare a accedere con il tuo indirizzo email e password.",
-    "unlinkGoogleConfirm": "Dissocia account Google",
-    "unlinkGoogleConfirmDescription": "Sei sicuro di voler dissocia il tuo account Google? Potrai continuare a accedere con il tuo indirizzo email e password.",
-    "unlinking": "Dissociazione in corso...",
-    "googleUnlinked": "Account Google dissocia con successo",
-    "cannotUnlinkOnlyMethod": "Non puoi dissocia il solo metodo di autenticazione"
+    "reset": "Ripristina"
   }
 }

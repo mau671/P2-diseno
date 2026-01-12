@@ -1,9 +1,8 @@
 // config/firebase.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import { initializeAuth, indexedDBLocalPersistence } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //Configuración 
 const firebaseConfig = {
@@ -18,9 +17,9 @@ const firebaseConfig = {
 //Previene inicializar más de una vez 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-//Inicializa Auth con persistencia de AsyncStorage
+//Inicializa Auth con persistencia de IndexedDB (funciona en React Native)
 const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
+  persistence: indexedDBLocalPersistence
 });
 
 //Exporta los servicios 
