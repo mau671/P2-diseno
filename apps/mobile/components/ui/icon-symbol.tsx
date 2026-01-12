@@ -20,13 +20,12 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'calendar': 'event',
   'gearshape.fill': 'settings',
-  'globe': 'language',
-  'globe.americas.fill': 'public',
-  'checkmark': 'check',
+  'person.circle': 'account-circle',
   'person.circle.fill': 'account-circle',
   'lock.shield.fill': 'security',
-  'paintbrush.fill': 'palette',
-  'moon.stars.fill': 'dark-mode',
+  'arrow.right.square': 'exit-to-app',
+  'paintbrush.fill': 'brush',
+  'checkmark': 'check',
 } as IconMapping;
 
 /**
