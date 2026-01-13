@@ -1,105 +1,160 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import * as React from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-import { Colors } from '@/constants/theme';
-import { useThemePreference } from '@/context/theme-preference';
+import { InfiniteHorizontalCarousel } from '@/components/home/InfiniteHorizontalCarousel';
+import {
+  useSeasonsNow,
+  useSeasonsUpcoming,
+  useTopAnimeByPopularity,
+} from '@/hooks/use-home';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const { resolvedScheme } = useThemePreference();
-  const colors = Colors[resolvedScheme];
+
+  const seasonsNowQuery = useSeasonsNow();
+  const seasonsUpcomingQuery = useSeasonsUpcoming();
+  const topPopularityQuery = useTopAnimeByPopularity();
+
+  const seasonsNowData = React.useMemo(() => {
+    const all = (seasonsNowQuery.data?.pages ?? []).flatMap((page: any) => page.data ?? []);
+    const seen = new Set<number>();
+    return all.filter(item => {
+      if (seen.has(item.mal_id)) return false;
+      seen.add(item.mal_id);
+      return true;
+    });
+  }, [seasonsNowQuery.data]);
+
+  const seasonsUpcomingData = React.useMemo(() => {
+    const all = (seasonsUpcomingQuery.data?.pages ?? []).flatMap((page: any) => page.data ?? []);
+    const seen = new Set<number>();
+    return all.filter(item => {
+      if (seen.has(item.mal_id)) return false;
+      seen.add(item.mal_id);
+      return true;
+    });
+  }, [seasonsUpcomingQuery.data]);
+
+  const topPopularityData = React.useMemo(() => {
+    const all = (topPopularityQuery.data?.pages ?? []).flatMap((page: any) => page.data ?? []);
+    const seen = new Set<number>();
+    return all.filter(item => {
+      if (seen.has(item.mal_id)) return false;
+      seen.add(item.mal_id);
+      return true;
+    });
+  }, [topPopularityQuery.data]);
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: colors.card, dark: colors.card }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">{t('home.welcome')}!</ThemedText>
-        <HelloWave />
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ThemedView style={styles.header}>
+        <ThemedText type="title">{t('home.welcome', { defaultValue: 'Home' })}</ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
+      <Section
+        title={t('home.trendingNow', { defaultValue: 'Trending Now' })}
+        isLoading={seasonsNowQuery.isLoading}
+        error={seasonsNowQuery.error}
+        empty={!seasonsNowQuery.isLoading && seasonsNowData.length === 0}
+      >
+        <InfiniteHorizontalCarousel
+          data={seasonsNowData}
+          isLoading={seasonsNowQuery.isLoading}
+          isFetchingNextPage={seasonsNowQuery.isFetchingNextPage}
+          hasNextPage={seasonsNowQuery.hasNextPage ?? false}
+          onEndReached={() => seasonsNowQuery.fetchNextPage()}
+        />
+      </Section>
+
+      <Section
+        title={t('home.upcoming', { defaultValue: 'Upcoming Next Season' })}
+        isLoading={seasonsUpcomingQuery.isLoading}
+        error={seasonsUpcomingQuery.error}
+        empty={!seasonsUpcomingQuery.isLoading && seasonsUpcomingData.length === 0}
+      >
+        <InfiniteHorizontalCarousel
+          data={seasonsUpcomingData}
+          isLoading={seasonsUpcomingQuery.isLoading}
+          isFetchingNextPage={seasonsUpcomingQuery.isFetchingNextPage}
+          hasNextPage={seasonsUpcomingQuery.hasNextPage ?? false}
+          onEndReached={() => seasonsUpcomingQuery.fetchNextPage()}
+        />
+      </Section>
+
+      <Section
+        title={t('home.allTimePopular', { defaultValue: 'All Time Popular' })}
+        isLoading={topPopularityQuery.isLoading}
+        error={topPopularityQuery.error}
+        empty={!topPopularityQuery.isLoading && topPopularityData.length === 0}
+      >
+        <InfiniteHorizontalCarousel
+          data={topPopularityData}
+          isLoading={topPopularityQuery.isLoading}
+          isFetchingNextPage={topPopularityQuery.isFetchingNextPage}
+          hasNextPage={topPopularityQuery.hasNextPage ?? false}
+          onEndReached={() => topPopularityQuery.fetchNextPage()}
+        />
+      </Section>
+    </ScrollView>
+  );
+}
+
+function Section({
+  title,
+  isLoading,
+  error,
+  empty,
+  children,
+}: {
+  title: string;
+  isLoading: boolean;
+  error: unknown;
+  empty: boolean;
+  children: React.ReactNode;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <View style={styles.section}>
+      <ThemedText style={styles.sectionTitle}>{title}</ThemedText>
+
+      {error ? (
+        <ThemedText style={styles.sectionState}>
+          {t('common.error', { defaultValue: 'Error' })}
         </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
+      ) : null}
+
+      {empty ? (
+        <ThemedText style={styles.sectionState}>
+          {t('common.empty', { defaultValue: 'No results' })}
         </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      ) : null}
+
+      {!error && !empty ? children : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: { flex: 1 },
+  content: { paddingBottom: 32 },
+  header: {
+    padding: 20,
+    paddingTop: 60,
+    paddingBottom: 10,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  section: {
+    marginTop: 12,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  sectionTitle: {
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  sectionState: {
+    paddingHorizontal: 20,
+    paddingBottom: 12,
   },
 });

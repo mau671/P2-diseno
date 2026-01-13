@@ -20,7 +20,8 @@
     "close": "Cerrar",
     "confirm": "Confirmar",
     "delete": "Eliminar",
-    "edit": "Editar"
+    "edit": "Editar",
+    "empty": "Sin resultados"
   },
   "settings": {
     "title": "Configuración",
@@ -58,7 +59,10 @@
   },
   "home": {
     "title": "Inicio",
-    "welcome": "Bienvenido"
+    "welcome": "Bienvenido",
+    "trendingNow": "En tendencia",
+    "upcoming": "Próxima temporada",
+    "allTimePopular": "Los más populares"
   },
   "calendar": {
     "title": "Calendario",

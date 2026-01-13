@@ -20,7 +20,8 @@
     "close": "Close",
     "confirm": "Confirm",
     "delete": "Delete",
-    "edit": "Edit"
+    "edit": "Edit",
+    "empty": "No results"
   },
   "settings": {
     "title": "Settings",
@@ -58,7 +59,10 @@
   },
   "home": {
     "title": "Home",
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "trendingNow": "Trending now",
+    "upcoming": "Upcoming next season",
+    "allTimePopular": "All time popular"
   },
   "calendar": {
     "title": "Calendar",
