@@ -26,9 +26,9 @@ function isSameDay(a: Date, b: Date) {
   return startOfDay(a).getTime() === startOfDay(b).getTime();
 }
 
-function formatHeaderDate(d: Date, locale?: string) {
+function formatHeaderDate(d: Date) {
   try {
-    const fmt = new Intl.DateTimeFormat(locale ? [locale, locale.split("-")[0]] : undefined, {
+    const fmt = new Intl.DateTimeFormat(undefined, {
       timeZone: TZ_CR,
       weekday: "short",
       day: "2-digit",
@@ -60,11 +60,6 @@ export function ScheduleColumn({
   onBusyChange?: (busy: boolean) => void;
 }) {
   const { t, i18n } = useTranslation();
-  const localeForIntl = React.useMemo(() => {
-  const lng = (i18n.resolvedLanguage ?? i18n.language ?? "").toLowerCase();
-  if (lng.startsWith("es")) return "es";
-  return "en-US";
-}, [i18n.language, i18n.resolvedLanguage]);
   const scheme = useColorScheme() ?? "light";
   const c = Colors[scheme];
 
@@ -74,7 +69,7 @@ export function ScheduleColumn({
   const [error, setError] = React.useState<string | null>(null);
   const [retryKey, setRetryKey] = React.useState(0);
 
-  const dayLabel = React.useMemo(() => formatHeaderDate(date, localeForIntl),[date, localeForIntl]);
+  const dayLabel = React.useMemo(() => formatHeaderDate(date), [date]);
   const isToday = React.useMemo(() => isSameDay(date, new Date()), [date]);
 
   const todayFallback = i18n.language?.toLowerCase().startsWith("en") ? "Today" : "Hoy";
@@ -255,8 +250,6 @@ const styles = StyleSheet.create({
   },
   dayTitle: {
     fontSize: 28,
-    lineHeight: 34,        
-    paddingTop: 2,
     fontWeight: "900",
     letterSpacing: -0.2,
     textTransform: "capitalize",
