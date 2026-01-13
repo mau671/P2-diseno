@@ -3,12 +3,15 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import './i18n';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ThemedView } from '@/components/themed-view';
 import { AuthProvider } from '@/context/auth-context';
 import { ThemePreferenceProvider, useThemePreference } from '@/context/theme-preference';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
+
+const queryClient = new QueryClient();
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -72,43 +75,45 @@ function AuthProviderWrapper() {
   const colors = Colors[resolvedScheme];
   
   return (
-    <AuthProvider>
-      <Stack 
-        screenOptions={{ 
-          headerShown: false,
-          animation: 'none',
-          contentStyle: {
-            backgroundColor: colors.background,
-          },
-        }}
-      >
-        <Stack.Screen 
-          name="(tabs)" 
-          options={{
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Stack 
+          screenOptions={{ 
+            headerShown: false,
             animation: 'none',
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
           }}
-        />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal', headerShown: true }} />
-        <Stack.Screen 
-          name="auth/login" 
-          options={{
-            animation: 'none',
-          }}
-        />
-        <Stack.Screen 
-          name="auth/signup"
-          options={{
-            animation: 'none',
-          }}
-        />
-        <Stack.Screen 
-          name="auth/forgot-password"
-          options={{
-            animation: 'none',
-          }}
-        />
-      </Stack>
-    </AuthProvider>
+        >
+          <Stack.Screen 
+            name="(tabs)" 
+            options={{
+              animation: 'none',
+            }}
+          />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal', headerShown: true }} />
+          <Stack.Screen 
+            name="auth/login" 
+            options={{
+              animation: 'none',
+            }}
+          />
+          <Stack.Screen 
+            name="auth/signup"
+            options={{
+              animation: 'none',
+            }}
+          />
+          <Stack.Screen 
+            name="auth/forgot-password"
+            options={{
+              animation: 'none',
+            }}
+          />
+        </Stack>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

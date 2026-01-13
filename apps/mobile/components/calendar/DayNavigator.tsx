@@ -4,30 +4,30 @@ import { useTranslation } from "react-i18next";
 
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useThemePreference } from "@/context/theme-preference";
+import { formatDayNavigatorDate } from "@/lib/date-utils";
 
 export function DayNavigator({
   disabled = false,
-  isToday,
+  selectedDate,
   canPrev,
   canNext,
   onPrev,
   onNext,
-  onToday,
 }: {
   disabled?: boolean;
-  isToday: boolean;
+  selectedDate: Date;
   canPrev: boolean;
   canNext: boolean;
   onPrev: () => void;
   onNext: () => void;
-  onToday: () => void;
 }) {
-  const { t, i18n } = useTranslation();
-  const scheme = useColorScheme() ?? "light";
-  const c = Colors[scheme];
+  const { i18n } = useTranslation();
+  const { resolvedScheme } = useThemePreference();
+  const c = Colors[resolvedScheme];
 
-  const todayFallback = i18n.language?.toLowerCase().startsWith("en") ? "Today" : "Hoy";
+  const locale = i18n.language || "es-419";
+  const dateLabel = formatDayNavigatorDate(selectedDate, locale);
 
   return (
     <View style={styles.row}>
@@ -38,21 +38,20 @@ export function DayNavigator({
         c={c}
       />
 
-      {/* ✅ SOLO “HOY” */}
       <Pressable
-        onPress={onToday}
-        disabled={disabled}
+        onPress={onNext}
+        disabled={disabled || !canNext}
         style={({ pressed }) => [
-          styles.todayBtn,
+          styles.dateBtn,
           {
-            backgroundColor: isToday ? c.card : c.secondary,
+            backgroundColor: c.card,
             borderColor: c.cardBorder,
             opacity: disabled ? 0.55 : pressed ? 0.9 : 1,
           },
         ]}
       >
-        <ThemedText style={[styles.todayLabel, { color: c.text }]}>
-          {t("calendar.today", { defaultValue: todayFallback })}
+        <ThemedText style={[styles.dateLabel, { color: c.text }]}>
+          {dateLabel}
         </ThemedText>
       </Pressable>
 
@@ -84,7 +83,7 @@ function NavBtn({
       style={({ pressed }) => [
         styles.btn,
         {
-          backgroundColor: c.background,
+          backgroundColor: c.card,
           borderColor: c.cardBorder,
           opacity: disabled ? 0.35 : pressed ? 0.9 : 1,
         },
@@ -114,7 +113,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "900",
   },
-  todayBtn: {
+  dateBtn: {
     flex: 1,
     height: 58,
     borderRadius: 18,
@@ -122,7 +121,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  todayLabel: {
+  dateLabel: {
     fontSize: 16,
     fontWeight: "900",
   },

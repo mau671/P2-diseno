@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { FontAwesome } from '@expo/vector-icons';
 import { useThemePreference } from '@/context/theme-preference';
 import { Colors } from '@/constants/theme';
 
@@ -133,7 +133,7 @@ export default function LoginScreen() {
               onPress={handleGoogleLogin}
               disabled={loading || googleLoading}
             >
-              <IconSymbol name="google" size={20} color={colors.text} style={styles.googleIcon} />
+              <FontAwesome name="google" size={20} color={colors.text} style={styles.googleIcon} />
               <ThemedText style={[styles.googleButtonText, { color: colors.text }]}>
                 {googleLoading ? t('common.loading') : t('auth.login.loginWithGoogle')}
               </ThemedText>
