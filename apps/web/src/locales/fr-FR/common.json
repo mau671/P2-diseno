@@ -1,9 +1,7 @@
 {
   "nav": {
     "home": "Accueil",
-    "anime": "Anime",
-    "support": "Support",
-    "catalog": "Catalogue"
+    "support": "Support"
   },
   "home": {
     "title": "Accueil",
@@ -11,16 +9,6 @@
   },
   "sections": {
     "label": "Section",
-    "topAnime": "Top Anime",
-    "topAnimeDescription": "Les meilleurs animes classés par la communauté",
-    "search": "Rechercher",
-    "searchDescription": "Trouvez votre anime préféré",
-    "favorites": "Favoris",
-    "catalog": "Catalogue",
-    "catalogDescription": "Parcourir le catalogue d’animes",
-    "trendingNow": "Tendances",
-    "upcomingNextSeason": "Prochaine saison",
-    "allTimePopular": "Les plus populaires de tous les temps",
     "user": "Utilisateur"
   },
   "common": {
@@ -34,9 +22,6 @@
     "scrollUp": "Défiler vers le haut",
     "scrollDown": "Défiler vers le bas",
     "tooManyRequests": "Trop de requêtes. Veuillez réessayer.",
-    "addToFavorites": "Ajouter aux favoris",
-    "removeFromFavorites": "Retirer des favoris",
-    "favorite": "Favoris",
     "back": "Retour",
     "forward": "Avancer",
     "notFound": "Non trouvé",
@@ -44,76 +29,6 @@
     "na": "N/A",
     "loadMore": "Charger plus",
     "cancel": "Annuler"
-  },
-  "search": {
-    "placeholder": "Rechercher un anime...",
-    "button": "Rechercher",
-    "hint": "Tapez quelque chose puis appuyez sur Rechercher.",
-    "error": "La recherche a échoué.",
-    "empty": "Aucun résultat.",
-    "allowNsfw": "Autoriser le contenu NSFW",
-    "moreFilters": "Plus de filtres",
-    "clearAll": "tout effacer",
-    "episodes": "épisodes",
-    "unknown": "Inconnu",
-    "filters": {
-      "genres": "Genres",
-      "year": "Année",
-      "season": "Saison",
-      "format": "Format",
-      "status": "Statut",
-      "streamingOn": "Disponible sur",
-      "countryOfOrigin": "Pays d’origine",
-      "sourceMaterial": "Matériau source",
-      "nsfw": "Contenu NSFW"
-    },
-    "seasons": {
-      "winter": "Hiver",
-      "spring": "Printemps",
-      "summer": "Été",
-      "fall": "Automne"
-    },
-    "formats": {
-      "tv": "TV",
-      "movie": "Film",
-      "ova": "OVA",
-      "special": "Spécial",
-      "ona": "ONA",
-      "music": "Musique",
-      "cm": "CM",
-      "pv": "PV",
-      "tv_special": "Spécial TV"
-    },
-    "statuses": {
-      "airing": "En cours",
-      "complete": "Terminé",
-      "upcoming": "À venir"
-    },
-    "types": {
-      "anime": "Anime",
-      "manga": "Manga",
-      "characters": "Personnages",
-      "people": "Personnes",
-      "studios": "Studios"
-    }
-  },
-  "topAnime": {
-    "empty": "Aucun élément."
-  },
-  "catalog": {
-    "title": "Catalogue d’anime",
-    "description": "Explorez les meilleurs animes.",
-    "loadMore": "Charger plus d’animes",
-    "empty": "Aucun anime trouvé",
-    "endOfList": "Vous avez atteint la fin du catalogue",
-    "previousSeason": "Saison précédente",
-    "nextSeason": "Saison suivante"
-  },
-  "seasons": {
-    "winter": "Hiver",
-    "spring": "Printemps",
-    "summer": "Été",
-    "fall": "Automne"
   },
   "theme": {
     "toggle": "Basculer le thème",
@@ -144,120 +59,6 @@
     "fr": "Français (France)",
     "it": "Italiano (Italia)"
   },
-  "anime": {
-    "detail": {
-      "scoreLabel": "Score",
-      "noSynopsis": "Aucun synopsis disponible",
-      "studiosLabel": "Studios",
-      "minPerEp": "{{minutes}} min par ép",
-      "watchTime": {
-        "title": "Temps de Visionnage",
-        "total": "{{episodes}} épisodes × {{minutesPerEpisode}} min/ép",
-        "minutes": "{{count}} {{minText}}",
-        "hours": "{{count}} {{hourText}}",
-        "hoursMinutes": "{{hours}}h {{minutes}}m",
-        "days": "{{count}} {{dayText}}",
-        "daysHours": "{{days}}j {{hours}}h",
-        "customize": "Personnaliser l'estimation :",
-        "episodesPerDay": "Épisodes/jour",
-        "hoursPerDay": "Heures/jour",
-        "estimates": "Estimations :",
-        "daysAtEpisodes": "{{count}} {{dayText}} en regardant {{episodesPerDay}} {{episodeText}}/jour",
-        "daysAtHours": "{{count}} {{dayText}} en regardant {{hoursPerDay}} {{hourText}}/jour",
-        "sessions1Hour": "{{count}} {{sessionText}} de 1 heure",
-        "sessions2Hours": "{{count}} {{sessionText}} de 2 heures"
-      },
-      "sections": {
-        "characters": "Personnages",
-        "related": "Similaires",
-        "episodes": "Épisodes",
-        "moreInfo": "Plus d'informations",
-        "recommendations": "Recommandations"
-      },
-      "episodes": {
-        "countShown": "{{count}} affichés",
-        "empty": "Aucun épisode disponible.",
-        "fallbackTitle": "Épisode {{number}}",
-        "moreAvailable": "D'autres épisodes sont disponibles.",
-        "end": "Fin de la liste."
-      }
-    },
-    "status": {
-      "finished_airing": "Terminé",
-      "currently_airing": "En cours",
-      "not_yet_aired": "Pas encore diffusé",
-      "unknown": "Inconnu"
-    }
-  },
-  "recommendations": {
-    "empty": "Aucune recommandation disponible."
-  },
-  "genres": {
-    "1": "Action",
-    "2": "Aventure",
-    "4": "Comédie",
-    "7": "Mystère",
-    "8": "Drame",
-    "10": "Fantasy",
-    "11": "Romance",
-    "14": "Horreur",
-    "17": "Arts martiaux",
-    "18": "Mecha",
-    "19": "Musique",
-    "20": "Parodie",
-    "22": "Sous-texte romantique",
-    "23": "Scolaire",
-    "24": "Science-fiction",
-    "25": "Shoujo",
-    "27": "Shounen",
-    "29": "Espace",
-    "30": "Sports",
-    "31": "Super pouvoirs",
-    "36": "Tranche de vie",
-    "37": "Surnaturel",
-    "38": "Militaire",
-    "39": "Police",
-    "40": "Psychologique",
-    "41": "Suspense",
-    "42": "Seinen",
-    "43": "Josei",
-    "46": "Récompensé",
-    "47": "Gourmet",
-    "48": "Vie professionnelle",
-    "49": "Érotique",
-    "50": "Casting adulte",
-    "51": "Anthropomorphique",
-    "52": "CGDCT",
-    "53": "Garde d’enfants",
-    "54": "Sports de combat",
-    "55": "Délinquants",
-    "56": "Détective",
-    "57": "Éducatif",
-    "58": "Humour absurde",
-    "59": "Gore",
-    "60": "Harem",
-    "61": "Jeu à haut risque",
-    "62": "Historique",
-    "63": "Isekai",
-    "64": "Iyashikei",
-    "65": "Polygone amoureux",
-    "66": "Changement de sexe magique",
-    "67": "Mahou Shoujo",
-    "68": "Médical",
-    "69": "Mémoires",
-    "70": "Mythologie",
-    "71": "Crime organisé",
-    "72": "Culture otaku",
-    "73": "Arts du spectacle",
-    "74": "Animaux",
-    "75": "Réincarnation",
-    "76": "Harem inversé",
-    "77": "Samouraï",
-    "78": "Showbiz",
-    "79": "Jeu de stratégie",
-    "80": "Survie",
-    "81": "Sports d’équipe"
-  },
   "auth": {
     "logout": "Se déconnecter",
     "login": {
@@ -274,8 +75,8 @@
       "forgotPassword": "Mot de passe oublié ?",
       "submit": "Connexion",
       "loading": "Connexion...",
-      "noAccount": "Vous n’avez pas de compte ?",
-      "registerLink": "S’inscrire"
+      "noAccount": "Vous n'avez pas de compte ?",
+      "registerLink": "S'inscrire"
     },
     "register": {
       "title": "Créer un compte",
@@ -307,29 +108,19 @@
     },
     "errors": {
       "loginFailed": "Échec de la connexion",
-      "registerFailed": "Échec de l’inscription",
-      "resetFailed": "Échec de l’envoi de l’e-mail"
+      "registerFailed": "Échec de l'inscription",
+      "resetFailed": "Échec de l'envoi de l'e-mail"
     },
     "legal": {
       "byClickingContinue": "En cliquant sur Continuer, vous acceptez nos",
-      "termsOfService": "Conditions d’utilisation",
+      "termsOfService": "Conditions d'utilisation",
       "and": "et",
       "privacyPolicy": "Politique de confidentialité"
     }
   },
   "user": {
     "defaultName": "Utilisateur",
-    "myProfile": "Mon profil",
-    "favorites": "Favoris",
-    "myLists": "Mes listes"
-  },
-  "favorites": {
-    "notLoggedIn": "Vous n'êtes pas connecté",
-    "loginToView": "Connectez-vous pour voir vos animes favoris",
-    "empty": "Aucun favori pour le moment",
-    "emptyDescription": "Commencez à ajouter des animes à vos favoris !",
-    "count": "{{count}} anime favori",
-    "error": "Erreur lors de la mise à jour des favoris"
+    "myProfile": "Mon profil"
   },
   "profile": {
     "title": "Mon Profil",
@@ -355,7 +146,7 @@
     "newPassword": "Nouveau Mot de Passe",
     "newPasswordPlaceholder": "Entrez votre nouveau mot de passe",
     "confirmPassword": "Confirmer le Mot de Passe",
-    "confirmPasswordPlaceholder": "Confirmez votre nouveau mot de passe",
+    "confirmPasswordPlaceholder": "Confimez votre nouveau mot de passe",
     "passwordRequired": "Tous les champs de mot de passe sont requis",
     "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
     "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
@@ -389,7 +180,7 @@
     "unlinkGoogleConfirm": "Confirmer la dissociation",
     "unlinkGoogleConfirmDescription": "Êtes-vous sûr de vouloir dissocier votre compte Google ? Vous pourrez toujours vous connecter avec votre adresse e-mail et mot de passe.",
     "unlinking": "Dissociation en cours...",
-    "googleUnlinked": "Compte Google dissocier avec succès",
+    "googleUnlinked": "Compte Google dissocié avec succès",
     "cannotUnlinkOnlyMethod": "Vous ne pouvez pas dissocier la seule méthode d'authentification"
   }
 }

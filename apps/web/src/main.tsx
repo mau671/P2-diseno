@@ -13,7 +13,6 @@ import { router } from "./router"
 import { ThemeProvider } from "./components/theme-provider"
 import { ThemeColorInitializer } from "./components/theme-color-initializer"
 import { AuthProvider } from "./context/auth-context"
-import { ApiError } from "./api/jikan"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,12 +23,7 @@ const queryClient = new QueryClient({
       refetchOnReconnect: false,
       refetchOnMount: false,
       retry: (failureCount, error) => {
-        // Always retry, but with a maximum limit
-        // Specifically retry 429 errors as well
-        if (error instanceof ApiError && error.status === 429) {
-          return failureCount < 10; // Retry 429 up to 10 times
-        }
-        return failureCount < 3; // Default retry limit for other errors
+        return failureCount < 3;
       },
       retryDelay: (attemptIndex) => {
         // Exponential backoff: 1s, 2s, 4s, 8s, 16s, 30s (max)
@@ -41,7 +35,7 @@ const queryClient = new QueryClient({
 
 const persister = createSyncStoragePersister({
   storage: window.localStorage,
-  key: 'anime-app-query-cache',
+  key: 'web-app-query-cache',
 })
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

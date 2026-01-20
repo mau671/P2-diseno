@@ -1,9 +1,7 @@
-﻿{
+{
   "nav": {
     "home": "Inicio",
-    "anime": "Anime",
-    "support": "Soporte",
-    "catalog": "Catálogo"
+    "support": "Soporte"
   },
   "home": {
     "title": "Inicio",
@@ -11,16 +9,6 @@
   },
   "sections": {
     "label": "Sección",
-    "topAnime": "Top Anime",
-    "topAnimeDescription": "Los mejores animes rankeados por la comunidad",
-    "search": "Buscar",
-    "searchDescription": "Encuentra tu anime favorito",
-    "favorites": "Favoritos",
-    "catalog": "Catálogo",
-    "catalogDescription": "Explora el catálogo de anime",
-    "trendingNow": "Tendencias ahora",
-    "upcomingNextSeason": "Próxima temporada",
-    "allTimePopular": "Más populares de todos los tiempos",
     "user": "Usuario"
   },
   "common": {
@@ -34,9 +22,6 @@
   "scrollUp": "Desplazar hacia arriba",
   "scrollDown": "Desplazar hacia abajo",
   "tooManyRequests": "Demasiadas solicitudes. Intenta de nuevo.",
-  "addToFavorites": "Agregar a favoritos",
-  "removeFromFavorites": "Quitar de favoritos",
-  "favorite": "Favorito",
     "back": "Volver",
     "forward": "Adelante",
     "notFound": "No encontrado",
@@ -44,76 +29,6 @@
   "na": "N/A",
   "loadMore": "Cargar más",
   "cancel": "Cancelar"
-  },
-  "search": {
-    "placeholder": "Buscar anime...",
-    "button": "Buscar",
-    "hint": "Escribe algo y presiona Buscar.",
-    "error": "La búsqueda falló.",
-    "empty": "Sin resultados.",
-    "allowNsfw": "Permitir contenido NSFW",
-    "moreFilters": "Más filtros",
-    "clearAll": "limpiar todo",
-    "episodes": "episodios",
-    "unknown": "Desconocido",
-    "filters": {
-      "genres": "Géneros",
-      "year": "Año",
-      "season": "Temporada",
-      "format": "Formato",
-      "status": "Estado",
-      "streamingOn": "Disponible en",
-      "countryOfOrigin": "País de origen",
-      "sourceMaterial": "Material de origen",
-      "nsfw": "Contenido NSFW"
-    },
-    "seasons": {
-      "winter": "Invierno",
-      "spring": "Primavera",
-      "summer": "Verano",
-      "fall": "Otoño"
-    },
-    "formats": {
-      "tv": "TV",
-      "movie": "Película",
-      "ova": "OVA",
-      "special": "Especial",
-      "ona": "ONA",
-      "music": "Música",
-      "cm": "CM",
-      "pv": "PV",
-      "tv_special": "Especial de TV"
-    },
-    "statuses": {
-      "airing": "En emisión",
-      "complete": "Completo",
-      "upcoming": "Próximamente"
-    },
-    "types": {
-      "anime": "Anime",
-      "manga": "Manga",
-      "characters": "Personajes",
-      "people": "Personas",
-      "studios": "Estudios"
-    }
-  },
-  "topAnime": {
-    "empty": "No hay elementos."
-  },
-  "catalog": {
-    "title": "Catálogo de anime",
-    "description": "Explora los mejores animes.",
-    "loadMore": "Cargar más anime",
-    "empty": "No se encontró anime",
-    "endOfList": "Llegaste al final del catálogo",
-    "previousSeason": "Temporada anterior",
-    "nextSeason": "Siguiente temporada"
-  },
-  "seasons": {
-    "winter": "Invierno",
-    "spring": "Primavera",
-    "summer": "Verano",
-    "fall": "Otoño"
   },
   "theme": {
     "toggle": "Cambiar tema",
@@ -144,117 +59,6 @@
     "fr": "Français (Francia)",
     "it": "Italiano (Italia)"
   },
-  "anime": {
-    "detail": {
-      "scoreLabel": "Puntaje",
-      "noSynopsis": "Sin sinopsis disponible",
-      "studiosLabel": "Estudios",
-      "minPerEp": "{{minutes}} min por ep",
-      "watchTime": {
-        "title": "Tiempo de visualización",
-        "total": "{{episodes}} episodios × {{minutesPerEpisode}} min/ep",
-        "minutes": "{{count}} {{minText}}",
-        "hours": "{{count}} {{hourText}}",
-        "hoursMinutes": "{{hours}}h {{minutes}}m",
-        "days": "{{count}} {{dayText}}",
-        "daysHours": "{{days}}d {{hours}}h",
-        "customize": "Personalizar estimación:",
-        "episodesPerDay": "Episodios/día",
-        "hoursPerDay": "Horas/día",
-        "estimates": "Estimaciones:",
-        "daysAtEpisodes": "{{count}} {{dayText}} viendo {{episodesPerDay}} {{episodeText}}/día",
-        "daysAtHours": "{{count}} {{dayText}} viendo {{hoursPerDay}} {{hourText}}/día",
-        "sessions1Hour": "{{count}} {{sessionText}} de 1 hora",
-        "sessions2Hours": "{{count}} {{sessionText}} de 2 horas"
-      },
-      "sections": {
-        "characters": "Personajes",
-        "related": "Relacionados",
-        "episodes": "Episodios",
-        "moreInfo": "Más información",
-        "recommendations": "Recomendaciones"
-      },
-      "episodes": {
-        "countShown": "{{count}} mostrados",
-        "empty": "No hay episodios disponibles.",
-        "fallbackTitle": "Episodio {{number}}",
-        "moreAvailable": "Hay más episodios disponibles.",
-        "end": "Fin de la lista."
-      }
-    },
-    "status": {
-      "finished_airing": "Finalizado",
-      "currently_airing": "En emisión",
-      "not_yet_aired": "Aún no estrenado",
-      "unknown": "Desconocido"
-    }
-  },
-  "genres": {
-  "1": "Acción",
-  "2": "Aventura",
-  "4": "Comedia",
-  "7": "Misterio",
-  "8": "Drama",
-  "10": "Fantasía",
-  "11": "Romance",
-  "14": "Terror",
-  "17": "Artes marciales",
-  "18": "Mecha",
-  "19": "Música",
-  "20": "Parodia",
-  "22": "Subtexto romántico",
-  "23": "Escolar",
-  "24": "Ciencia ficción",
-  "25": "Shōjo",
-  "27": "Shōnen",
-  "29": "Espacio",
-  "30": "Deportes",
-  "31": "Superpoderes",
-  "36": "Recuentos de la vida",
-  "37": "Sobrenatural",
-  "38": "Militar",
-  "39": "Policial",
-  "40": "Psicológico",
-  "41": "Suspenso",
-  "42": "Seinen",
-  "43": "Josei",
-  "46": "Premiado",
-  "47": "Gastronomía",
-  "48": "Trabajo",
-  "49": "Erótica",
-  "50": "Reparto adulto",
-  "51": "Antropomórfico",
-  "52": "Chicas lindas haciendo cosas lindas",
-  "53": "Cuidado infantil",
-  "54": "Deportes de combate",
-  "55": "Delincuentes",
-  "56": "Detectives",
-  "57": "Educativo",
-  "58": "Humor absurdo",
-  "59": "Gore",
-  "60": "Harén",
-  "61": "Juego de alto riesgo",
-  "62": "Histórico",
-  "63": "Isekai",
-  "64": "Iyashikei",
-  "65": "Polígono amoroso",
-  "66": "Cambio de sexo mágico",
-  "67": "Mahō shōjo",
-  "68": "Médico",
-  "69": "Memorias",
-  "70": "Mitología",
-  "71": "Crimen organizado",
-  "72": "Cultura otaku",
-  "73": "Artes escénicas",
-  "74": "Mascotas",
-  "75": "Reencarnación",
-  "76": "Harén inverso",
-  "77": "Samurái",
-  "78": "Farándula",
-  "79": "Juego de estrategia",
-  "80": "Supervivencia",
-  "81": "Deportes de equipo"
-},
   "auth": {
     "logout": "Cerrar sesión",
     "login": {
@@ -316,20 +120,7 @@
   },
   "user": {
   "defaultName": "Usuario",
-  "myProfile": "Mi Perfil",
-  "favorites": "Favoritos",
-  "myLists": "Mis Listas"
-  },
-  "favorites": {
-  "notLoggedIn": "No has iniciado sesión",
-  "loginToView": "Inicia sesión para ver tus anime favoritos",
-  "empty": "Aún no tienes favoritos",
-  "emptyDescription": "¡Comienza a agregar anime a tus favoritos!",
-  "count": "{{count}} anime favoritos",
-  "error": "Error al actualizar favoritos"
-  },
-  "recommendations": {
-      "empty": "No hay recomendaciones disponibles."
+  "myProfile": "Mi Perfil"
   },
   "profile": {
     "title": "Mi Perfil",

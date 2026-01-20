@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import {
-  Bot,
   Command,
   LifeBuoy,
   Home,
@@ -33,25 +32,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/",
         icon: Home,
         isActive: true,
-      },
-      {
-        title: t("nav.anime"),
-        url: "#",
-        icon: Bot,
-        items: [
-          {
-            title: t("sections.topAnime"),
-            url: "/anime/top",
-          },
-          {
-            title: t("sections.search"),
-            url: "/anime/search",
-          },
-          {
-            title: t("sections.catalog"),
-            url: "/anime/catalog",
-          },
-        ],
       },
     ],
     navSecondary: [

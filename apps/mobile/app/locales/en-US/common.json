@@ -1,14 +1,10 @@
 {
   "nav": {
     "home": "Home",
-    "calendar": "Calendar",
     "settings": "Settings"
   },
   "user": {
     "myProfile": "My Profile"
-  },
-  "favorites": {
-    "notLoggedIn": "Sign in to access your favorites"
   },
   "common": {
     "loading": "Loading...",
@@ -21,7 +17,8 @@
     "confirm": "Confirm",
     "delete": "Delete",
     "edit": "Edit",
-    "empty": "No results"
+    "empty": "No results",
+    "comingSoon": "Coming Soon"
   },
   "settings": {
     "title": "Settings",
@@ -37,7 +34,7 @@
     },
     "appearance": {
       "title": "Appearance",
-      "subtitle": "Customize the app appearance",
+      "subtitle": "Customize app appearance",
       "language": {
         "title": "Language",
         "subtitle": "Choose your preferred language",
@@ -58,21 +55,7 @@
     }
   },
   "home": {
-    "title": "Home",
-    "welcome": "Welcome",
-    "trendingNow": "Trending now",
-    "upcoming": "Upcoming next season",
-    "allTimePopular": "All time popular"
-  },
-  "calendar": {
-    "title": "Calendar",
-    "noEvents": "No events scheduled",
-    "empty": "No events scheduled",
-    "today": "Today",
-    "prevDay": "Previous day",
-    "nextDay": "Next day",
-    "prevWeek": "Previous week",
-    "nextWeek": "Next week"
+    "welcome": "Welcome"
   },
   "auth": {
     "logout": "Sign out",

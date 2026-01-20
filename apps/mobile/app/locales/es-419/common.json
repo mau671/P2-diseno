@@ -1,14 +1,10 @@
 {
   "nav": {
     "home": "Inicio",
-    "calendar": "Calendario",
     "settings": "Configuración"
   },
   "user": {
     "myProfile": "Mi perfil"
-  },
-  "favorites": {
-    "notLoggedIn": "Inicia sesión para ver tus favoritos"
   },
   "common": {
     "loading": "Cargando...",
@@ -21,7 +17,8 @@
     "confirm": "Confirmar",
     "delete": "Eliminar",
     "edit": "Editar",
-    "empty": "Sin resultados"
+    "empty": "Sin resultados",
+    "comingSoon": "Próximamente"
   },
   "settings": {
     "title": "Configuración",
@@ -58,21 +55,7 @@
     }
   },
   "home": {
-    "title": "Inicio",
-    "welcome": "Bienvenido",
-    "trendingNow": "En tendencia",
-    "upcoming": "Próxima temporada",
-    "allTimePopular": "Los más populares"
-  },
-  "calendar": {
-    "title": "Calendario",
-    "noEvents": "No hay eventos programados",
-    "empty": "No hay eventos programados",
-    "today": "Hoy",
-    "prevDay": "Día anterior",
-    "nextDay": "Día siguiente",
-    "prevWeek": "Semana anterior",
-    "nextWeek": "Semana siguiente"
+    "welcome": "Bienvenido"
   },
   "auth": {
     "logout": "Cerrar sesión",

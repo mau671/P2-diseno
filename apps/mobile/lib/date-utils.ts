@@ -64,14 +64,12 @@ export function isTodayInTz(date: Date, timeZone: string = TZ_CR): boolean {
 
 export function formatZonedDate(date: Date, locale: string = "es-419", options: Intl.DateTimeFormatOptions = {}): string {
   const normalizedLocaleInput = (locale || "es-419").toLowerCase();
-  // Normalize locale: map es-419 -> es to avoid Hermes/RN inconsistencies
   const normalizedLocale = normalizedLocaleInput.startsWith("es")
     ? "es"
     : normalizedLocaleInput.startsWith("en")
       ? "en"
       : normalizedLocaleInput;
 
-  // Force manual formatter for Spanish locales to avoid Hermes weekday/month bug
   if (normalizedLocale === "es") {
     return buildDateStringFallback(date, normalizedLocale, options);
   }
@@ -114,7 +112,6 @@ function buildDateStringFallback(date: Date, locale: string, options: Intl.DateT
     const weekdays = locale.startsWith("es") 
       ? ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"]
       : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    // Get day of week from date
     const tempDate = new Date(Date.UTC(parts.year, parts.month - 1, parts.day, 12, 0));
     result.push(weekdays[tempDate.getUTCDay()]);
   }
@@ -134,66 +131,22 @@ function buildDateStringFallback(date: Date, locale: string, options: Intl.DateT
     result.push(String(parts.year));
   }
   
-  // Join with appropriate separator based on locale
   if (locale.startsWith("es")) {
     if (options.weekday && result.length > 1) {
       return `${result[0]}, ${result.slice(1).join(" ")}`;
     }
     if (!options.weekday && options.day && options.month) {
-      // e.g. "15 ene" (day-month combo)
       return result.join(" ");
     }
     if (options.weekday && options.day && options.month) {
-      // ensure weekday-day-month order
       const [weekday, ...rest] = result;
       return `${weekday}, ${rest.join(" ")}`;
     }
     return result.join(" ");
   }
   
-  // English: "Thu, Jan 15" 
   if (options.weekday && result.length > 1) {
     return result[0] + ", " + result.slice(1).join(" ");
   }
   return result.join(" ");
-}
-
-export function formatDayNavigatorDate(date: Date, locale: string = "es-419"): string {
-  return formatZonedDate(date, locale, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
-}
-
-const JST_OFFSET_HOURS = 9;
-
-export function convertJikanTimeToCR(jikanTime: string, broadcastDate: Date): Date {
-  const timeMatch = jikanTime.match(/^(\d{1,2}):(\d{2})$/);
-  if (!timeMatch) {
-    return broadcastDate;
-  }
-  
-  const hourJST = parseInt(timeMatch[1], 10);
-  const minute = parseInt(timeMatch[2], 10);
-  
-  const dateCR = new Date(broadcastDate);
-  dateCR.setHours(hourJST, minute, 0, 0);
-  
-  const dateJST = new Date(dateCR);
-  dateJST.setHours(hourJST + JST_OFFSET_HOURS, minute, 0, 0);
-  
-  const diffMs = dateJST.getTime() - dateCR.getTime();
-  const diffHours = Math.round(diffMs / (1000 * 60 * 60));
-  
-  dateCR.setHours(hourJST - diffHours, minute, 0, 0);
-  
-  return dateCR;
-}
-
-export function formatTimeCR(date: Date, locale: string = "es-419"): string {
-  return formatZonedDate(date, locale, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
 }
