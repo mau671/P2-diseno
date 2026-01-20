@@ -12,16 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UserProfileRouteImport } from './routes/user/profile'
-import { Route as UserFavoritesRouteImport } from './routes/user/favorites'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
-import { Route as AnimeTopRouteImport } from './routes/anime/top'
-import { Route as AnimeSearchRouteImport } from './routes/anime/search'
-import { Route as AnimeCatalogRouteImport } from './routes/anime/catalog'
-import { Route as AnimeIdRouteRouteImport } from './routes/anime/$id/route'
-import { Route as AnimeIdIndexRouteImport } from './routes/anime/$id/index'
-import { Route as AnimeIdSlugRouteImport } from './routes/anime/$id/$slug'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -36,11 +29,6 @@ const IndexRoute = IndexRouteImport.update({
 const UserProfileRoute = UserProfileRouteImport.update({
   id: '/user/profile',
   path: '/user/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UserFavoritesRoute = UserFavoritesRouteImport.update({
-  id: '/user/favorites',
-  path: '/user/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -58,137 +46,62 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => AuthRoute,
 } as any)
-const AnimeTopRoute = AnimeTopRouteImport.update({
-  id: '/anime/top',
-  path: '/anime/top',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnimeSearchRoute = AnimeSearchRouteImport.update({
-  id: '/anime/search',
-  path: '/anime/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnimeCatalogRoute = AnimeCatalogRouteImport.update({
-  id: '/anime/catalog',
-  path: '/anime/catalog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnimeIdRouteRoute = AnimeIdRouteRouteImport.update({
-  id: '/anime/$id',
-  path: '/anime/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnimeIdIndexRoute = AnimeIdIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AnimeIdRouteRoute,
-} as any)
-const AnimeIdSlugRoute = AnimeIdSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => AnimeIdRouteRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/anime/$id': typeof AnimeIdRouteRouteWithChildren
-  '/anime/catalog': typeof AnimeCatalogRoute
-  '/anime/search': typeof AnimeSearchRoute
-  '/anime/top': typeof AnimeTopRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/user/favorites': typeof UserFavoritesRoute
   '/user/profile': typeof UserProfileRoute
-  '/anime/$id/$slug': typeof AnimeIdSlugRoute
-  '/anime/$id/': typeof AnimeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/anime/catalog': typeof AnimeCatalogRoute
-  '/anime/search': typeof AnimeSearchRoute
-  '/anime/top': typeof AnimeTopRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/user/favorites': typeof UserFavoritesRoute
   '/user/profile': typeof UserProfileRoute
-  '/anime/$id/$slug': typeof AnimeIdSlugRoute
-  '/anime/$id': typeof AnimeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/anime/$id': typeof AnimeIdRouteRouteWithChildren
-  '/anime/catalog': typeof AnimeCatalogRoute
-  '/anime/search': typeof AnimeSearchRoute
-  '/anime/top': typeof AnimeTopRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/user/favorites': typeof UserFavoritesRoute
   '/user/profile': typeof UserProfileRoute
-  '/anime/$id/$slug': typeof AnimeIdSlugRoute
-  '/anime/$id/': typeof AnimeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
-    | '/anime/$id'
-    | '/anime/catalog'
-    | '/anime/search'
-    | '/anime/top'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
-    | '/user/favorites'
     | '/user/profile'
-    | '/anime/$id/$slug'
-    | '/anime/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/anime/catalog'
-    | '/anime/search'
-    | '/anime/top'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
-    | '/user/favorites'
     | '/user/profile'
-    | '/anime/$id/$slug'
-    | '/anime/$id'
   id:
     | '__root__'
     | '/'
     | '/auth'
-    | '/anime/$id'
-    | '/anime/catalog'
-    | '/anime/search'
-    | '/anime/top'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
-    | '/user/favorites'
     | '/user/profile'
-    | '/anime/$id/$slug'
-    | '/anime/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
-  AnimeIdRouteRoute: typeof AnimeIdRouteRouteWithChildren
-  AnimeCatalogRoute: typeof AnimeCatalogRoute
-  AnimeSearchRoute: typeof AnimeSearchRoute
-  AnimeTopRoute: typeof AnimeTopRoute
-  UserFavoritesRoute: typeof UserFavoritesRoute
   UserProfileRoute: typeof UserProfileRoute
 }
 
@@ -215,13 +128,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user/favorites': {
-      id: '/user/favorites'
-      path: '/user/favorites'
-      fullPath: '/user/favorites'
-      preLoaderRoute: typeof UserFavoritesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth/register': {
       id: '/auth/register'
       path: '/register'
@@ -243,48 +149,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/anime/top': {
-      id: '/anime/top'
-      path: '/anime/top'
-      fullPath: '/anime/top'
-      preLoaderRoute: typeof AnimeTopRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/anime/search': {
-      id: '/anime/search'
-      path: '/anime/search'
-      fullPath: '/anime/search'
-      preLoaderRoute: typeof AnimeSearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/anime/catalog': {
-      id: '/anime/catalog'
-      path: '/anime/catalog'
-      fullPath: '/anime/catalog'
-      preLoaderRoute: typeof AnimeCatalogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/anime/$id': {
-      id: '/anime/$id'
-      path: '/anime/$id'
-      fullPath: '/anime/$id'
-      preLoaderRoute: typeof AnimeIdRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/anime/$id/': {
-      id: '/anime/$id/'
-      path: '/'
-      fullPath: '/anime/$id/'
-      preLoaderRoute: typeof AnimeIdIndexRouteImport
-      parentRoute: typeof AnimeIdRouteRoute
-    }
-    '/anime/$id/$slug': {
-      id: '/anime/$id/$slug'
-      path: '/$slug'
-      fullPath: '/anime/$id/$slug'
-      preLoaderRoute: typeof AnimeIdSlugRouteImport
-      parentRoute: typeof AnimeIdRouteRoute
-    }
   }
 }
 
@@ -302,28 +166,9 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
-interface AnimeIdRouteRouteChildren {
-  AnimeIdSlugRoute: typeof AnimeIdSlugRoute
-  AnimeIdIndexRoute: typeof AnimeIdIndexRoute
-}
-
-const AnimeIdRouteRouteChildren: AnimeIdRouteRouteChildren = {
-  AnimeIdSlugRoute: AnimeIdSlugRoute,
-  AnimeIdIndexRoute: AnimeIdIndexRoute,
-}
-
-const AnimeIdRouteRouteWithChildren = AnimeIdRouteRoute._addFileChildren(
-  AnimeIdRouteRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
-  AnimeIdRouteRoute: AnimeIdRouteRouteWithChildren,
-  AnimeCatalogRoute: AnimeCatalogRoute,
-  AnimeSearchRoute: AnimeSearchRoute,
-  AnimeTopRoute: AnimeTopRoute,
-  UserFavoritesRoute: UserFavoritesRoute,
   UserProfileRoute: UserProfileRoute,
 }
 export const routeTree = rootRouteImport

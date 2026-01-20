@@ -1,9 +1,7 @@
 {
   "nav": {
     "home": "Home",
-    "anime": "Anime",
-    "support": "Supporto",
-    "catalog": "Catalogo"
+    "support": "Supporto"
   },
   "home": {
     "title": "Home",
@@ -11,16 +9,6 @@
   },
   "sections": {
     "label": "Sezione",
-    "topAnime": "Top Anime",
-    "topAnimeDescription": "I migliori anime classificati dalla community",
-    "search": "Cerca",
-    "searchDescription": "Trova il tuo anime preferito",
-    "favorites": "Preferiti",
-    "catalog": "Catalogo",
-    "catalogDescription": "Sfoglia il catalogo degli anime",
-    "trendingNow": "Di tendenza",
-    "upcomingNextSeason": "Prossima stagione",
-    "allTimePopular": "Più popolari di sempre",
     "user": "Utente"
   },
   "common": {
@@ -34,9 +22,6 @@
     "scrollUp": "Scorri verso l'alto",
     "scrollDown": "Scorri verso il basso",
     "tooManyRequests": "Troppe richieste. Riprova.",
-    "addToFavorites": "Aggiungi ai preferiti",
-    "removeFromFavorites": "Rimuovi dai preferiti",
-    "favorite": "Preferiti",
     "back": "Indietro",
     "forward": "Avanti",
     "notFound": "Non trovato",
@@ -44,76 +29,6 @@
     "na": "N/A",
     "loadMore": "Carica altro",
     "cancel": "Annulla"
-  },
-  "search": {
-    "placeholder": "Cerca anime...",
-    "button": "Cerca",
-    "hint": "Digita qualcosa e premi Cerca.",
-    "error": "Ricerca non riuscita.",
-    "empty": "Nessun risultato.",
-    "allowNsfw": "Consenti contenuti NSFW",
-    "moreFilters": "Altri filtri",
-    "clearAll": "cancella tutto",
-    "episodes": "episodi",
-    "unknown": "Sconosciuto",
-    "filters": {
-      "genres": "Generi",
-      "year": "Anno",
-      "season": "Stagione",
-      "format": "Formato",
-      "status": "Stato",
-      "streamingOn": "Disponibile su",
-      "countryOfOrigin": "Paese di origine",
-      "sourceMaterial": "Materiale di origine",
-      "nsfw": "Contenuti NSFW"
-    },
-    "seasons": {
-      "winter": "Inverno",
-      "spring": "Primavera",
-      "summer": "Estate",
-      "fall": "Autunno"
-    },
-    "formats": {
-      "tv": "TV",
-      "movie": "Film",
-      "ova": "OVA",
-      "special": "Speciale",
-      "ona": "ONA",
-      "music": "Musica",
-      "cm": "CM",
-      "pv": "PV",
-      "tv_special": "Speciale TV"
-    },
-    "statuses": {
-      "airing": "In onda",
-      "complete": "Completato",
-      "upcoming": "In arrivo"
-    },
-    "types": {
-      "anime": "Anime",
-      "manga": "Manga",
-      "characters": "Personaggi",
-      "people": "Persone",
-      "studios": "Studi"
-    }
-  },
-  "topAnime": {
-    "empty": "Nessun elemento."
-  },
-  "catalog": {
-    "title": "Catalogo anime",
-    "description": "Esplora i migliori anime.",
-    "loadMore": "Carica altri anime",
-    "empty": "Nessun anime trovato",
-    "endOfList": "Hai raggiunto la fine del catalogo",
-    "previousSeason": "Stagione precedente",
-    "nextSeason": "Stagione successiva"
-  },
-  "seasons": {
-    "winter": "Inverno",
-    "spring": "Primavera",
-    "summer": "Estate",
-    "fall": "Autunno"
   },
   "theme": {
     "toggle": "Cambia tema",
@@ -143,120 +58,6 @@
     "pt": "Português (Brasil)",
     "fr": "Français (Francia)",
     "it": "Italiano (Italia)"
-  },
-  "anime": {
-    "detail": {
-      "scoreLabel": "Voto",
-      "noSynopsis": "Nessuna sinossi disponibile",
-      "studiosLabel": "Studi",
-      "minPerEp": "{{minutes}} min per ep",
-      "watchTime": {
-        "title": "Tempo di Visione",
-        "total": "{{episodes}} episodi × {{minutesPerEpisode}} min/ep",
-        "minutes": "{{count}} {{minText}}",
-        "hours": "{{count}} {{hourText}}",
-        "hoursMinutes": "{{hours}}h {{minutes}}m",
-        "days": "{{count}} {{dayText}}",
-        "daysHours": "{{days}}g {{hours}}h",
-        "customize": "Personalizza stima:",
-        "episodesPerDay": "Episodi/giorno",
-        "hoursPerDay": "Ore/giorno",
-        "estimates": "Stime:",
-        "daysAtEpisodes": "{{count}} {{dayText}} guardando {{episodesPerDay}} {{episodeText}}/giorno",
-        "daysAtHours": "{{count}} {{dayText}} guardando {{hoursPerDay}} {{hourText}}/giorno",
-        "sessions1Hour": "{{count}} {{sessionText}} di 1 ora",
-        "sessions2Hours": "{{count}} {{sessionText}} di 2 ore"
-      },
-      "sections": {
-        "characters": "Personaggi",
-        "related": "Correlati",
-        "episodes": "Episodi",
-        "moreInfo": "Maggiori informazioni",
-        "recommendations": "Consigli"
-      },
-      "episodes": {
-        "countShown": "{{count}} mostrati",
-        "empty": "Nessun episodio disponibile.",
-        "fallbackTitle": "Episodio {{number}}",
-        "moreAvailable": "Sono disponibili altri episodi.",
-        "end": "Fine della lista."
-      }
-    },
-    "status": {
-      "finished_airing": "Concluso",
-      "currently_airing": "In onda",
-      "not_yet_aired": "Non ancora trasmesso",
-      "unknown": "Sconosciuto"
-    }
-  },
-  "recommendations": {
-    "empty": "Nessun consiglio disponibile."
-  },
-  "genres": {
-    "1": "Azione",
-    "2": "Avventura",
-    "4": "Commedia",
-    "7": "Mistero",
-    "8": "Drammatico",
-    "10": "Fantasy",
-    "11": "Romance",
-    "14": "Horror",
-    "17": "Arti marziali",
-    "18": "Mecha",
-    "19": "Musica",
-    "20": "Parodia",
-    "22": "Sottotesto romantico",
-    "23": "Scolastico",
-    "24": "Fantascienza",
-    "25": "Shoujo",
-    "27": "Shounen",
-    "29": "Spazio",
-    "30": "Sport",
-    "31": "Superpoteri",
-    "36": "Slice of Life",
-    "37": "Soprannaturale",
-    "38": "Militare",
-    "39": "Polizia",
-    "40": "Psicologico",
-    "41": "Suspense",
-    "42": "Seinen",
-    "43": "Josei",
-    "46": "Premiato",
-    "47": "Gourmet",
-    "48": "Ambiente di lavoro",
-    "49": "Erotico",
-    "50": "Cast adulto",
-    "51": "Antropomorfo",
-    "52": "CGDCT",
-    "53": "Cura dei bambini",
-    "54": "Sport da combattimento",
-    "55": "Delinquenti",
-    "56": "Detective",
-    "57": "Educativo",
-    "58": "Umorismo demenziale",
-    "59": "Gore",
-    "60": "Harem",
-    "61": "Gioco ad alto rischio",
-    "62": "Storico",
-    "63": "Isekai",
-    "64": "Iyashikei",
-    "65": "Poligono amoroso",
-    "66": "Cambio di sesso magico",
-    "67": "Mahou Shoujo",
-    "68": "Medico",
-    "69": "Memorie",
-    "70": "Mitologia",
-    "71": "Crimine organizzato",
-    "72": "Cultura otaku",
-    "73": "Arti performative",
-    "74": "Animali domestici",
-    "75": "Reincarnazione",
-    "76": "Harem inverso",
-    "77": "Samurai",
-    "78": "Showbiz",
-    "79": "Gioco di strategia",
-    "80": "Sopravvivenza",
-    "81": "Sport di squadra"
   },
   "auth": {
     "logout": "Esci",
@@ -319,17 +120,7 @@
   },
   "user": {
     "defaultName": "Utente",
-    "myProfile": "Il mio profilo",
-    "favorites": "Preferiti",
-    "myLists": "Le mie liste"
-  },
-  "favorites": {
-    "notLoggedIn": "Non hai effettuato l'accesso",
-    "loginToView": "Accedi per vedere i tuoi anime preferiti",
-    "empty": "Ancora nessun preferito",
-    "emptyDescription": "Inizia ad aggiungere anime ai preferiti!",
-    "count": "{{count}} anime preferito",
-    "error": "Errore nell'aggiornamento dei preferiti"
+    "myProfile": "Il mio profilo"
   },
   "profile": {
     "title": "Il Mio Profilo",
@@ -387,9 +178,9 @@
     "unlinkGoogle": "Dissocia Google",
     "unlinkGoogleHint": "Dissocia il tuo account Google. Potrai continuare a accedere con il tuo indirizzo email e password.",
     "unlinkGoogleConfirm": "Dissocia account Google",
-    "unlinkGoogleConfirmDescription": "Sei sicuro di voler dissocia il tuo account Google? Potrai continuare a accedere con il tuo indirizzo email e password.",
+    "unlinkGoogleConfirmDescription": "Sei sicuro di voler dissociare il tuo account Google? Potrai continuare a accedere con il tuo indirizzo email e password.",
     "unlinking": "Dissociazione in corso...",
-    "googleUnlinked": "Account Google dissocia con successo",
-    "cannotUnlinkOnlyMethod": "Non puoi dissocia il solo metodo di autenticazione"
+    "googleUnlinked": "Account Google dissociato con successo",
+    "cannotUnlinkOnlyMethod": "Non puoi dissociare l'unico metodo di autenticazione"
   }
 }

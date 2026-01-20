@@ -31,8 +31,6 @@ export default defineConfig({
     warmup: {
       clientFiles: [
         "./src/routes/index.tsx",
-        "./src/routes/anime/top.tsx",
-        "./src/routes/anime/catalog.tsx",
         "./src/components/app-sidebar.tsx",
       ],
     },
