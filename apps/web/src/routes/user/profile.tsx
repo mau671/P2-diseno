@@ -5,9 +5,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileSection } from "@/components/profile/ProfileSection";
-import { SecuritySection } from "@/components/profile/SecuritySection";
 import { AppearanceSection } from "@/components/profile/AppearanceSection";
-import { User, Shield, Palette } from "lucide-react";
+import { User, Palette } from "lucide-react";
 
 export const Route = createFileRoute("/user/profile")({
   component: ProfilePage,
@@ -53,10 +52,6 @@ function ProfilePage() {
             <User className="mr-2 h-4 w-4" />
             {t("profile.profileTab")}
           </TabsTrigger>
-          <TabsTrigger value="security">
-            <Shield className="mr-2 h-4 w-4" />
-            {t("profile.securityTab")}
-          </TabsTrigger>
           <TabsTrigger value="appearance">
             <Palette className="mr-2 h-4 w-4" />
             {t("profile.appearanceTab")}
@@ -65,10 +60,6 @@ function ProfilePage() {
 
         <TabsContent value="profile" className="mt-6">
           <ProfileSection />
-        </TabsContent>
-
-        <TabsContent value="security" className="mt-6">
-          <SecuritySection />
         </TabsContent>
 
         <TabsContent value="appearance" className="mt-6">

@@ -24,13 +24,14 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"div">) {
   const { t } = useTranslation();
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { register } = useAuth();
+  const { signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +51,7 @@ export function SignupForm({
     setLoading(true);
 
     try {
-      await register(email, password);
+      await signUp(email, password, fullName.trim() || undefined);
       navigate({ to: "/" });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("auth.errors.registerFailed"));
@@ -78,6 +79,16 @@ export function SignupForm({
                   </div>
                 </Field>
               )}
+              <Field>
+                <FieldLabel htmlFor="fullName">{t("auth.register.fullName")}</FieldLabel>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder={t("auth.register.fullNamePlaceholder")}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </Field>
               <Field>
                 <FieldLabel htmlFor="email">{t("auth.register.email")}</FieldLabel>
                 <Input

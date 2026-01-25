@@ -24,7 +24,9 @@
     "title": "Settings",
     "profile": {
       "title": "Profile",
-      "subtitle": "Manage your profile information"
+      "subtitle": "Manage your profile information",
+      "dietary": "Dietary preferences",
+      "verified": "Verified account"
     },
     "security": {
       "title": "Security",
@@ -107,5 +109,17 @@
       "registerFailed": "Registration failed",
       "resetFailed": "Failed to send email"
     }
+  },
+  "dietary": {
+    "title": "Dietary profile",
+    "subtitle": "Select allergens and nutrition goals",
+    "allergens": "Allergens",
+    "diets": "Goals",
+    "saving": "Saving...",
+    "saved": "Preferences updated",
+    "loadError": "Failed to load restrictions",
+    "saveError": "Failed to save restrictions",
+    "emptyAllergens": "No allergens available",
+    "emptyDiets": "No goals available"
   }
 }

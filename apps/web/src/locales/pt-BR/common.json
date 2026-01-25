@@ -1,4 +1,7 @@
 {
+  "app": {
+    "name": "Cocina Express"
+  },
   "nav": {
     "home": "Início",
     "support": "Suporte"
@@ -66,6 +69,7 @@
       "welcomeBack": "Bem-vindo de volta",
       "accessAccount": "Acesse sua conta",
       "signIn": "Entrar",
+      "description": "Entre com seu e-mail e senha",
       "socialLogin": "Entre com sua conta Google",
       "loginWithGoogle": "Entrar com Google",
       "orContinueWith": "Ou continue com",
@@ -128,6 +132,8 @@
     "securityTab": "Segurança",
     "appearanceTab": "Aparência",
     "userInfo": "Informações do Usuário",
+    "fullName": "Nome completo",
+    "email": "E-mail",
     "displayName": "Nome de Exibição",
     "displayNamePlaceholder": "Digite seu nome",
     "avatar": "Foto de Perfil",

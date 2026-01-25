@@ -54,9 +54,6 @@ function getRouteLabel(
   if (routeId.includes("/user/profile")) {
     return t("profile.title");
   }
-  if (routeId.includes("/user/favorites")) {
-    return t("sections.favorites");
-  }
   if (routeId.includes("/user")) {
     return t("sections.user");
   }
@@ -195,7 +192,7 @@ export function AppBreadcrumbs() {
       if (isUserRoute && !hasUserParent) {
         const isUserSubRoute =
           match.routeId.includes("/user/profile") ||
-          match.routeId.includes("/user/favorites");
+          match.routeId.includes("/user/profile");
 
         if (isUserSubRoute) {
           items.push({
@@ -285,4 +282,3 @@ export function AppBreadcrumbs() {
     </Breadcrumb>
   );
 }
-
