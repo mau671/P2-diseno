@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, ScrollView, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -16,19 +18,142 @@ type DietaryRestriction = {
   type: string;
 };
 
+type DietaryRestrictionsResponse = {
+  restrictions: DietaryRestriction[];
+};
+
+type UserDietaryResponse = {
+  restriction_ids: string[];
+};
+
+const RESTRICTIONS_CACHE_KEY = 'ce-dietary-restrictions';
+const USER_RESTRICTIONS_CACHE_PREFIX = 'ce-user-dietary';
+
+const setsEqual = (a: Set<string>, b: Set<string>) => {
+  if (a.size !== b.size) return false;
+  for (const value of a) {
+    if (!b.has(value)) return false;
+  }
+  return true;
+};
+
+const getErrorMessage = (err: unknown, fallback: string) =>
+  err instanceof Error ? err.message : fallback;
+
 export default function DietaryProfileScreen() {
   const { t } = useTranslation();
   const { resolvedScheme } = useThemePreference();
-  const { session, loading: authLoading } = useAuth();
+  const { session, user, loading: authLoading } = useAuth();
   const colors = Colors[resolvedScheme];
+  const queryClient = useQueryClient();
 
-  const [restrictions, setRestrictions] = useState<DietaryRestriction[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [initialIds, setInitialIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  const restrictionsQuery = useQuery<DietaryRestrictionsResponse>({
+    queryKey: ['dietary', 'restrictions'],
+    queryFn: () => apiRequest<DietaryRestrictionsResponse>('/dietary/restrictions', { method: 'GET' }),
+    staleTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
+  });
+
+  const userRestrictionsQuery = useQuery<UserDietaryResponse>({
+    queryKey: ['dietary', 'user', user?.id],
+    queryFn: () =>
+      apiRequest<UserDietaryResponse>('/profiles/me/dietary', { method: 'GET' }, session?.access_token),
+    enabled: !!session?.access_token,
+    staleTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    let active = true;
+    const loadCache = async () => {
+      try {
+        const restrictionsRaw = await AsyncStorage.getItem(RESTRICTIONS_CACHE_KEY);
+        if (restrictionsRaw) {
+          const cached = JSON.parse(restrictionsRaw) as DietaryRestrictionsResponse & { cachedAt?: number };
+          if (active && cached?.restrictions?.length) {
+            queryClient.setQueryData(['dietary', 'restrictions'], { restrictions: cached.restrictions });
+          }
+        }
+        if (user?.id) {
+          const userKey = `${USER_RESTRICTIONS_CACHE_PREFIX}:${user.id}`;
+          const userRaw = await AsyncStorage.getItem(userKey);
+          if (userRaw) {
+            const cached = JSON.parse(userRaw) as UserDietaryResponse & { cachedAt?: number };
+            if (active && cached?.restriction_ids) {
+              queryClient.setQueryData(['dietary', 'user', user.id], {
+                restriction_ids: cached.restriction_ids,
+              });
+            }
+          }
+        }
+      } catch {
+        // Ignore cache errors
+      }
+    };
+    void loadCache();
+    return () => {
+      active = false;
+    };
+  }, [queryClient, user?.id]);
+
+  useEffect(() => {
+    const restrictions = restrictionsQuery.data?.restrictions;
+    if (!restrictions) return;
+    void AsyncStorage.setItem(
+      RESTRICTIONS_CACHE_KEY,
+      JSON.stringify({ restrictions, cachedAt: Date.now() })
+    );
+  }, [restrictionsQuery.data]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const restrictionIds = userRestrictionsQuery.data?.restriction_ids;
+    if (!restrictionIds) return;
+    const userKey = `${USER_RESTRICTIONS_CACHE_PREFIX}:${user.id}`;
+    void AsyncStorage.setItem(
+      userKey,
+      JSON.stringify({ restriction_ids: restrictionIds, cachedAt: Date.now() })
+    );
+  }, [user?.id, userRestrictionsQuery.data]);
+
+  const saveMutation = useMutation({
+    mutationFn: (restrictionIds: string[]) =>
+      apiRequest<UserDietaryResponse>(
+        '/profiles/me/dietary',
+        {
+          method: 'PUT',
+          body: JSON.stringify({ restriction_ids: restrictionIds }),
+        },
+        session?.access_token
+      ),
+    onMutate: async (restrictionIds: string[]) => {
+      setError('');
+      setSuccess(false);
+      const previous = queryClient.getQueryData<UserDietaryResponse>(['dietary', 'user', user?.id]);
+      queryClient.setQueryData(['dietary', 'user', user?.id], { restriction_ids: restrictionIds });
+      return { previous };
+    },
+    onError: (err, _restrictionIds, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['dietary', 'user', user?.id], context.previous);
+      }
+      setError(getErrorMessage(err, t('dietary.saveError')));
+    },
+    onSuccess: (data) => {
+      const updatedIds = data?.restriction_ids ?? [];
+      const nextSet = new Set(updatedIds);
+      setSelectedIds(nextSet);
+      setInitialIds(nextSet);
+      setSuccess(true);
+    },
+  });
+
+  const restrictions = restrictionsQuery.data?.restrictions ?? [];
   const grouped = useMemo(() => {
     const allergens: DietaryRestriction[] = [];
     const diets: DietaryRestriction[] = [];
@@ -43,6 +168,8 @@ export default function DietaryProfileScreen() {
   }, [restrictions]);
 
   const toggleRestriction = (id: string) => {
+    setError('');
+    setSuccess(false);
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -54,51 +181,38 @@ export default function DietaryProfileScreen() {
     });
   };
 
-  const loadData = async () => {
-    setError('');
-    setSuccess(false);
-    setLoading(true);
-    try {
-      const restrictionsResponse = await apiRequest<{ restrictions: DietaryRestriction[] }>(
-        '/dietary/restrictions',
-        { method: 'GET' }
-      );
+  const isDirty = useMemo(() => !setsEqual(selectedIds, initialIds), [initialIds, selectedIds]);
 
-      const dietaryResponse = await apiRequest<{ restriction_ids: string[] }>(
-        '/profiles/me/dietary',
-        { method: 'GET' },
-        session?.access_token
-      );
+  useEffect(() => {
+    if (!userRestrictionsQuery.data) return;
+    if (isDirty) return;
+    const next = new Set(userRestrictionsQuery.data.restriction_ids ?? []);
+    setSelectedIds(next);
+    setInitialIds(next);
+  }, [isDirty, userRestrictionsQuery.data, userRestrictionsQuery.dataUpdatedAt]);
 
-      setRestrictions(restrictionsResponse.restrictions || []);
-      setSelectedIds(new Set(dietaryResponse.restriction_ids || []));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('dietary.loadError'));
-    } finally {
-      setLoading(false);
+  const handleSave = () => {
+    if (!session?.access_token) {
+      router.replace('/auth/login');
+      return;
     }
+    saveMutation.mutate(Array.from(selectedIds));
   };
 
-  const handleSave = async () => {
-    setError('');
-    setSuccess(false);
-    setSaving(true);
-    try {
-      await apiRequest<{ restriction_ids: string[] }>(
-        '/profiles/me/dietary',
-        {
-          method: 'PUT',
-          body: JSON.stringify({ restriction_ids: Array.from(selectedIds) })
-        },
-        session?.access_token
-      );
-      setSuccess(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('dietary.saveError'));
-    } finally {
-      setSaving(false);
+  const loadErrorMessage = useMemo(() => {
+    if (restrictionsQuery.error) {
+      return getErrorMessage(restrictionsQuery.error, t('dietary.loadError'));
     }
-  };
+    if (userRestrictionsQuery.error) {
+      return getErrorMessage(userRestrictionsQuery.error, t('dietary.loadError'));
+    }
+    return '';
+  }, [restrictionsQuery.error, t, userRestrictionsQuery.error]);
+
+  const saving = (saveMutation as { isPending?: boolean; isLoading?: boolean }).isPending
+    ?? saveMutation.isLoading;
+  const loading = restrictionsQuery.isLoading || userRestrictionsQuery.isLoading;
+  const canSave = !loading && !saving && isDirty;
 
   useEffect(() => {
     if (authLoading) return;
@@ -106,7 +220,6 @@ export default function DietaryProfileScreen() {
       router.replace('/auth/login');
       return;
     }
-    void loadData();
   }, [authLoading, session?.access_token]);
 
   return (
@@ -120,10 +233,16 @@ export default function DietaryProfileScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {error ? (
-          <View style={[styles.messageBox, { backgroundColor: `${colors.error}20`, borderColor: `${colors.error}40` }]}
-            >
-            <ThemedText style={[styles.messageText, { color: colors.error }]}>{error}</ThemedText>
+        {error || loadErrorMessage ? (
+          <View
+            style={[
+              styles.messageBox,
+              { backgroundColor: `${colors.error}20`, borderColor: `${colors.error}40` },
+            ]}
+          >
+            <ThemedText style={[styles.messageText, { color: colors.error }]}>
+              {error || loadErrorMessage}
+            </ThemedText>
           </View>
         ) : null}
 
@@ -160,9 +279,9 @@ export default function DietaryProfileScreen() {
 
       <View style={[styles.footer, { backgroundColor: colors.background, borderTopColor: colors.cardBorder }]}>
         <TouchableOpacity
-          style={[styles.saveButton, { backgroundColor: colors.primary }, saving && styles.buttonDisabled]}
+          style={[styles.saveButton, { backgroundColor: colors.primary }, !canSave && styles.buttonDisabled]}
           onPress={handleSave}
-          disabled={saving || loading}
+          disabled={!canSave}
         >
           <ThemedText style={[styles.saveButtonText, { color: colors.primaryText }]}
             >
