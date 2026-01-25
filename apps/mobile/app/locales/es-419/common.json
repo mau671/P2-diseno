@@ -24,7 +24,9 @@
     "title": "Configuración",
     "profile": {
       "title": "Perfil",
-      "subtitle": "Gestiona la información de tu perfil"
+      "subtitle": "Gestiona la información de tu perfil",
+      "dietary": "Restricciones alimenticias",
+      "verified": "Cuenta verificada"
     },
     "security": {
       "title": "Seguridad",
@@ -107,5 +109,17 @@
       "registerFailed": "Falló el registro",
       "resetFailed": "No se pudo enviar el correo"
     }
+  },
+  "dietary": {
+    "title": "Perfil dietético",
+    "subtitle": "Selecciona alergias y objetivos nutricionales",
+    "allergens": "Alérgenos",
+    "diets": "Objetivos",
+    "saving": "Guardando...",
+    "saved": "Preferencias actualizadas",
+    "loadError": "No se pudieron cargar las restricciones",
+    "saveError": "No se pudieron guardar las restricciones",
+    "emptyAllergens": "No hay alérgenos disponibles",
+    "emptyDiets": "No hay objetivos disponibles"
   }
 }

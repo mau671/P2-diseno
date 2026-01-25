@@ -9,7 +9,7 @@ This is a mobile application built with:
 - **Language**: TypeScript
 - **State Management**: TanStack Query (React Query)
 - **Internationalization**: i18next + react-i18next
-- **Backend**: Firebase
+- **Backend**: Custom API (Supabase)
 - **Storage**: AsyncStorage
 
 ## Project Structure
@@ -29,8 +29,6 @@ apps/mobile/
 │   │   │   └── common.json    # English translations
 │   │   └── es-419/
 │   │       └── common.json    # Spanish translations
-│   ├── config/                # Configurations
-│   │   └── firebase.ts        # Firebase configuration
 │   └── modal.tsx              # Example modal screen
 ├── components/                # Reusable components
 │   ├── ui/                    # Basic UI components
@@ -217,9 +215,9 @@ Icons use the `IconSymbol` component which supports:
 <IconSymbol size={28} name="calendar" color={color} />
 ```
 
-## Firebase Configuration
+## Backend Configuration
 
-Firebase configuration is located in `app/config/firebase.ts`. Make sure you have the correct environment variables configured.
+Configure the API base URL via `EXPO_PUBLIC_API_BASE_URL` for the mobile app to reach the backend.
 
 ## Custom Hooks
 
@@ -251,7 +249,6 @@ Key packages:
 ## Next Steps Suggestions
 
 - Implement real content in Home, Calendar, and Settings screens
-- Connect to Firebase for authentication and data
 - Add more translations as features are developed
 - Add additional navigation as needed
 - Implement global state management if necessary

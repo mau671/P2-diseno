@@ -60,6 +60,8 @@ function SectionHeader({
 function ProfileSection({ user, colors }: { user: any; colors: typeof Colors.light }) {
   const { t } = useTranslation();
   const { logout } = useAuth();
+  const email = user?.email || '';
+  const initial = email ? email.charAt(0).toUpperCase() : 'U';
 
   const handleLogout = async () => {
     Alert.alert(
@@ -75,30 +77,17 @@ function ProfileSection({ user, colors }: { user: any; colors: typeof Colors.lig
     );
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone.',
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
-          console.log('Delete account');
-        }}
-      ]
-    );
-  };
-
   return (
     <View style={[styles.sectionContent, { backgroundColor: colors.background }]}>
       <View style={styles.profileHeader}>
         <View style={[styles.avatar, { backgroundColor: colors.secondary }]}>
           <ThemedText style={styles.avatarText}>
-            {user.email?.charAt(0).toUpperCase() || 'U'}
+            {initial}
           </ThemedText>
         </View>
         <View style={styles.profileInfo}>
-          <ThemedText style={styles.profileEmail}>{user.email}</ThemedText>
-          <ThemedText style={[styles.profileLabel, { color: colors.icon }]}>Verified Account</ThemedText>
+          <ThemedText style={styles.profileEmail}>{email || t('user.myProfile')}</ThemedText>
+          <ThemedText style={[styles.profileLabel, { color: colors.icon }]}>{t('settings.profile.verified')}</ThemedText>
         </View>
       </View>
 
@@ -106,24 +95,12 @@ function ProfileSection({ user, colors }: { user: any; colors: typeof Colors.lig
 
       <TouchableOpacity
         style={[styles.optionItem, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
-        onPress={() => router.push('/auth/forgot-password')}
+        onPress={() => router.push('/profile/dietary')}
         activeOpacity={0.7}
       >
         <View style={styles.optionItemRow}>
-          <IconSymbol name="lock.fill" size={20} color={colors.primary} />
-          <ThemedText style={styles.optionItemText}>{t('settings.security.changePassword')}</ThemedText>
-          <IconSymbol name="chevron.right" size={18} color={colors.icon} />
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.optionItem, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
-        onPress={handleDeleteAccount}
-        activeOpacity={0.7}
-      >
-        <View style={styles.optionItemRow}>
-          <IconSymbol name="trash.fill" size={20} color={colors.error} />
-          <ThemedText style={[styles.optionItemText, { color: colors.error }]}>{t('settings.security.deleteAccount')}</ThemedText>
+          <IconSymbol name="leaf.fill" size={20} color={colors.primary} />
+          <ThemedText style={styles.optionItemText}>{t('settings.profile.dietary')}</ThemedText>
           <IconSymbol name="chevron.right" size={18} color={colors.icon} />
         </View>
       </TouchableOpacity>

@@ -1,204 +1,191 @@
-import React, { createContext, useEffect, useState } from 'react';
-import { 
-  type User,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  GoogleAuthProvider,
-  signInWithCredential,
-  sendPasswordResetEmail,
-  updateProfile,
-  updatePassword,
-  deleteUser,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-  linkWithCredential,
-  unlink
-} from 'firebase/auth';
-import { auth } from '@/app/config/firebase';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { apiRequest, type AuthResponse, type AuthSession, type AuthUser } from '@/lib/api';
 
-WebBrowser.maybeCompleteAuthSession();
-
-// Client IDs
-const EXPO_CLIENT_ID = '661319432288-0voa3ej7ue91mudjeiu3uj61hus4cpe5.apps.googleusercontent.com';
-const WEB_CLIENT_ID = '661319432288-f4e0tfd3cha0h8p10pc0utk18fe3o71q.apps.googleusercontent.com';
+type StoredAuth = {
+  session: AuthSession;
+  user: AuthUser | null;
+};
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
+  session: AuthSession | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  updateAuthProfile: (updates: { displayName?: string; photoURL?: string | null }) => Promise<void>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
-  deleteAccount: (password: string) => Promise<void>;
-  linkPassword: (password: string) => Promise<void>;
-  linkGoogle: () => Promise<void>;
-  unlinkGoogle: () => Promise<void>;
-  hasPassword: boolean;
-  hasGoogle: boolean;
-  providers: string[];
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const AUTH_STORAGE_KEY = 'ce-auth-session';
+const REFRESH_EARLY_MS = 60 * 1000;
+
+async function readStoredAuth(): Promise<StoredAuth | null> {
+  try {
+    const raw = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as StoredAuth;
+  } catch {
+    return null;
+  }
+}
+
+async function writeStoredAuth(data: StoredAuth | null) {
+  try {
+    if (!data) {
+      await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+      return;
+    }
+    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshSessionRef = useRef<() => Promise<void>>(async () => {});
 
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: EXPO_CLIENT_ID,
-    webClientId: WEB_CLIENT_ID,
-  });
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
+  const clearRefreshTimer = useCallback(() => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
   }, []);
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { id_token } = response.params;
-      const credential = GoogleAuthProvider.credential(id_token);
-      signInWithCredential(auth, credential);
+  const scheduleRefresh = useCallback(
+    (expiresAt: number) => {
+      clearRefreshTimer();
+      const delay = expiresAt * 1000 - Date.now() - REFRESH_EARLY_MS;
+      if (delay <= 0) {
+        void refreshSessionRef.current();
+        return;
+      }
+      refreshTimerRef.current = setTimeout(() => {
+        void refreshSessionRef.current();
+      }, delay);
+    },
+    [clearRefreshTimer]
+  );
+
+  const applyAuth = useCallback(
+    async (payload: AuthResponse) => {
+      const nextSession = payload.session ?? null;
+      const nextUser = nextSession ? payload.user ?? null : null;
+
+      setUser(nextUser);
+      setSession(nextSession);
+      if (nextSession) {
+        await writeStoredAuth({ session: nextSession, user: nextUser });
+        scheduleRefresh(nextSession.expires_at);
+      } else {
+        await writeStoredAuth(null);
+        clearRefreshTimer();
+      }
+    },
+    [clearRefreshTimer, scheduleRefresh]
+  );
+
+  const refreshSession = useCallback(async () => {
+    const stored = await readStoredAuth();
+    const refreshToken = stored?.session.refresh_token ?? session?.refresh_token;
+    if (!refreshToken) {
+      await applyAuth({ user: null, session: null });
+      return;
     }
-  }, [response]);
 
-  const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
-  };
-
-  const loginWithGoogle = async () => {
-    try {
-      await promptAsync();
-    } catch (error) {
-      console.error('Google login error:', error);
-      throw error;
-    }
-  };
-
-  const register = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
-  };
-
-  const logout = async () => {
-    await firebaseSignOut(auth);
-  };
-
-  const resetPassword = async (email: string) => {
-    await sendPasswordResetEmail(auth, email);
-  };
-
-  const updateAuthProfile = async (updates: { displayName?: string; photoURL?: string | null }) => {
-    if (!auth.currentUser) {
-      throw new Error('No user is currently signed in');
-    }
-    await updateProfile(auth.currentUser, updates);
-    setUser((prevUser) => {
-      if (!prevUser) return null;
-      return { ...prevUser, ...updates } as User;
+    const data = await apiRequest<AuthResponse>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: refreshToken })
     });
-  };
 
-  const changePassword = async (currentPassword: string, newPassword: string) => {
-    if (!auth.currentUser || !auth.currentUser.email) {
-      throw new Error('No user is currently signed in');
-    }
+    await applyAuth(data);
+  }, [applyAuth, session?.refresh_token]);
 
-    const credential = EmailAuthProvider.credential(
-      auth.currentUser.email,
-      currentPassword
-    );
-    await reauthenticateWithCredential(auth.currentUser, credential);
-    await updatePassword(auth.currentUser, newPassword);
-  };
+  useEffect(() => {
+    refreshSessionRef.current = refreshSession;
+  }, [refreshSession]);
 
-  const deleteAccount = async (password: string) => {
-    if (!auth.currentUser || !auth.currentUser.email) {
-      throw new Error('No user is currently signed in');
-    }
-
-    const credential = EmailAuthProvider.credential(
-      auth.currentUser.email,
-      password
-    );
-    await reauthenticateWithCredential(auth.currentUser, credential);
-    await deleteUser(auth.currentUser);
-    setUser(null);
-  };
-
-  const linkPassword = async (password: string) => {
-    if (!auth.currentUser || !auth.currentUser.email) {
-      throw new Error("No user or email available");
-    }
-
-    const credential = EmailAuthProvider.credential(
-      auth.currentUser.email,
-      password
-    );
-
-    await linkWithCredential(auth.currentUser, credential);
-  };
-
-  const linkGoogle = async () => {
-    if (!auth.currentUser) {
-      throw new Error("No user signed in");
+  const loadSession = useCallback(async () => {
+    const stored = await readStoredAuth();
+    if (!stored?.session?.access_token) {
+      setLoading(false);
+      return;
     }
 
     try {
-      await promptAsync();
-      // El useEffect manejará la vinculación cuando reciba la respuesta
-    } catch (error) {
-      console.error('Link Google error:', error);
-      throw error;
+      const me = await apiRequest<{ user: AuthUser | null }>(
+        '/auth/me',
+        { method: 'GET' },
+        stored.session.access_token
+      );
+
+      setUser(me.user ?? stored.user ?? null);
+      setSession(stored.session);
+      scheduleRefresh(stored.session.expires_at);
+    } catch {
+      try {
+        await refreshSession();
+      } catch {
+        await applyAuth({ user: null, session: null });
+      }
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [applyAuth, refreshSession, scheduleRefresh]);
 
-  const unlinkGoogle = async () => {
-    if (!auth.currentUser) {
-      throw new Error("No user signed in");
+  useEffect(() => {
+    void loadSession();
+    return () => {
+      clearRefreshTimer();
+    };
+  }, [clearRefreshTimer, loadSession]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const data = await apiRequest<AuthResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+
+    await applyAuth(data);
+  }, [applyAuth]);
+
+  const register = useCallback(async (email: string, password: string) => {
+    const data = await apiRequest<AuthResponse>('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+
+    await applyAuth(data);
+  }, [applyAuth]);
+
+  const logout = useCallback(async () => {
+    if (session?.access_token) {
+      await apiRequest('/auth/logout', { method: 'POST' }, session.access_token);
     }
+    await applyAuth({ user: null, session: null });
+  }, [applyAuth, session?.access_token]);
 
-    const providers = auth.currentUser.providerData.map((p) => p.providerId);
-    if (providers.length <= 1) {
-      throw new Error("Cannot unlink the only authentication method");
-    }
+  const resetPassword = useCallback(async (email: string) => {
+    await apiRequest('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    });
+  }, []);
 
-    await unlink(auth.currentUser, "google.com");
-  };
-
-  const providers = user?.providerData.map((p) => p.providerId) ?? [];
-  const hasPassword = providers.includes("password");
-  const hasGoogle = providers.includes("google.com");
+  const value = useMemo(
+    () => ({ user, session, loading, login, register, logout, resetPassword, refreshSession }),
+    [loading, login, logout, refreshSession, register, resetPassword, session, user]
+  );
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      login, 
-      loginWithGoogle, 
-      register, 
-      logout, 
-      resetPassword,
-      updateAuthProfile,
-      changePassword,
-      deleteAccount,
-      hasGoogle,
-      hasPassword,
-      providers,
-      linkPassword,
-      linkGoogle,
-      unlinkGoogle
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

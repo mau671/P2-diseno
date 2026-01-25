@@ -22,7 +22,7 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       refetchOnMount: false,
-      retry: (failureCount, error) => {
+      retry: (failureCount) => {
         return failureCount < 3;
       },
       retryDelay: (attemptIndex) => {

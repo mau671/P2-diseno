@@ -1,59 +1,189 @@
-import React, { createContext, useEffect, useState } from 'react';
-import { 
-  type User,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  GoogleAuthProvider,
-  signInWithPopup
-} from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { apiRequest, type AuthResponse, type AuthSession, type AuthUser } from "@/api/backend";
+
+type StoredAuth = {
+  session: AuthSession;
+  user: AuthUser | null;
+};
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
+  session: AuthSession | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const AUTH_STORAGE_KEY = "ce-auth-session";
+const REFRESH_EARLY_MS = 60 * 1000;
+
+function readStoredAuth(): StoredAuth | null {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as StoredAuth;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredAuth(data: StoredAuth | null) {
+  try {
+    if (!data) {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      return;
+    }
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const refreshTimerRef = useRef<number | null>(null);
+  const refreshSessionRef = useRef<() => Promise<void>>(async () => {});
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
+  const clearRefreshTimer = useCallback(() => {
+    if (refreshTimerRef.current) {
+      window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
-  };
-
-  const signUp = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
-  };
-
-  const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-  };
-
-  const signOut = async () => {
-    await firebaseSignOut(auth);
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signInWithGoogle, signOut }}>
-      {children}
-    </AuthContext.Provider>
+  const scheduleRefresh = useCallback(
+    (expiresAt: number) => {
+      clearRefreshTimer();
+      const delay = expiresAt * 1000 - Date.now() - REFRESH_EARLY_MS;
+      if (delay <= 0) {
+        void refreshSessionRef.current();
+        return;
+      }
+      refreshTimerRef.current = window.setTimeout(() => {
+        void refreshSessionRef.current();
+      }, delay);
+    },
+    [clearRefreshTimer]
   );
+
+  const applyAuth = useCallback(
+    (payload: AuthResponse) => {
+      const nextSession = payload.session ?? null;
+      const nextUser = nextSession ? payload.user ?? null : null;
+
+      setUser(nextUser);
+      setSession(nextSession);
+      if (nextSession) {
+        writeStoredAuth({ session: nextSession, user: nextUser });
+        scheduleRefresh(nextSession.expires_at);
+      } else {
+        writeStoredAuth(null);
+        clearRefreshTimer();
+      }
+    },
+    [clearRefreshTimer, scheduleRefresh]
+  );
+
+  const refreshSession = useCallback(async () => {
+    const stored = readStoredAuth();
+    const refreshToken = stored?.session.refresh_token ?? session?.refresh_token;
+    if (!refreshToken) {
+      applyAuth({ user: null, session: null });
+      return;
+    }
+
+    const data = await apiRequest<AuthResponse>("/auth/refresh", {
+      method: "POST",
+      body: JSON.stringify({ refresh_token: refreshToken })
+    });
+
+    applyAuth(data);
+  }, [applyAuth, session?.refresh_token]);
+
+  useEffect(() => {
+    refreshSessionRef.current = refreshSession;
+  }, [refreshSession]);
+
+  const loadSession = useCallback(async () => {
+    const stored = readStoredAuth();
+    if (!stored?.session?.access_token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const me = await apiRequest<{ user: AuthUser | null }>(
+        "/auth/me",
+        { method: "GET" },
+        stored.session.access_token
+      );
+
+      setUser(me.user ?? stored.user ?? null);
+      setSession(stored.session);
+      scheduleRefresh(stored.session.expires_at);
+    } catch {
+      try {
+        await refreshSession();
+      } catch {
+        applyAuth({ user: null, session: null });
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [applyAuth, refreshSession, scheduleRefresh]);
+
+  useEffect(() => {
+    void loadSession();
+    return () => {
+      clearRefreshTimer();
+    };
+  }, [clearRefreshTimer, loadSession]);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    const data = await apiRequest<AuthResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password })
+    });
+
+    applyAuth(data);
+  }, [applyAuth]);
+
+  const signUp = useCallback(async (email: string, password: string, fullName?: string) => {
+    const data = await apiRequest<AuthResponse>("/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({ email, password, full_name: fullName })
+    });
+
+    applyAuth(data);
+  }, [applyAuth]);
+
+  const signOut = useCallback(async () => {
+    if (session?.access_token) {
+      await apiRequest("/auth/logout", { method: "POST" }, session.access_token);
+    }
+    applyAuth({ user: null, session: null });
+  }, [applyAuth, session?.access_token]);
+
+  const resetPassword = useCallback(async (email: string) => {
+    await apiRequest("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email })
+    });
+  }, []);
+
+  const value = useMemo(
+    () => ({ user, session, loading, signIn, signUp, signOut, resetPassword, refreshSession }),
+    [loading, refreshSession, resetPassword, session, signIn, signOut, signUp, user]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
+export default AuthContext;

@@ -1,4 +1,7 @@
 {
+  "app": {
+    "name": "Cocina Express"
+  },
   "nav": {
     "home": "Home",
     "support": "Support"
@@ -24,8 +27,10 @@
   "tooManyRequests": "Too many requests. Please try again.",
     "back": "Back",
     "forward": "Forward",
+    "notFound": "Not found",
     "loadMore": "Load more",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "na": "N/A"
 },
   "theme": {
     "toggle": "Toggle theme",
@@ -63,6 +68,7 @@
       "welcomeBack": "Welcome back",
       "accessAccount": "Access your account",
       "signIn": "Sign in",
+      "description": "Sign in with your email and password",
       "socialLogin": "Login with your Google account",
       "loginWithGoogle": "Login with Google",
       "orContinueWith": "Or continue with",
@@ -125,6 +131,8 @@
     "securityTab": "Security",
     "appearanceTab": "Appearance",
     "userInfo": "User Information",
+    "fullName": "Full name",
+    "email": "Email",
     "displayName": "Display Name",
     "displayNamePlaceholder": "Enter your name",
     "avatar": "Profile Picture",

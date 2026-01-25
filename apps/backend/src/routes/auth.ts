@@ -62,6 +62,27 @@ router.post('/login', async (req, res, next) => {
   }
 })
 
+router.post('/forgot-password', async (req, res, next) => {
+  try {
+    const { email } = req.body ?? {}
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' })
+    }
+
+    const supabase = getSupabaseClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email)
+
+    if (error) {
+      return res.status(400).json({ error: error.message })
+    }
+
+    return res.status(200).json({ message: 'Password reset email sent' })
+  } catch (err) {
+    next(err)
+  }
+})
+
 router.post('/refresh', async (req, res, next) => {
   try {
     const { refresh_token } = req.body ?? {}

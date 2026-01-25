@@ -5,19 +5,17 @@ import { router } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
-import { FontAwesome } from '@expo/vector-icons';
 import { useThemePreference } from '@/context/theme-preference';
 import { Colors } from '@/constants/theme';
 
 export default function LoginScreen() {
   const { t } = useTranslation();
-  const { login, loginWithGoogle } = useAuth();
+  const { login } = useAuth();
   const { resolvedScheme } = useThemePreference();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleSubmit = async () => {
     setError('');
@@ -30,20 +28,6 @@ export default function LoginScreen() {
       setError(err instanceof Error ? err.message : t('auth.errors.loginFailed'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setError('');
-    setGoogleLoading(true);
-
-    try {
-      await loginWithGoogle();
-      router.replace('/(tabs)');
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('auth.errors.loginFailed'));
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
@@ -84,7 +68,7 @@ export default function LoginScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
-                  editable={!loading && !googleLoading}
+                  editable={!loading}
                 />
               </ThemedView>
             </View>
@@ -101,7 +85,7 @@ export default function LoginScreen() {
                   secureTextEntry
                   autoCapitalize="none"
                   autoCorrect={false}
-                  editable={!loading && !googleLoading}
+                  editable={!loading}
                 />
               </ThemedView>
               <TouchableOpacity 
@@ -113,29 +97,12 @@ export default function LoginScreen() {
             </View>
 
             <TouchableOpacity 
-              style={[styles.button, styles.primaryButton, { backgroundColor: colors.primary }, (loading || googleLoading) && styles.buttonDisabled]}
+              style={[styles.button, styles.primaryButton, { backgroundColor: colors.primary }, loading && styles.buttonDisabled]}
               onPress={handleSubmit}
-              disabled={loading || googleLoading || !email || !password}
+              disabled={loading || !email || !password}
             >
               <ThemedText style={[styles.buttonText, { color: colors.primaryText }]}>
                 {loading ? t('auth.login.loading') : t('auth.login.submit')}
-              </ThemedText>
-            </TouchableOpacity>
-
-            <View style={styles.divider}>
-              <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
-              <ThemedText style={[styles.dividerText, { color: colors.icon }]}>{t('auth.login.orContinueWith')}</ThemedText>
-              <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
-            </View>
-
-            <TouchableOpacity 
-              style={[styles.button, styles.googleButton, { borderColor: colors.divider, backgroundColor: colors.card }, (loading || googleLoading) && styles.buttonDisabled]}
-              onPress={handleGoogleLogin}
-              disabled={loading || googleLoading}
-            >
-              <FontAwesome name="google" size={20} color={colors.text} style={styles.googleIcon} />
-              <ThemedText style={[styles.googleButtonText, { color: colors.text }]}>
-                {googleLoading ? t('common.loading') : t('auth.login.loginWithGoogle')}
               </ThemedText>
             </TouchableOpacity>
 
@@ -147,7 +114,7 @@ export default function LoginScreen() {
             </View>
 
             <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-              <ThemedText style={[styles.skipButtonText, { color: colors.icon }]}>Continue without signing in</ThemedText>
+              <ThemedText style={[styles.skipButtonText, { color: colors.icon }]}>{t('auth.continueWithoutSignIn')}</ThemedText>
             </TouchableOpacity>
           </ThemedView>
         </ScrollView>
@@ -228,35 +195,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  googleButton: {
-    borderWidth: 1,
-  },
-  googleIcon: {
-    width: 20,
-    height: 20,
-  },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  googleButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    fontSize: 13,
   },
   footer: {
     flexDirection: 'row',

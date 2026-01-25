@@ -141,7 +141,7 @@ export default function SignupScreen() {
             </View>
 
             <TouchableOpacity style={styles.skipButton} onPress={() => router.replace('/(tabs)')}>
-              <ThemedText style={[styles.skipButtonText, { color: colors.icon }]}>Continue without signing up</ThemedText>
+              <ThemedText style={[styles.skipButtonText, { color: colors.icon }]}>{t('auth.continueWithoutSignUp')}</ThemedText>
             </TouchableOpacity>
           </ThemedView>
         </ScrollView>

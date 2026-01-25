@@ -1,6 +1,5 @@
 import {
   ChevronsUpDown,
-  Heart,
   LogOut,
   Sparkles,
   User,
@@ -28,14 +27,12 @@ import {
 } from "@/components/ui/sidebar"
 import { useSidebar } from "@/hooks/use-sidebar"
 import { useAuth } from "@/hooks/use-auth"
-import { useUserProfile } from "@/hooks/use-user-profile"
 import { useNavigate } from "@tanstack/react-router"
 
 export function NavUser() {
   const { t } = useTranslation()
   const { isMobile } = useSidebar()
-  const { user, logout } = useAuth()
-  const { profile } = useUserProfile()
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
 
   if (!user) {
@@ -58,8 +55,8 @@ export function NavUser() {
     )
   }
 
-  const displayName = user.displayName || profile?.displayName || t("user.defaultName")
-  const email = user.email || profile?.email || ""
+  const displayName = user?.user_metadata?.full_name || t("user.defaultName")
+  const email = user?.email || ""
   const initials = displayName
     .split(" ")
     .map(n => n[0])
@@ -69,7 +66,7 @@ export function NavUser() {
 
   const handleLogout = async () => {
     try {
-      await logout()
+      await signOut()
       navigate({ to: "/" })
     } catch (error) {
       console.error("Error al cerrar sesión:", error)
@@ -86,7 +83,7 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.photoURL || profile?.photoURL || undefined} alt={displayName} />
+                <AvatarImage src={undefined} alt={displayName} />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -105,7 +102,7 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.photoURL || profile?.photoURL || undefined} alt={displayName} />
+                  <AvatarImage src={undefined} alt={displayName} />
                   <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -119,11 +116,6 @@ export function NavUser() {
               <DropdownMenuItem onClick={() => navigate({ to: "/user/profile" })}>
                 <Sparkles className="mr-2 h-4 w-4" />
                 {t("user.myProfile")}
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem onClick={() => navigate({ to: "/user/favorites" })}>
-                <Heart className="mr-2 h-4 w-4" />
-                {t("user.favorites")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
