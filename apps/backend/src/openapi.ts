@@ -39,6 +39,31 @@ export const openapiSpec = {
           type: { type: 'string' }
         }
       },
+      Ingredient: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          name: { type: 'string' },
+          category: { type: 'string' },
+          unit_price: { type: 'string' },
+          stock: { type: 'integer' },
+          is_active: { type: 'boolean' },
+          created_at: { type: 'string', format: 'date-time' },
+          updated_at: { type: 'string', format: 'date-time' }
+        }
+      },
+      IngredientsList: {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Ingredient' }
+          },
+          page: { type: 'integer' },
+          page_size: { type: 'integer' },
+          total: { type: 'integer' }
+        }
+      },
       UserDietaryResponse: {
         type: 'object',
         properties: {
@@ -313,6 +338,203 @@ export const openapiSpec = {
                 }
               }
             }
+          }
+        }
+      }
+    },
+    '/ingredients': {
+      get: {
+        summary: 'List ingredients',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'search', in: 'query', required: false, schema: { type: 'string' } },
+          { name: 'category', in: 'query', required: false, schema: { type: 'string' } },
+          { name: 'is_active', in: 'query', required: false, schema: { type: 'boolean' } },
+          { name: 'page', in: 'query', required: false, schema: { type: 'integer' } },
+          { name: 'page_size', in: 'query', required: false, schema: { type: 'integer' } },
+          { name: 'sort', in: 'query', required: false, schema: { type: 'string' } },
+          { name: 'order', in: 'query', required: false, schema: { type: 'string', enum: ['asc', 'desc'] } }
+        ],
+        responses: {
+          200: {
+            description: 'Ingredients list',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/IngredientsList' } }
+            }
+          },
+          401: {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          }
+        }
+      },
+      post: {
+        summary: 'Create ingredient',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name', 'category', 'unit_price', 'stock'],
+                properties: {
+                  name: { type: 'string' },
+                  category: { type: 'string' },
+                  unit_price: { type: 'number', minimum: 0 },
+                  stock: { type: 'integer', minimum: 0 },
+                  is_active: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          201: {
+            description: 'Ingredient created',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ingredient: { $ref: '#/components/schemas/Ingredient' }
+                  }
+                }
+              }
+            }
+          },
+          400: {
+            description: 'Bad request',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          },
+          401: {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          },
+          403: {
+            description: 'Forbidden',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          }
+        }
+      }
+    },
+    '/ingredients/{id}': {
+      get: {
+        summary: 'Get ingredient by id',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          200: {
+            description: 'Ingredient detail',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ingredient: { $ref: '#/components/schemas/Ingredient' }
+                  }
+                }
+              }
+            }
+          },
+          401: {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          },
+          404: {
+            description: 'Not found',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          }
+        }
+      },
+      put: {
+        summary: 'Update ingredient',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  category: { type: 'string' },
+                  unit_price: { type: 'number', minimum: 0 },
+                  stock: { type: 'integer', minimum: 0 },
+                  is_active: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: 'Ingredient updated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ingredient: { $ref: '#/components/schemas/Ingredient' }
+                  }
+                }
+              }
+            }
+          },
+          400: {
+            description: 'Bad request',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          },
+          401: {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          },
+          403: {
+            description: 'Forbidden',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          },
+          404: {
+            description: 'Not found',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          }
+        }
+      },
+      delete: {
+        summary: 'Deactivate ingredient',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          200: {
+            description: 'Ingredient deactivated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ingredient: { $ref: '#/components/schemas/Ingredient' }
+                  }
+                }
+              }
+            }
+          },
+          401: {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          },
+          403: {
+            description: 'Forbidden',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+          },
+          404: {
+            description: 'Not found',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
           }
         }
       }

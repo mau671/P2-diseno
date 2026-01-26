@@ -5,6 +5,9 @@ import type { AuthRequest } from '../types/supabase'
 
 const router = Router()
 
+const WEB_BASE_URL = process.env.WEB_BASE_URL || 'http://localhost:5173'
+const EMAIL_VERIFY_REDIRECT = `${WEB_BASE_URL}/auth/verify`
+
 router.post('/signup', async (req, res, next) => {
   try {
     const { email, password, full_name } = req.body ?? {}
@@ -18,7 +21,8 @@ router.post('/signup', async (req, res, next) => {
       email,
       password,
       options: {
-        data: full_name ? { full_name } : undefined
+        data: full_name ? { full_name } : undefined,
+        emailRedirectTo: EMAIL_VERIFY_REDIRECT
       }
     })
 

@@ -51,8 +51,13 @@ export function SignupForm({
     setLoading(true);
 
     try {
-      await signUp(email, password, fullName.trim() || undefined);
-      navigate({ to: "/" });
+      const result = await signUp(email, password, fullName.trim() || undefined);
+      if (result.session) {
+        navigate({ to: "/" });
+        return;
+      }
+      const params = new URLSearchParams({ status: "pending", email });
+      navigate({ to: `/auth/verify?${params.toString()}` });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("auth.errors.registerFailed"));
     } finally {

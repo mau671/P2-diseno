@@ -4,11 +4,52 @@
   },
   "nav": {
     "home": "Inicio",
+    "ingredients": "Ingredientes",
     "support": "Soporte"
   },
   "home": {
     "title": "Inicio",
     "description": "Vista principal con SidebarInset (shadcn) y navegación con TanStack Router."
+  },
+  "ingredients": {
+    "title": "Ingredientes",
+    "subtitle": "Gestiona el catálogo de ingredientes",
+    "search": "Buscar ingrediente",
+    "category": "Categoría",
+    "status": "Estado",
+    "statusAll": "Todos",
+    "statusActive": "Activo",
+    "statusInactive": "Inactivo",
+    "new": "Nuevo ingrediente",
+    "edit": "Editar ingrediente",
+    "create": "Crear ingrediente",
+    "save": "Guardar cambios",
+    "empty": "No hay ingredientes para mostrar.",
+    "formDescription": "Completa la información del ingrediente.",
+    "form": {
+      "name": "Nombre",
+      "category": "Categoría",
+      "unitPrice": "Precio unitario",
+      "stock": "Stock",
+      "isActive": "Activo"
+    },
+    "columns": {
+      "name": "Nombre",
+      "category": "Categoría",
+      "unitPrice": "Precio unitario",
+      "stock": "Stock",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "deleteTitle": "Eliminar ingrediente",
+    "deleteDescription": "Esta acción desactivará \"{{name}}\".",
+    "pagination": "Página {{page}} de {{total}} ({{count}} ingredientes)",
+    "prev": "Anterior",
+    "next": "Siguiente"
   },
   "sections": {
     "label": "Sección",
@@ -64,6 +105,17 @@
   },
   "auth": {
     "logout": "Cerrar sesión",
+    "verify": {
+      "title": "Verifica tu correo",
+      "description": "Estamos confirmando tu dirección de correo.",
+      "success": "Correo verificado.",
+      "redirecting": "Redirigiendo a inicio de sesión...",
+      "checkEmail": "Revisa tu correo",
+      "pending": "Si acabas de hacer clic en el enlace, espera un momento.",
+      "pendingWithEmail": "Te enviamos un enlace de verificación a {{email}}.",
+      "errorDefault": "No se pudo verificar el correo.",
+      "goToLogin": "Ir a iniciar sesión"
+    },
     "login": {
       "title": "Iniciar Sesión",
       "welcomeBack": "Qué bueno verte de nuevo",

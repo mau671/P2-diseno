@@ -5,6 +5,7 @@ import {
   Command,
   LifeBuoy,
   Home,
+  Leaf,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "@tanstack/react-router"
@@ -32,6 +33,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/",
         icon: Home,
         isActive: true,
+      },
+      {
+        title: t("nav.ingredients"),
+        url: "/ingredients",
+        icon: Leaf,
       },
     ],
     navSecondary: [
