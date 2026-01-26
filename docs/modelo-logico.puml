@@ -1,0 +1,113 @@
+@startuml
+left to right direction
+hide circle
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+' Modelo logico en notacion de clases
+
+class "auth.users" as auth_users <<tabla>> {
+  id : UUID <<PK>>
+  email : TEXT
+}
+
+class "public.profiles" as profiles <<tabla>> {
+  id : UUID <<PK, FK auth.users.id>>
+  full_name : TEXT
+  is_admin : BOOLEAN
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.dietary_restrictions" as dietary_restrictions <<tabla>> {
+  id : UUID <<PK>>
+  name : TEXT
+  type : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.user_dietary_restrictions" as user_dietary_restrictions <<tabla>> {
+  user_id : UUID <<PK, FK public.profiles.id>>
+  restriction_id : UUID <<PK, FK public.dietary_restrictions.id>>
+  created_at : TIMESTAMPTZ
+}
+
+class "public.ingredients" as ingredients <<tabla>> {
+  id : UUID <<PK>>
+  name : TEXT
+  category : TEXT
+  unit_price : NUMERIC(10,2)
+  stock : INTEGER
+  is_active : BOOLEAN
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.meal_bases" as meal_bases <<tabla>> {
+  id : UUID <<PK>>
+  name : TEXT
+  description : TEXT
+  image_url : TEXT
+  base_price : NUMERIC(10,2)
+  is_active : BOOLEAN
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.base_ingredients" as base_ingredients <<tabla>> {
+  base_id : UUID <<PK, FK public.meal_bases.id>>
+  ingredient_id : UUID <<PK, FK public.ingredients.id>>
+  default_qty : INTEGER
+  is_removable : BOOLEAN
+  is_essential : BOOLEAN
+}
+
+class "public.orders" as orders <<tabla>> {
+  id : UUID <<PK>>
+  user_id : UUID <<FK public.profiles.id>>
+  status : TEXT
+  delivery_address : TEXT
+  payment_method : TEXT
+  scheduled_for : TIMESTAMPTZ
+  subtotal : NUMERIC(10,2)
+  tax : NUMERIC(10,2)
+  total : NUMERIC(10,2)
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.order_items" as order_items <<tabla>> {
+  id : UUID <<PK>>
+  order_id : UUID <<FK public.orders.id>>
+  base_id : UUID <<FK public.meal_bases.id>>
+  quantity : INTEGER
+  unit_price : NUMERIC(10,2)
+  subtotal : NUMERIC(10,2)
+}
+
+class "public.item_customizations" as item_customizations <<tabla>> {
+  id : UUID <<PK>>
+  order_item_id : UUID <<FK public.order_items.id>>
+  ingredient_id : UUID <<FK public.ingredients.id>>
+  action : TEXT
+  qty : INTEGER
+  delta_price : NUMERIC(10,2)
+  created_at : TIMESTAMPTZ
+}
+
+auth_users "1" -- "1" profiles
+
+profiles "1" -- "0..*" user_dietary_restrictions
+dietary_restrictions "1" -- "0..*" user_dietary_restrictions
+
+meal_bases "1" -- "0..*" base_ingredients
+ingredients "1" -- "0..*" base_ingredients
+
+profiles "1" -- "0..*" orders
+orders "1" -- "1..*" order_items
+meal_bases "1" -- "0..*" order_items
+
+order_items "1" -- "0..*" item_customizations
+ingredients "1" -- "0..*" item_customizations
+
+@enduml
