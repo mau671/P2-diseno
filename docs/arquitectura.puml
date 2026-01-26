@@ -1,0 +1,186 @@
+@startuml
+left to right direction
+skinparam componentStyle rectangle
+
+actor "Usuario" as usuario
+
+package "Workspace bun" as workspace {
+  package "Aplicacion web" as webPkg {
+    component "Interfaz" as webUi
+    component "Ruteo" as webRouter
+    component "Cache" as webQuery
+    component "Tabla" as webTable
+    component "Pacer" as webPacer
+    component "Internacionalizacion" as webI18n
+    component "Cliente HTTP" as webHttp
+    component "Contexto de autenticacion" as webAuthCtx
+    component "Rutas de autenticacion" as webAuthRoutes
+    component "Pantalla ingredientes" as webIngredients
+    component "Pagina verificacion" as webVerify
+  }
+
+  package "Aplicacion movil" as mobilePkg {
+    component "Navegacion" as mobileRouter
+    component "Pantallas de autenticacion" as mobileAuthUi
+    component "Pantalla perfil dietetico" as mobileDietUi
+    component "Cache" as mobileQuery
+    component "Cache local" as mobileStorage
+    component "Internacionalizacion" as mobileI18n
+    component "Cliente HTTP" as mobileHttp
+    component "Contexto de autenticacion" as mobileAuthCtx
+  }
+
+  package "API backend" as apiPkg {
+    component "Servidor HTTP" as apiServer
+    component "Middleware CORS" as apiCors
+    component "Middleware autenticacion" as apiAuthMw
+    component "Especificacion API" as apiOpenapi
+    component "Rutas AUTH" as apiAuth
+    component "Rutas perfiles" as apiProfiles
+    component "Rutas dieteticas" as apiDietary
+    component "Rutas ingredientes" as apiIngredients
+    component "Rutas catalogo" as apiCatalog
+    component "Rutas pedidos" as apiOrders
+    component "ORM" as apiOrm
+    component "Cliente de autenticacion" as apiSupabaseClient
+  }
+}
+
+package "Plataforma" as supaPkg {
+  component "Servicio de autenticacion" as supaAuth
+  database "Base de datos" as postgres
+  component "Esquema publico" as publicSchema
+  component "Funciones y triggers" as triggers
+  component "Politicas" as rls
+  component "Tablas de dominio" as tables
+}
+
+note right of webUi
+  shadcn UI
+end note
+
+note right of webRouter
+  tanstack router
+end note
+
+note right of webQuery
+  tanstack query
+end note
+
+note right of webTable
+  tanstack table
+end note
+
+note right of webPacer
+  tanstack pacer
+end note
+
+note right of webI18n
+  i18next
+end note
+
+note right of mobileRouter
+  expo router
+end note
+
+note right of mobileQuery
+  tanstack query
+end note
+
+note right of mobileStorage
+  asyncstorage
+end note
+
+note right of mobileI18n
+  i18next
+end note
+
+note right of apiServer
+  bun y express
+end note
+
+note right of apiOpenapi
+  OpenAPI
+end note
+
+note right of apiOrm
+  drizzle
+end note
+
+note right of apiSupabaseClient
+  supabase
+end note
+
+note right of supaPkg
+  supabase
+end note
+
+note right of supaAuth
+  supabase auth
+end note
+
+note right of postgres
+  PostgreSQL
+end note
+
+note right of rls
+  RLS
+end note
+
+usuario --> webRouter : "Navegacion"
+usuario --> mobileRouter : "Navegacion"
+
+webRouter --> webUi : "Renderizado"
+webUi --> webI18n : "Textos"
+webUi --> webAuthRoutes : "Flujo AUTH"
+webAuthRoutes --> webAuthCtx : "Sesion"
+webAuthCtx --> webHttp : "Bearer token"
+webUi --> webIngredients : "Gestion"
+webIngredients --> webTable : "Tabla"
+webIngredients --> webQuery : "Consultas"
+webPacer --> webHttp : "Debounce"
+webQuery --> webHttp : "Fetch"
+webUi --> webVerify : "Verificacion"
+webVerify --> webAuthRoutes : "Redireccion"
+webHttp --> apiServer : "HTTP REST /api/v1"
+
+mobileRouter --> mobileAuthUi : "Flujo AUTH"
+mobileAuthUi --> mobileAuthCtx : "Sesion"
+mobileAuthCtx --> mobileHttp : "Bearer token"
+mobileRouter --> mobileDietUi : "Perfil"
+mobileDietUi --> mobileQuery : "Estado remoto"
+mobileDietUi --> mobileStorage : "Persistencia"
+mobileQuery --> mobileHttp : "Fetch"
+mobileHttp --> apiServer : "HTTP REST /api/v1"
+
+apiServer --> apiCors : "CORS"
+apiServer --> apiOpenapi : "OpenAPI.json"
+apiServer --> apiAuthMw : "Validacion"
+apiServer --> apiAuth : "AUTH"
+apiServer --> apiProfiles : "Perfiles"
+apiServer --> apiDietary : "Dietas"
+apiServer --> apiIngredients : "Ingredientes"
+apiServer --> apiCatalog : "Catalogo"
+apiServer --> apiOrders : "Pedidos"
+
+apiAuthMw --> apiSupabaseClient : "JWT"
+apiAuth --> apiSupabaseClient : "Registro y login"
+apiSupabaseClient --> supaAuth : "API"
+
+supaAuth --> usuario : "Correo de verificacion"
+usuario --> webVerify : "Enlace de verificacion"
+
+apiProfiles --> apiOrm : "Consultas"
+apiDietary --> apiOrm : "Consultas"
+apiIngredients --> apiOrm : "Consultas"
+apiCatalog --> apiOrm : "Consultas"
+apiOrders --> apiOrm : "Consultas"
+apiOrm --> postgres : "SQL"
+
+postgres --> publicSchema : "Esquema"
+publicSchema --> tables : "Datos"
+publicSchema --> triggers : "Consistencia"
+publicSchema --> rls : "Seguridad"
+supaAuth --> postgres : "auth.users"
+
+@enduml
