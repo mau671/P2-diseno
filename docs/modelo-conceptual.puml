@@ -1,0 +1,97 @@
+@startuml
+left to right direction
+hide circle
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+' Modelo conceptual en notacion ERD
+
+entity "Usuario autenticado" as auth_user {
+  id
+  correo
+}
+
+entity "Perfil" as profile {
+  id
+  nombre completo
+  es administrador
+}
+
+entity "Restriccion dietetica" as restriction {
+  id
+  nombre
+  tipo
+}
+
+entity "Preferencia dietetica" as user_restriction {
+  id de usuario
+  id de restriccion
+}
+
+entity "Ingrediente" as ingredient {
+  id
+  nombre
+  categoria
+  precio unitario
+  stock
+  esta activo
+}
+
+entity "Base" as meal_base {
+  id
+  nombre
+  descripcion
+  imagen
+  precio base
+  esta activo
+}
+
+entity "Receta base" as base_ingredient {
+  id de base
+  id de ingrediente
+  cantidad por defecto
+  es removible
+  es esencial
+}
+
+entity "Pedido" as order {
+  id
+  estado
+  direccion de entrega
+  metodo de pago
+  programado para
+  subtotal
+  impuesto
+  total
+}
+
+entity "Item de pedido" as order_item {
+  id
+  cantidad
+  precio unitario
+  subtotal
+}
+
+entity "Personalizacion" as customization {
+  id
+  accion
+  cantidad
+  delta de precio
+}
+
+auth_user ||--|| profile : "tiene"
+
+profile ||--o{ user_restriction : "define"
+restriction ||--o{ user_restriction : "incluye"
+
+meal_base ||--o{ base_ingredient : "incluye"
+ingredient ||--o{ base_ingredient : "usa"
+
+profile ||--o{ order : "realiza"
+order ||--o{ order_item : "contiene"
+meal_base ||--o{ order_item : "selecciona"
+
+order_item ||--o{ customization : "aplica"
+ingredient ||--o{ customization : "modifica"
+
+@enduml
