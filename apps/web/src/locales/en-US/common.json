@@ -4,11 +4,52 @@
   },
   "nav": {
     "home": "Home",
+    "ingredients": "Ingredients",
     "support": "Support"
   },
   "home": {
     "title": "Home",
     "description": "Main view with SidebarInset (shadcn) and TanStack Router navigation."
+  },
+  "ingredients": {
+    "title": "Ingredients",
+    "subtitle": "Manage the ingredient catalog",
+    "search": "Search ingredient",
+    "category": "Category",
+    "status": "Status",
+    "statusAll": "All",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "new": "New ingredient",
+    "edit": "Edit ingredient",
+    "create": "Create ingredient",
+    "save": "Save changes",
+    "empty": "No ingredients to display.",
+    "formDescription": "Fill in the ingredient details.",
+    "form": {
+      "name": "Name",
+      "category": "Category",
+      "unitPrice": "Unit price",
+      "stock": "Stock",
+      "isActive": "Active"
+    },
+    "columns": {
+      "name": "Name",
+      "category": "Category",
+      "unitPrice": "Unit price",
+      "stock": "Stock",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "deleteTitle": "Delete ingredient",
+    "deleteDescription": "This will deactivate \"{{name}}\".",
+    "pagination": "Page {{page}} of {{total}} ({{count}} ingredients)",
+    "prev": "Previous",
+    "next": "Next"
   },
   "sections": {
     "label": "Section",
@@ -63,6 +104,17 @@
   },
   "auth": {
     "logout": "Sign out",
+    "verify": {
+      "title": "Verify your email",
+      "description": "We are confirming your email address.",
+      "success": "Email verified.",
+      "redirecting": "Redirecting to sign in...",
+      "checkEmail": "Check your email",
+      "pending": "If you just clicked the link, give it a moment.",
+      "pendingWithEmail": "We sent a verification link to {{email}}.",
+      "errorDefault": "Email verification failed.",
+      "goToLogin": "Go to sign in"
+    },
     "login": {
       "title": "Sign In",
       "welcomeBack": "Welcome back",
