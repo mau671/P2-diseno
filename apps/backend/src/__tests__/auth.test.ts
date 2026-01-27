@@ -3,6 +3,43 @@ import type { AddressInfo } from 'net'
 import { app } from '../app'
 import { setSupabaseClientForTest } from '../lib/supabase'
 
+type AuthUserPayload = {
+  id: string
+  email?: string
+  user_metadata?: { full_name?: string }
+}
+
+type AuthUserWithMetadata = AuthUserPayload & {
+  user_metadata: { full_name?: string }
+}
+
+type AuthSessionPayload = {
+  access_token: string
+  refresh_token?: string
+  expires_at?: number
+}
+
+type AuthResponsePayload = {
+  user: AuthUserPayload
+  session: AuthSessionPayload | null
+}
+
+type AuthResponseWithSession = {
+  user: AuthUserPayload
+  session: AuthSessionPayload
+}
+
+type SignupResponsePayload = {
+  user: AuthUserWithMetadata
+  session: null
+}
+
+type MeResponsePayload = {
+  user: AuthUserPayload | null
+}
+
+const parseJson = async <T>(response: Response) => response.json() as Promise<T>
+
 const createSupabaseMock = () => {
   const calls = {
     signUp: [] as unknown[],
@@ -108,7 +145,7 @@ describe('auth endpoints', () => {
     })
 
     expect(response.status).toBe(201)
-    const payload = await response.json()
+    const payload = await parseJson<SignupResponsePayload>(response)
     expect(payload.user.email).toBe('test@example.com')
     expect(payload.user.user_metadata.full_name).toBe('Test User')
   })
@@ -131,7 +168,7 @@ describe('auth endpoints', () => {
     })
 
     expect(response.status).toBe(200)
-    const payload = await response.json()
+    const payload = await parseJson<AuthResponseWithSession>(response)
     expect(payload.session.access_token).toBe('access-123')
   })
 
@@ -151,7 +188,10 @@ describe('auth endpoints', () => {
     })
 
     expect(response.status).toBe(200)
-    const payload = await response.json()
+    const payload = await parseJson<MeResponsePayload>(response)
+    if (!payload.user) {
+      throw new Error('Expected user in /me response')
+    }
     expect(payload.user.id).toBe('user-1')
   })
 
@@ -168,7 +208,7 @@ describe('auth endpoints', () => {
     })
 
     expect(response.status).toBe(200)
-    const payload = await response.json()
+    const payload = await parseJson<AuthResponseWithSession>(response)
     expect(payload.session.access_token).toBe('new-access')
   })
 

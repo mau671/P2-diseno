@@ -1,6 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-let supabaseClient: ReturnType<typeof createClient> | null = null
+type SupabaseClientType = SupabaseClient<any>
+
+let supabaseClient: SupabaseClientType | null = null
 
 const createSupabaseClient = () => {
   const supabaseUrl = process.env.SUPABASE_URL
@@ -18,14 +20,11 @@ const createSupabaseClient = () => {
   })
 }
 
-export const getSupabaseClient = () => {
-  if (!supabaseClient) {
-    supabaseClient = createSupabaseClient()
-  }
-
+export const getSupabaseClient = (): SupabaseClientType => {
+  supabaseClient = supabaseClient ?? createSupabaseClient()
   return supabaseClient
 }
 
-export const setSupabaseClientForTest = (client: ReturnType<typeof createClient>) => {
+export const setSupabaseClientForTest = (client: SupabaseClientType) => {
   supabaseClient = client
 }

@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import { getSupabaseClient } from '../lib/supabase'
-import type { AuthRequest } from '../types/supabase'
+import type { AuthLocals, AuthRequest } from '../types/supabase'
 
 const parseBearerToken = (authorization?: string) => {
   if (!authorization) return null
@@ -29,7 +29,7 @@ export const authMiddleware = async (
 
     const authRequest = req as AuthRequest
     authRequest.locals = {
-      user: data.user as unknown as AuthRequest['locals']['user'],
+      user: data.user as AuthLocals['user'],
       userId: data.user.id
     }
 
@@ -56,7 +56,7 @@ export const optionalAuthMiddleware = async (
     if (!error && data?.user) {
       const authRequest = req as AuthRequest
       authRequest.locals = {
-        user: data.user as unknown as AuthRequest['locals']['user'],
+        user: data.user as AuthLocals['user'],
         userId: data.user.id
       }
     }
