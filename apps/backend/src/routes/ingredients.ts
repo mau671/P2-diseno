@@ -135,6 +135,9 @@ router.get('/', authMiddleware, async (req, res, next) => {
 router.get('/:id', authMiddleware, async (req, res, next) => {
   try {
     const id = req.params.id
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid ingredient id' })
+    }
     const rows = await db
       .select({
         id: ingredients.id,
@@ -184,7 +187,7 @@ router.post('/', authMiddleware, async (req, res, next) => {
       .values({
         name,
         category,
-        unitPrice,
+        unitPrice: unitPrice.toString(),
         stock,
         isActive
       })
@@ -212,6 +215,9 @@ router.put('/:id', authMiddleware, async (req, res, next) => {
     if (!isAdmin) return
 
     const id = req.params.id
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid ingredient id' })
+    }
     const name = normalizeText(req.body?.name)
     const category = normalizeText(req.body?.category)
     const unitPrice = req.body?.unit_price !== undefined ? parseNumber(req.body?.unit_price) : null
@@ -221,7 +227,7 @@ router.put('/:id', authMiddleware, async (req, res, next) => {
     const updates: Record<string, unknown> = {}
     if (name) updates.name = name
     if (category) updates.category = category
-    if (unitPrice !== null) updates.unitPrice = unitPrice
+    if (unitPrice !== null) updates.unitPrice = unitPrice.toString()
     if (stock !== null) updates.stock = stock
     if (isActive !== null) updates.isActive = isActive
 
@@ -269,6 +275,9 @@ router.delete('/:id', authMiddleware, async (req, res, next) => {
     if (!isAdmin) return
 
     const id = req.params.id
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid ingredient id' })
+    }
     const rows = await db
       .update(ingredients)
       .set({ isActive: false })
