@@ -4,6 +4,8 @@ import dietaryRoutes from './dietary'
 import ingredientsRoutes from './ingredients'
 import profilesRoutes from './profiles'
 import { openapiSpec } from '../openapi'
+import catalogRoutes from "./catalog";
+
 
 const router = Router()
 
@@ -19,5 +21,6 @@ router.use('/auth', authRoutes)
 router.use('/dietary', dietaryRoutes)
 router.use('/ingredients', ingredientsRoutes)
 router.use('/profiles', profilesRoutes)
+router.use("/catalog", catalogRoutes);
 
 export default router
