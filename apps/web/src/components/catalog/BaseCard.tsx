@@ -1,5 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
 import type { CatalogBase } from "@/api/catalog";
+import { Card, CardContent } from "@/components/ui/card";
 
 function moneyCRC(value: number) {
   return new Intl.NumberFormat("es-CR", {
@@ -35,7 +35,7 @@ export function BaseCard({ base }: { base: CatalogBase }) {
           </div>
 
           <div className="shrink-0 text-sm font-medium">
-            {moneyCRC(base.base_price ?? 0)}
+            {moneyCRC(Number(base.base_price ?? 0))}
           </div>
         </div>
 

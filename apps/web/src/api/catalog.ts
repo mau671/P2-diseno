@@ -37,8 +37,16 @@ export async function getCatalogBases(
   const usp = new URLSearchParams();
   usp.set("page", String(page));
   usp.set("limit", String(limit));
-  if (params.q?.trim()) usp.set("q", params.q.trim());
-  if (params.cuisine?.trim()) usp.set("cuisine", params.cuisine.trim());
 
-  return apiRequest<CatalogResponse>(`/catalog/bases?${usp.toString()}`, {}, accessToken);
+  const q = params.q?.trim();
+  const cuisine = params.cuisine?.trim();
+
+  if (q) usp.set("q", q);
+  if (cuisine) usp.set("cuisine", cuisine);
+
+  return apiRequest<CatalogResponse>(
+    `/catalog/bases?${usp.toString()}`,
+    { method: "GET" },
+    accessToken
+  );
 }

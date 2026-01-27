@@ -6,11 +6,19 @@ type Args = {
   cuisine: string;
   limit?: number;
   accessToken?: string;
+  enabled?: boolean;
 };
 
-export function useCatalogBases({ q, cuisine, limit = 12, accessToken }: Args) {
+export function useCatalogBases({
+  q,
+  cuisine,
+  limit = 12,
+  accessToken,
+  enabled = true,
+}: Args) {
   return useInfiniteQuery({
     queryKey: ["catalog-bases", { q, cuisine, limit, isAuthed: Boolean(accessToken) }],
+    enabled,
     queryFn: ({ pageParam }) =>
       getCatalogBases(
         {
