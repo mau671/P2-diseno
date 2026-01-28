@@ -1,4 +1,3 @@
-import type { Request, Response, NextFunction } from "express";
 import type { Request, Response, NextFunction } from 'express'
 import { getSupabaseClient } from '../lib/supabase'
 import type { AuthLocals, AuthRequest } from '../types/supabase'
