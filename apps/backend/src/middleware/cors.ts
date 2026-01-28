@@ -1,4 +1,3 @@
-import type { CorsOptions } from "cors";
 import type { CorsOptions } from 'cors'
 
 const allowedOrigins = [
