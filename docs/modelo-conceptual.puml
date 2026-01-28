@@ -14,13 +14,79 @@ entity "Usuario autenticado" as auth_user {
 entity "Perfil" as profile {
   id
   nombre completo
+  telefono
+  url avatar
+  fecha nacimiento
+  idioma preferido
+  preferencias notif
+  moneda preferido
   es administrador
+}
+
+entity "Restaurante" as restaurant {
+  id
+  nombre
+  razon social
+  estado
+}
+
+entity "Moneda" as currency {
+  codigo
+  nombre
+  simbolo
+}
+
+entity "Monedas por restaurante" as restaurant_currency {
+  id restaurante
+  codigo moneda
+  es default
+}
+
+entity "Pais" as country {
+  id
+  iso2
+  iso3
+  nombre
+}
+
+entity "Provincia" as region {
+  id
+  nombre
+}
+
+entity "Ciudad" as city {
+  id
+  nombre
+}
+
+entity "Direccion" as address {
+  id
+  linea 1
+  linea 2
+  codigo postal
+  notas
+}
+
+entity "Cocina" as kitchen {
+  id
+  nombre
+  estado
+}
+
+entity "Miembro de restaurante" as restaurant_user {
+  id restaurante
+  id usuario
+  rol
+}
+
+entity "Tipo de restriccion" as restriction_type {
+  id
+  nombre
 }
 
 entity "Restriccion dietetica" as restriction {
   id
   nombre
-  tipo
 }
 
 entity "Preferencia dietetica" as user_restriction {
@@ -28,22 +94,88 @@ entity "Preferencia dietetica" as user_restriction {
   id de restriccion
 }
 
+entity "Objetivo nutricional" as nutrition_goal {
+  id
+  nombre
+}
+
+entity "Objetivo del usuario" as user_goal {
+  id de usuario
+  id de objetivo
+}
+
+entity "Categoria de ingrediente" as ingredient_category {
+  id
+  nombre
+}
+
 entity "Ingrediente" as ingredient {
   id
   nombre
-  categoria
   precio unitario
   stock
   esta activo
+}
+
+entity "Restriccion por ingrediente" as ingredient_restriction {
+  id ingrediente
+  id restriccion
+}
+
+entity "Movimiento de inventario" as stock_movement {
+  id
+  delta
+  razon
+}
+
+entity "Historial de precios" as price_history {
+  id
+  precio unitario
+  fecha efectiva
+}
+
+entity "Categoria de base" as base_category {
+  id
+  nombre
+}
+
+entity "Activo multimedia" as asset {
+  id
+  bucket
+  path
+  titulo
+  tipo contenido
+  tamano bytes
 }
 
 entity "Base" as meal_base {
   id
   nombre
   descripcion
-  imagen
   precio base
   esta activo
+}
+
+entity "Base por categoria" as base_category_map {
+  id base
+  id categoria
+}
+
+entity "Metodo de coccion" as cooking_method {
+  id
+  nombre
+  precio extra
+}
+
+entity "Metodos por base" as base_cooking_method {
+  id base
+  id metodo
+}
+
+entity "Base por cocina" as base_kitchen {
+  id base
+  id cocina
+  disponible
 }
 
 entity "Receta base" as base_ingredient {
@@ -57,8 +189,9 @@ entity "Receta base" as base_ingredient {
 entity "Pedido" as order {
   id
   estado
-  direccion de entrega
-  metodo de pago
+  moneda
+  tipo de pago
+  metodo pago
   programado para
   subtotal
   impuesto
@@ -70,6 +203,7 @@ entity "Item de pedido" as order_item {
   cantidad
   precio unitario
   subtotal
+  metodo coccion
 }
 
 entity "Personalizacion" as customization {
@@ -79,19 +213,192 @@ entity "Personalizacion" as customization {
   delta de precio
 }
 
+entity "Carrito" as cart {
+  id
+  estado
+}
+
+entity "Item de carrito" as cart_item {
+  id
+  cantidad
+  precio unitario
+  subtotal
+  metodo coccion
+}
+
+entity "Personalizacion de carrito" as cart_customization {
+  id
+  accion
+  cantidad
+  delta de precio
+}
+
+entity "Comida guardada" as saved_meal {
+  id
+  nombre
+  metodo coccion
+}
+
+entity "Personalizacion guardada" as saved_customization {
+  id
+  accion
+  cantidad
+  delta de precio
+}
+
+entity "Pago" as payment {
+  id
+  proveedor
+  estado
+  moneda
+  monto
+  ref transaccion
+}
+
+entity "Historial de estado" as order_status_history {
+  id
+  estado
+  fecha cambio
+}
+
+entity "Direccion de usuario" as user_address {
+  id usuario
+  id direccion
+  etiqueta
+  es default
+}
+
+entity "Metodo de pago" as payment_method {
+  id
+  tipo
+  nombre
+  ultimos 4 digitos
+  mes expiracion
+  anio expiracion
+  es default
+}
+
+entity "Pedido recurrente" as recurring_order {
+  id
+  estado
+  frecuencia
+  prox ejecucion
+  moneda
+  tipo de pago
+  metodo pago
+}
+
+entity "Item pedido recurrente" as recurring_order_item {
+  id
+  cantidad
+  precio unitario
+  subtotal
+  metodo coccion
+}
+
+entity "Personalizacion pedido recurrente" as recurring_order_customization {
+  id
+  accion
+  cantidad
+  delta de precio
+}
+
 auth_user ||--|| profile : "tiene"
 
+restaurant ||--o{ kitchen : "opera"
+restaurant ||--o{ restaurant_user : "tiene"
+profile ||--o{ restaurant_user : "colabora"
+
+currency ||--o{ restaurant_currency : "se acepta"
+restaurant ||--o{ restaurant_currency : "define"
+
+country ||--o{ region : "incluye"
+region ||--o{ city : "incluye"
+city ||--o{ address : "ubica"
+region ||--o{ address : "ubica"
+country ||--o{ address : "ubica"
+
+profile ||--o{ user_address : "guarda"
+address ||--o{ user_address : "asigna"
+
+restriction_type ||--o{ restriction : "clasifica"
 profile ||--o{ user_restriction : "define"
 restriction ||--o{ user_restriction : "incluye"
+
+nutrition_goal ||--o{ user_goal : "define"
+profile ||--o{ user_goal : "elige"
+
+ingredient_category ||--o{ ingredient : "clasifica"
+restaurant ||--o{ ingredient : "tiene"
+ingredient ||--o{ ingredient_restriction : "asocia"
+restriction ||--o{ ingredient_restriction : "aplica"
+ingredient ||--o{ stock_movement : "registra"
+ingredient ||--o{ price_history : "tiene"
+
+restaurant ||--o{ asset : "posee"
+asset ||--o{ meal_base : "ilustra"
+restaurant ||--o{ meal_base : "ofrece"
+
+meal_base ||--o{ base_category_map : "clasifica"
+base_category ||--o{ base_category_map : "agrupa"
+
+cooking_method ||--o{ base_cooking_method : "aplica"
+meal_base ||--o{ base_cooking_method : "permite"
+
+kitchen ||--o{ base_kitchen : "dispone"
+meal_base ||--o{ base_kitchen : "habilita"
 
 meal_base ||--o{ base_ingredient : "incluye"
 ingredient ||--o{ base_ingredient : "usa"
 
 profile ||--o{ order : "realiza"
+restaurant ||--o{ order : "recibe"
+kitchen ||--o{ order : "prepara"
+address ||--o{ order : "entrega"
+currency ||--o{ order : "moneda"
+payment_method ||--o{ order : "usa"
+
 order ||--o{ order_item : "contiene"
 meal_base ||--o{ order_item : "selecciona"
+cooking_method ||--o{ order_item : "selecciona"
 
 order_item ||--o{ customization : "aplica"
 ingredient ||--o{ customization : "modifica"
+
+profile ||--o{ cart : "mantiene"
+restaurant ||--o{ cart : "pertenece"
+cart ||--o{ cart_item : "contiene"
+meal_base ||--o{ cart_item : "selecciona"
+cooking_method ||--o{ cart_item : "selecciona"
+
+cart_item ||--o{ cart_customization : "aplica"
+ingredient ||--o{ cart_customization : "modifica"
+
+profile ||--o{ saved_meal : "guarda"
+meal_base ||--o{ saved_meal : "referencia"
+cooking_method ||--o{ saved_meal : "selecciona"
+saved_meal ||--o{ saved_customization : "incluye"
+ingredient ||--o{ saved_customization : "modifica"
+
+order ||--o{ payment : "paga"
+currency ||--o{ payment : "moneda"
+
+order ||--o{ order_status_history : "historial"
+profile ||--o{ order_status_history : "cambia"
+
+profile ||--o{ payment_method : "guarda"
+
+profile ||--o{ recurring_order : "suscribe"
+restaurant ||--o{ recurring_order : "recibe"
+payment_method ||--o{ recurring_order : "usa"
+address ||--o{ recurring_order : "entrega"
+currency ||--o{ recurring_order : "moneda"
+
+recurring_order ||--o{ recurring_order_item : "contiene"
+meal_base ||--o{ recurring_order_item : "selecciona"
+cooking_method ||--o{ recurring_order_item : "selecciona"
+
+recurring_order_item ||--o{ recurring_order_customization : "aplica"
+ingredient ||--o{ recurring_order_customization : "modifica"
 
 @enduml

@@ -1,7 +1,10 @@
 {
   "nav": {
     "home": "Home",
-    "settings": "Settings"
+    "explore": "Explore",
+    "cart": "Cart",
+    "settings": "Settings",
+    "orders": "Orders"
   },
   "user": {
     "myProfile": "My Profile"
@@ -26,7 +29,11 @@
       "title": "Profile",
       "subtitle": "Manage your profile information",
       "dietary": "Dietary preferences",
-      "verified": "Verified account"
+      "verified": "Verified account",
+      "addresses": "Addresses",
+      "paymentMethods": "Payment methods",
+      "orders": "Orders",
+      "recurringOrders": "Recurring orders"
     },
     "security": {
       "title": "Security",
@@ -121,5 +128,41 @@
     "saveError": "Failed to save restrictions",
     "emptyAllergens": "No allergens available",
     "emptyDiets": "No goals available"
+  },
+  "addresses": {
+    "title": "Addresses",
+    "addNew": "Add address",
+    "label": "Label",
+    "line1": "Address line 1",
+    "line2": "Address line 2",
+    "city": "City",
+    "region": "State/Region",
+    "country": "Country",
+    "postalCode": "Postal code",
+    "notes": "Notes",
+    "save": "Save address",
+    "saving": "Saving...",
+    "empty": "You have no saved addresses"
+  },
+  "paymentMethods": {
+    "title": "Payment methods",
+    "addNew": "Add method",
+    "name": "Method name",
+    "lastFour": "Last 4 digits",
+    "save": "Save method",
+    "saving": "Saving...",
+    "empty": "You have no saved payment methods"
+  },
+  "orders": {
+    "title": "My orders",
+    "orderId": "Order #{{id}}",
+    "status": "Status",
+    "empty": "You have no orders yet"
+  },
+  "recurringOrders": {
+    "title": "Recurring orders",
+    "pause": "Pause",
+    "runNow": "Run now",
+    "empty": "You have no recurring orders"
   }
 }

@@ -15,7 +15,7 @@ export function useIngredientsList(params: IngredientsQueryParams, accessToken?:
   return useQuery({
     queryKey: ingredientsQueryKey(params),
     queryFn: () => fetchIngredients(params, accessToken),
-    enabled: !!accessToken,
+    enabled: !!accessToken && !!params.restaurant_id,
     staleTime: 1000 * 60 * 5,
     placeholderData: keepPreviousData,
   });

@@ -3,7 +3,9 @@ import { apiRequest } from "@/api/backend";
 export type Ingredient = {
   id: string;
   name: string;
-  category: string;
+  category_id: string;
+  category_name: string;
+  restaurant_id?: string;
   unit_price: string;
   stock: number;
   is_active: boolean;
@@ -20,7 +22,8 @@ export type IngredientsResponse = {
 
 export type CreateIngredientPayload = {
   name: string;
-  category: string;
+  category_id: string;
+  restaurant_id: string;
   unit_price: number;
   stock: number;
   is_active?: boolean;
@@ -32,6 +35,7 @@ export type IngredientsQueryParams = {
   search?: string;
   category?: string;
   is_active?: boolean | null;
+  restaurant_id: string;
   page?: number;
   page_size?: number;
   sort?: string;
@@ -42,6 +46,7 @@ const buildQueryString = (params: IngredientsQueryParams) => {
   const query = new URLSearchParams();
   if (params.search) query.set("search", params.search);
   if (params.category) query.set("category", params.category);
+  if (params.restaurant_id) query.set("restaurant_id", params.restaurant_id);
   if (params.is_active !== undefined && params.is_active !== null) {
     query.set("is_active", String(params.is_active));
   }
@@ -61,8 +66,12 @@ export async function fetchIngredients(
   return apiRequest<IngredientsResponse>(`/ingredients${queryString}`, { method: "GET" }, accessToken);
 }
 
-export async function fetchIngredient(id: string, accessToken?: string) {
-  return apiRequest<{ ingredient: Ingredient }>(`/ingredients/${id}`, { method: "GET" }, accessToken);
+export async function fetchIngredient(id: string, restaurantId: string, accessToken?: string) {
+  return apiRequest<{ ingredient: Ingredient }>(
+    `/ingredients/${id}?restaurant_id=${restaurantId}`,
+    { method: "GET" },
+    accessToken
+  );
 }
 
 export async function createIngredient(payload: CreateIngredientPayload, accessToken?: string) {

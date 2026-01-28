@@ -14,15 +14,105 @@ class "auth.users" as auth_users <<tabla>> {
 class "public.profiles" as profiles <<tabla>> {
   id : UUID <<PK, FK auth.users.id>>
   full_name : TEXT
+  phone : TEXT
+  avatar_url : TEXT
+  date_of_birth : DATE
+  preferred_language : TEXT
+  notification_preferences : JSONB
+  preferred_currency_code : TEXT
   is_admin : BOOLEAN
   created_at : TIMESTAMPTZ
   updated_at : TIMESTAMPTZ
 }
 
+class "public.restaurants" as restaurants <<tabla>> {
+  id : UUID <<PK>>
+  name : TEXT
+  legal_name : TEXT
+  status : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.currencies" as currencies <<tabla>> {
+  code : TEXT <<PK>>
+  name : TEXT
+  symbol : TEXT
+  precision : INTEGER
+  is_active : BOOLEAN
+  created_at : TIMESTAMPTZ
+}
+
+class "public.restaurant_currencies" as restaurant_currencies <<tabla>> {
+  restaurant_id : UUID <<PK, FK public.restaurants.id>>
+  currency_code : TEXT <<PK, FK public.currencies.code>>
+  is_default : BOOLEAN
+  created_at : TIMESTAMPTZ
+}
+
+class "public.countries" as countries <<tabla>> {
+  id : UUID <<PK>>
+  iso2 : TEXT
+  iso3 : TEXT
+  name_es : TEXT
+  name_en : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.regions" as regions <<tabla>> {
+  id : UUID <<PK>>
+  country_id : UUID <<FK public.countries.id>>
+  name : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.cities" as cities <<tabla>> {
+  id : UUID <<PK>>
+  region_id : UUID <<FK public.regions.id>>
+  name : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.addresses" as addresses <<tabla>> {
+  id : UUID <<PK>>
+  line1 : TEXT
+  line2 : TEXT
+  city_id : UUID <<FK public.cities.id>>
+  region_id : UUID <<FK public.regions.id>>
+  country_id : UUID <<FK public.countries.id>>
+  postal_code : TEXT
+  notes : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.kitchens" as kitchens <<tabla>> {
+  id : UUID <<PK>>
+  restaurant_id : UUID <<FK public.restaurants.id>>
+  name : TEXT
+  address_id : UUID <<FK public.addresses.id>>
+  status : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.restaurant_users" as restaurant_users <<tabla>> {
+  restaurant_id : UUID <<PK, FK public.restaurants.id>>
+  user_id : UUID <<PK, FK public.profiles.id>>
+  role : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.dietary_restriction_types" as dietary_restriction_types <<tabla>> {
+  id : UUID <<PK>>
+  name : TEXT
+  created_at : TIMESTAMPTZ
+}
+
 class "public.dietary_restrictions" as dietary_restrictions <<tabla>> {
   id : UUID <<PK>>
   name : TEXT
-  type : TEXT
+  restriction_type_id : UUID <<FK public.dietary_restriction_types.id>>
   created_at : TIMESTAMPTZ
 }
 
@@ -32,10 +122,29 @@ class "public.user_dietary_restrictions" as user_dietary_restrictions <<tabla>> 
   created_at : TIMESTAMPTZ
 }
 
-class "public.ingredients" as ingredients <<tabla>> {
+class "public.nutrition_goals" as nutrition_goals <<tabla>> {
   id : UUID <<PK>>
   name : TEXT
-  category : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.user_nutrition_goals" as user_nutrition_goals <<tabla>> {
+  user_id : UUID <<PK, FK public.profiles.id>>
+  goal_id : UUID <<PK, FK public.nutrition_goals.id>>
+  created_at : TIMESTAMPTZ
+}
+
+class "public.ingredient_categories" as ingredient_categories <<tabla>> {
+  id : UUID <<PK>>
+  name : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.ingredients" as ingredients <<tabla>> {
+  id : UUID <<PK>>
+  restaurant_id : UUID <<FK public.restaurants.id>>
+  category_id : UUID <<FK public.ingredient_categories.id>>
+  name : TEXT
   unit_price : NUMERIC(10,2)
   stock : INTEGER
   is_active : BOOLEAN
@@ -43,15 +152,76 @@ class "public.ingredients" as ingredients <<tabla>> {
   updated_at : TIMESTAMPTZ
 }
 
-class "public.meal_bases" as meal_bases <<tabla>> {
+class "public.ingredient_restrictions" as ingredient_restrictions <<tabla>> {
+  ingredient_id : UUID <<PK, FK public.ingredients.id>>
+  restriction_id : UUID <<PK, FK public.dietary_restrictions.id>>
+}
+
+class "public.ingredient_stock_movements" as ingredient_stock_movements <<tabla>> {
+  id : UUID <<PK>>
+  ingredient_id : UUID <<FK public.ingredients.id>>
+  delta : INTEGER
+  reason : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.ingredient_price_history" as ingredient_price_history <<tabla>> {
+  id : UUID <<PK>>
+  ingredient_id : UUID <<FK public.ingredients.id>>
+  unit_price : NUMERIC(10,2)
+  effective_from : TIMESTAMPTZ
+}
+
+class "public.meal_base_categories" as meal_base_categories <<tabla>> {
   id : UUID <<PK>>
   name : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.assets" as assets <<tabla>> {
+  id : UUID <<PK>>
+  restaurant_id : UUID <<FK public.restaurants.id>>
+  bucket_id : TEXT
+  path : TEXT
+  title : TEXT
+  content_type : TEXT
+  size_bytes : INTEGER
+  created_at : TIMESTAMPTZ
+}
+
+class "public.meal_bases" as meal_bases <<tabla>> {
+  id : UUID <<PK>>
+  restaurant_id : UUID <<FK public.restaurants.id>>
+  name : TEXT
   description : TEXT
-  image_url : TEXT
+  image_asset_id : UUID <<FK public.assets.id>>
   base_price : NUMERIC(10,2)
   is_active : BOOLEAN
   created_at : TIMESTAMPTZ
   updated_at : TIMESTAMPTZ
+}
+
+class "public.meal_base_category_map" as meal_base_category_map <<tabla>> {
+  base_id : UUID <<PK, FK public.meal_bases.id>>
+  category_id : UUID <<PK, FK public.meal_base_categories.id>>
+}
+
+class "public.cooking_methods" as cooking_methods <<tabla>> {
+  id : UUID <<PK>>
+  name : TEXT
+  price_delta : NUMERIC(10,2)
+  created_at : TIMESTAMPTZ
+}
+
+class "public.base_cooking_methods" as base_cooking_methods <<tabla>> {
+  base_id : UUID <<PK, FK public.meal_bases.id>>
+  method_id : UUID <<PK, FK public.cooking_methods.id>>
+}
+
+class "public.meal_base_kitchens" as meal_base_kitchens <<tabla>> {
+  base_id : UUID <<PK, FK public.meal_bases.id>>
+  kitchen_id : UUID <<PK, FK public.kitchens.id>>
+  is_available : BOOLEAN
 }
 
 class "public.base_ingredients" as base_ingredients <<tabla>> {
@@ -65,9 +235,14 @@ class "public.base_ingredients" as base_ingredients <<tabla>> {
 class "public.orders" as orders <<tabla>> {
   id : UUID <<PK>>
   user_id : UUID <<FK public.profiles.id>>
+  restaurant_id : UUID <<FK public.restaurants.id>>
+  kitchen_id : UUID <<FK public.kitchens.id>>
+  delivery_address_id : UUID <<FK public.addresses.id>>
   status : TEXT
-  delivery_address : TEXT
+  currency_code : TEXT <<FK public.currencies.code>>
+  exchange_rate : NUMERIC(12,6)
   payment_method : TEXT
+  payment_method_id : UUID <<FK public.payment_methods.id>>
   scheduled_for : TIMESTAMPTZ
   subtotal : NUMERIC(10,2)
   tax : NUMERIC(10,2)
@@ -83,6 +258,7 @@ class "public.order_items" as order_items <<tabla>> {
   quantity : INTEGER
   unit_price : NUMERIC(10,2)
   subtotal : NUMERIC(10,2)
+  cooking_method_id : UUID <<FK public.cooking_methods.id>>
 }
 
 class "public.item_customizations" as item_customizations <<tabla>> {
@@ -95,19 +271,227 @@ class "public.item_customizations" as item_customizations <<tabla>> {
   created_at : TIMESTAMPTZ
 }
 
+class "public.carts" as carts <<tabla>> {
+  id : UUID <<PK>>
+  user_id : UUID <<FK public.profiles.id>>
+  restaurant_id : UUID <<FK public.restaurants.id>>
+  status : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.cart_items" as cart_items <<tabla>> {
+  id : UUID <<PK>>
+  cart_id : UUID <<FK public.carts.id>>
+  base_id : UUID <<FK public.meal_bases.id>>
+  quantity : INTEGER
+  unit_price : NUMERIC(10,2)
+  subtotal : NUMERIC(10,2)
+  cooking_method_id : UUID <<FK public.cooking_methods.id>>
+}
+
+class "public.cart_item_customizations" as cart_item_customizations <<tabla>> {
+  id : UUID <<PK>>
+  cart_item_id : UUID <<FK public.cart_items.id>>
+  ingredient_id : UUID <<FK public.ingredients.id>>
+  action : TEXT
+  qty : INTEGER
+  delta_price : NUMERIC(10,2)
+  created_at : TIMESTAMPTZ
+}
+
+class "public.saved_meals" as saved_meals <<tabla>> {
+  id : UUID <<PK>>
+  user_id : UUID <<FK public.profiles.id>>
+  base_id : UUID <<FK public.meal_bases.id>>
+  name : TEXT
+  cooking_method_id : UUID <<FK public.cooking_methods.id>>
+  created_at : TIMESTAMPTZ
+}
+
+class "public.saved_meal_customizations" as saved_meal_customizations <<tabla>> {
+  id : UUID <<PK>>
+  saved_meal_id : UUID <<FK public.saved_meals.id>>
+  ingredient_id : UUID <<FK public.ingredients.id>>
+  action : TEXT
+  qty : INTEGER
+  delta_price : NUMERIC(10,2)
+  created_at : TIMESTAMPTZ
+}
+
+class "public.payments" as payments <<tabla>> {
+  id : UUID <<PK>>
+  order_id : UUID <<FK public.orders.id>>
+  provider : TEXT
+  status : TEXT
+  currency_code : TEXT <<FK public.currencies.code>>
+  amount : NUMERIC(10,2)
+  transaction_ref : TEXT
+  created_at : TIMESTAMPTZ
+}
+
+class "public.order_status_history" as order_status_history <<tabla>> {
+  id : UUID <<PK>>
+  order_id : UUID <<FK public.orders.id>>
+  status : TEXT
+  changed_at : TIMESTAMPTZ
+  changed_by : UUID <<FK public.profiles.id>>
+}
+
+class "public.user_addresses" as user_addresses <<tabla>> {
+  user_id : UUID <<PK, FK public.profiles.id>>
+  address_id : UUID <<PK, FK public.addresses.id>>
+  label : TEXT
+  is_default : BOOLEAN
+  created_at : TIMESTAMPTZ
+}
+
+class "public.payment_methods" as payment_methods <<tabla>> {
+  id : UUID <<PK>>
+  user_id : UUID <<FK public.profiles.id>>
+  type : TEXT
+  name : TEXT
+  last_four : TEXT
+  expiry_month : INTEGER
+  expiry_year : INTEGER
+  is_default : BOOLEAN
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.recurring_orders" as recurring_orders <<tabla>> {
+  id : UUID <<PK>>
+  user_id : UUID <<FK public.profiles.id>>
+  restaurant_id : UUID <<FK public.restaurants.id>>
+  status : TEXT
+  frequency : TEXT
+  next_run_at : TIMESTAMPTZ
+  delivery_address_id : UUID <<FK public.addresses.id>>
+  payment_method_id : UUID <<FK public.payment_methods.id>>
+  currency_code : TEXT <<FK public.currencies.code>>
+  exchange_rate : NUMERIC(12,6)
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+class "public.recurring_order_items" as recurring_order_items <<tabla>> {
+  id : UUID <<PK>>
+  recurring_order_id : UUID <<FK public.recurring_orders.id>>
+  base_id : UUID <<FK public.meal_bases.id>>
+  quantity : INTEGER
+  unit_price : NUMERIC(10,2)
+  subtotal : NUMERIC(10,2)
+  cooking_method_id : UUID <<FK public.cooking_methods.id>>
+}
+
+class "public.recurring_order_customizations" as recurring_order_customizations <<tabla>> {
+  id : UUID <<PK>>
+  recurring_order_item_id : UUID <<FK public.recurring_order_items.id>>
+  ingredient_id : UUID <<FK public.ingredients.id>>
+  action : TEXT
+  qty : INTEGER
+  delta_price : NUMERIC(10,2)
+  created_at : TIMESTAMPTZ
+}
+
 auth_users "1" -- "1" profiles
 
+restaurants "1" -- "0..*" kitchens
+restaurants "1" -- "0..*" restaurant_users
+profiles "1" -- "0..*" restaurant_users
+
+restaurants "1" -- "0..*" restaurant_currencies
+currencies "1" -- "0..*" restaurant_currencies
+
+countries "1" -- "0..*" regions
+regions "1" -- "0..*" cities
+cities "1" -- "0..*" addresses
+regions "1" -- "0..*" addresses
+countries "1" -- "0..*" addresses
+
+profiles "1" -- "0..*" user_addresses
+addresses "1" -- "0..*" user_addresses
+
+profiles "1" -- "0..*" payment_methods
+
+dietary_restriction_types "1" -- "0..*" dietary_restrictions
 profiles "1" -- "0..*" user_dietary_restrictions
 dietary_restrictions "1" -- "0..*" user_dietary_restrictions
+
+nutrition_goals "1" -- "0..*" user_nutrition_goals
+profiles "1" -- "0..*" user_nutrition_goals
+
+ingredient_categories "1" -- "0..*" ingredients
+restaurants "1" -- "0..*" ingredients
+ingredients "1" -- "0..*" ingredient_restrictions
+dietary_restrictions "1" -- "0..*" ingredient_restrictions
+ingredients "1" -- "0..*" ingredient_stock_movements
+ingredients "1" -- "0..*" ingredient_price_history
+
+restaurants "1" -- "0..*" assets
+assets "1" -- "0..*" meal_bases
+restaurants "1" -- "0..*" meal_bases
+
+meal_base_categories "1" -- "0..*" meal_base_category_map
+meal_bases "1" -- "0..*" meal_base_category_map
+
+cooking_methods "1" -- "0..*" base_cooking_methods
+meal_bases "1" -- "0..*" base_cooking_methods
+
+kitchens "1" -- "0..*" meal_base_kitchens
+meal_bases "1" -- "0..*" meal_base_kitchens
 
 meal_bases "1" -- "0..*" base_ingredients
 ingredients "1" -- "0..*" base_ingredients
 
 profiles "1" -- "0..*" orders
+restaurants "1" -- "0..*" orders
+kitchens "1" -- "0..*" orders
+addresses "1" -- "0..*" orders
+currencies "1" -- "0..*" orders
+payment_methods "1" -- "0..*" orders
+
 orders "1" -- "1..*" order_items
 meal_bases "1" -- "0..*" order_items
+cooking_methods "1" -- "0..*" order_items
 
 order_items "1" -- "0..*" item_customizations
 ingredients "1" -- "0..*" item_customizations
+
+profiles "1" -- "0..*" carts
+restaurants "1" -- "0..*" carts
+carts "1" -- "0..*" cart_items
+meal_bases "1" -- "0..*" cart_items
+cooking_methods "1" -- "0..*" cart_items
+
+cart_items "1" -- "0..*" cart_item_customizations
+ingredients "1" -- "0..*" cart_item_customizations
+
+profiles "1" -- "0..*" saved_meals
+meal_bases "1" -- "0..*" saved_meals
+cooking_methods "1" -- "0..*" saved_meals
+saved_meals "1" -- "0..*" saved_meal_customizations
+ingredients "1" -- "0..*" saved_meal_customizations
+
+orders "1" -- "0..*" payments
+currencies "1" -- "0..*" payments
+
+orders "1" -- "0..*" order_status_history
+profiles "1" -- "0..*" order_status_history
+
+profiles "1" -- "0..*" payment_methods
+
+profiles "1" -- "0..*" recurring_orders
+restaurants "1" -- "0..*" recurring_orders
+addresses "1" -- "0..*" recurring_orders
+payment_methods "1" -- "0..*" recurring_orders
+currencies "1" -- "0..*" recurring_orders
+
+recurring_orders "1" -- "0..*" recurring_order_items
+meal_bases "1" -- "0..*" recurring_order_items
+cooking_methods "1" -- "0..*" recurring_order_items
+
+recurring_order_items "1" -- "0..*" recurring_order_customizations
+ingredients "1" -- "0..*" recurring_order_customizations
 
 @enduml

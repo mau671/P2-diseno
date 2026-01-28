@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { asc, eq } from 'drizzle-orm'
 import { db } from '../db'
-import { dietaryRestrictions } from '../db/schema'
+import { dietaryRestrictionTypes, dietaryRestrictions } from '../db/schema'
 
 const router = Router()
 
@@ -13,12 +13,16 @@ router.get('/restrictions', async (req, res, next) => {
       .select({
         id: dietaryRestrictions.id,
         name: dietaryRestrictions.name,
-        type: dietaryRestrictions.type
+        type: dietaryRestrictionTypes.name
       })
       .from(dietaryRestrictions)
+      .innerJoin(
+        dietaryRestrictionTypes,
+        eq(dietaryRestrictions.restrictionTypeId, dietaryRestrictionTypes.id)
+      )
 
     const restrictions = await (type
-      ? baseQuery.where(eq(dietaryRestrictions.type, type))
+      ? baseQuery.where(eq(dietaryRestrictionTypes.name, type))
       : baseQuery
     ).orderBy(asc(dietaryRestrictions.name))
 

@@ -1,12 +1,7 @@
 "use client"
 
 import * as React from "react"
-import {
-  Command,
-  LifeBuoy,
-  Home,
-  Leaf,
-} from "lucide-react"
+import { Command, LifeBuoy, Home, Leaf } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "@tanstack/react-router"
 
@@ -22,9 +17,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useRestaurant } from "@/context/restaurant-context"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
+  const { restaurants, selectedRestaurantId, setSelectedRestaurantId } = useRestaurant();
 
   const data = {
     navMain: [
@@ -60,13 +64,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-semibold">{t("app.name")}</span>
+                  <span className="truncate text-xs">{t("nav.restaurant")}</span>
                 </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        {restaurants.length ? (
+          <div className="px-2 pb-2">
+            <Select
+              value={selectedRestaurantId ?? undefined}
+              onValueChange={setSelectedRestaurantId}
+              disabled={restaurants.length <= 1}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("nav.restaurant")} />
+              </SelectTrigger>
+              <SelectContent>
+                {restaurants.map((restaurant) => (
+                  <SelectItem key={restaurant.restaurant_id} value={restaurant.restaurant_id}>
+                    {restaurant.restaurant_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

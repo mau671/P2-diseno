@@ -5,7 +5,7 @@ skinparam componentStyle rectangle
 actor "Usuario" as usuario
 
 package "Workspace bun" as workspace {
-  package "Aplicacion web" as webPkg {
+package "Aplicacion web" as webPkg {
     component "Interfaz" as webUi
     component "Ruteo" as webRouter
     component "Cache" as webQuery
@@ -13,13 +13,14 @@ package "Workspace bun" as workspace {
     component "Pacer" as webPacer
     component "Internacionalizacion" as webI18n
     component "Cliente HTTP" as webHttp
+    component "Carga de archivos" as webUpload
     component "Contexto de autenticacion" as webAuthCtx
     component "Rutas de autenticacion" as webAuthRoutes
     component "Pantalla ingredientes" as webIngredients
     component "Pagina verificacion" as webVerify
   }
 
-  package "Aplicacion movil" as mobilePkg {
+package "Aplicacion movil" as mobilePkg {
     component "Navegacion" as mobileRouter
     component "Pantallas de autenticacion" as mobileAuthUi
     component "Pantalla perfil dietetico" as mobileDietUi
@@ -27,6 +28,7 @@ package "Workspace bun" as workspace {
     component "Cache local" as mobileStorage
     component "Internacionalizacion" as mobileI18n
     component "Cliente HTTP" as mobileHttp
+    component "Carga de archivos" as mobileUpload
     component "Contexto de autenticacion" as mobileAuthCtx
   }
 
@@ -41,6 +43,7 @@ package "Workspace bun" as workspace {
     component "Rutas ingredientes" as apiIngredients
     component "Rutas catalogo" as apiCatalog
     component "Rutas pedidos" as apiOrders
+    component "Rutas assets" as apiAssets
     component "ORM" as apiOrm
     component "Cliente de autenticacion" as apiSupabaseClient
   }
@@ -48,6 +51,7 @@ package "Workspace bun" as workspace {
 
 package "Plataforma" as supaPkg {
   component "Servicio de autenticacion" as supaAuth
+  component "Storage" as supaStorage
   database "Base de datos" as postgres
   component "Esquema publico" as publicSchema
   component "Funciones y triggers" as triggers
@@ -111,6 +115,10 @@ note right of apiSupabaseClient
   supabase
 end note
 
+note right of supaStorage
+  supabase storage
+end note
+
 note right of supaPkg
   supabase
 end note
@@ -143,6 +151,8 @@ webQuery --> webHttp : "Fetch"
 webUi --> webVerify : "Verificacion"
 webVerify --> webAuthRoutes : "Redireccion"
 webHttp --> apiServer : "HTTP REST /api/v1"
+webUpload --> apiAssets : "Solicita URL firmada"
+webUpload --> supaStorage : "Upload directo"
 
 mobileRouter --> mobileAuthUi : "Flujo AUTH"
 mobileAuthUi --> mobileAuthCtx : "Sesion"
@@ -152,6 +162,8 @@ mobileDietUi --> mobileQuery : "Estado remoto"
 mobileDietUi --> mobileStorage : "Persistencia"
 mobileQuery --> mobileHttp : "Fetch"
 mobileHttp --> apiServer : "HTTP REST /api/v1"
+mobileUpload --> apiAssets : "Solicita URL firmada"
+mobileUpload --> supaStorage : "Upload directo"
 
 apiServer --> apiCors : "CORS"
 apiServer --> apiOpenapi : "OpenAPI.json"
@@ -162,6 +174,7 @@ apiServer --> apiDietary : "Dietas"
 apiServer --> apiIngredients : "Ingredientes"
 apiServer --> apiCatalog : "Catalogo"
 apiServer --> apiOrders : "Pedidos"
+apiServer --> apiAssets : "Assets"
 
 apiAuthMw --> apiSupabaseClient : "JWT"
 apiAuth --> apiSupabaseClient : "Registro y login"
@@ -175,6 +188,7 @@ apiDietary --> apiOrm : "Consultas"
 apiIngredients --> apiOrm : "Consultas"
 apiCatalog --> apiOrm : "Consultas"
 apiOrders --> apiOrm : "Consultas"
+apiAssets --> apiOrm : "Metadatos"
 apiOrm --> postgres : "SQL"
 
 postgres --> publicSchema : "Esquema"
@@ -182,5 +196,6 @@ publicSchema --> tables : "Datos"
 publicSchema --> triggers : "Consistencia"
 publicSchema --> rls : "Seguridad"
 supaAuth --> postgres : "auth.users"
+supaStorage --> postgres : "storage.*"
 
 @enduml

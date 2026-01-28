@@ -1,7 +1,10 @@
 {
   "nav": {
     "home": "Inicio",
-    "settings": "Configuración"
+    "explore": "Explorar",
+    "cart": "Carrito",
+    "settings": "Configuración",
+    "orders": "Pedidos"
   },
   "user": {
     "myProfile": "Mi perfil"
@@ -26,7 +29,11 @@
       "title": "Perfil",
       "subtitle": "Gestiona la información de tu perfil",
       "dietary": "Restricciones alimenticias",
-      "verified": "Cuenta verificada"
+      "verified": "Cuenta verificada",
+      "addresses": "Direcciones",
+      "paymentMethods": "Métodos de pago",
+      "orders": "Pedidos",
+      "recurringOrders": "Órdenes recurrentes"
     },
     "security": {
       "title": "Seguridad",
@@ -121,5 +128,41 @@
     "saveError": "No se pudieron guardar las restricciones",
     "emptyAllergens": "No hay alérgenos disponibles",
     "emptyDiets": "No hay objetivos disponibles"
+  },
+  "addresses": {
+    "title": "Direcciones",
+    "addNew": "Agregar dirección",
+    "label": "Etiqueta",
+    "line1": "Dirección línea 1",
+    "line2": "Dirección línea 2",
+    "city": "Ciudad",
+    "region": "Provincia/Estado",
+    "country": "País",
+    "postalCode": "Código postal",
+    "notes": "Notas",
+    "save": "Guardar dirección",
+    "saving": "Guardando...",
+    "empty": "No tienes direcciones guardadas"
+  },
+  "paymentMethods": {
+    "title": "Métodos de pago",
+    "addNew": "Agregar método",
+    "name": "Nombre del método",
+    "lastFour": "Últimos 4 dígitos",
+    "save": "Guardar método",
+    "saving": "Guardando...",
+    "empty": "No tienes métodos de pago guardados"
+  },
+  "orders": {
+    "title": "Mis pedidos",
+    "orderId": "Pedido #{{id}}",
+    "status": "Estado",
+    "empty": "No tienes pedidos aún"
+  },
+  "recurringOrders": {
+    "title": "Órdenes recurrentes",
+    "pause": "Pausar",
+    "runNow": "Ejecutar ahora",
+    "empty": "No tienes órdenes recurrentes"
   }
 }
