@@ -153,19 +153,19 @@ export default function DietaryProfileScreen() {
     },
   });
 
-  const restrictions = restrictionsQuery.data?.restrictions ?? [];
   const grouped = useMemo(() => {
+    const restrictions = restrictionsQuery.data?.restrictions ?? [];
     const allergens: DietaryRestriction[] = [];
     const diets: DietaryRestriction[] = [];
     restrictions.forEach((item) => {
-      if (item.type === 'allergen') {
+      if (item.type === 'allergen' || item.type === 'alergeno') {
         allergens.push(item);
       } else {
         diets.push(item);
       }
     });
     return { allergens, diets };
-  }, [restrictions]);
+  }, [restrictionsQuery.data]);
 
   const toggleRestriction = (id: string) => {
     setError('');

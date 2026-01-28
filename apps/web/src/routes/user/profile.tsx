@@ -6,7 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileSection } from "@/components/profile/ProfileSection";
 import { AppearanceSection } from "@/components/profile/AppearanceSection";
-import { User, Palette } from "lucide-react";
+import { AddressesSection } from "@/components/profile/AddressesSection";
+import { PaymentMethodsSection } from "@/components/profile/PaymentMethodsSection";
+import { OrdersSection } from "@/components/profile/OrdersSection";
+import { RecurringOrdersSection } from "@/components/profile/RecurringOrdersSection";
+import { CreditCard, ListOrdered, MapPin, Palette, Repeat, User } from "lucide-react";
 
 export const Route = createFileRoute("/user/profile")({
   component: ProfilePage,
@@ -52,6 +56,22 @@ function ProfilePage() {
             <User className="mr-2 h-4 w-4" />
             {t("profile.profileTab")}
           </TabsTrigger>
+          <TabsTrigger value="addresses">
+            <MapPin className="mr-2 h-4 w-4" />
+            {t("addresses.title")}
+          </TabsTrigger>
+          <TabsTrigger value="payment-methods">
+            <CreditCard className="mr-2 h-4 w-4" />
+            {t("paymentMethods.title")}
+          </TabsTrigger>
+          <TabsTrigger value="orders">
+            <ListOrdered className="mr-2 h-4 w-4" />
+            {t("orders.title")}
+          </TabsTrigger>
+          <TabsTrigger value="recurring">
+            <Repeat className="mr-2 h-4 w-4" />
+            {t("recurringOrders.title")}
+          </TabsTrigger>
           <TabsTrigger value="appearance">
             <Palette className="mr-2 h-4 w-4" />
             {t("profile.appearanceTab")}
@@ -60,6 +80,22 @@ function ProfilePage() {
 
         <TabsContent value="profile" className="mt-6">
           <ProfileSection />
+        </TabsContent>
+
+        <TabsContent value="addresses" className="mt-6">
+          <AddressesSection />
+        </TabsContent>
+
+        <TabsContent value="payment-methods" className="mt-6">
+          <PaymentMethodsSection />
+        </TabsContent>
+
+        <TabsContent value="orders" className="mt-6">
+          <OrdersSection />
+        </TabsContent>
+
+        <TabsContent value="recurring" className="mt-6">
+          <RecurringOrdersSection />
         </TabsContent>
 
         <TabsContent value="appearance" className="mt-6">

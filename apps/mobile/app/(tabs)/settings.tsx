@@ -106,6 +106,54 @@ function ProfileSection({ user, colors }: { user: any; colors: typeof Colors.lig
       </TouchableOpacity>
 
       <TouchableOpacity
+        style={[styles.optionItem, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
+        onPress={() => router.push('/addresses')}
+        activeOpacity={0.7}
+      >
+        <View style={styles.optionItemRow}>
+          <IconSymbol name="location.fill" size={20} color={colors.primary} />
+          <ThemedText style={styles.optionItemText}>{t('settings.profile.addresses')}</ThemedText>
+          <IconSymbol name="chevron.right" size={18} color={colors.icon} />
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.optionItem, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
+        onPress={() => router.push('/payment-methods')}
+        activeOpacity={0.7}
+      >
+        <View style={styles.optionItemRow}>
+          <IconSymbol name="creditcard.fill" size={20} color={colors.primary} />
+          <ThemedText style={styles.optionItemText}>{t('settings.profile.paymentMethods')}</ThemedText>
+          <IconSymbol name="chevron.right" size={18} color={colors.icon} />
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.optionItem, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
+        onPress={() => router.push('/orders')}
+        activeOpacity={0.7}
+      >
+        <View style={styles.optionItemRow}>
+          <IconSymbol name="list.bullet.rectangle" size={20} color={colors.primary} />
+          <ThemedText style={styles.optionItemText}>{t('settings.profile.orders')}</ThemedText>
+          <IconSymbol name="chevron.right" size={18} color={colors.icon} />
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.optionItem, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
+        onPress={() => router.push('/recurring-orders')}
+        activeOpacity={0.7}
+      >
+        <View style={styles.optionItemRow}>
+          <IconSymbol name="arrow.triangle.2.circlepath" size={20} color={colors.primary} />
+          <ThemedText style={styles.optionItemText}>{t('settings.profile.recurringOrders')}</ThemedText>
+          <IconSymbol name="chevron.right" size={18} color={colors.icon} />
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         style={[styles.logoutOption, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
         onPress={handleLogout}
         activeOpacity={0.7}

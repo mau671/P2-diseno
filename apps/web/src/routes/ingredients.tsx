@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import { useAuth } from "@/hooks/use-auth";
+import { useRestaurant } from "@/context/restaurant-context";
 import {
   useCreateIngredient,
   useDeleteIngredient,
@@ -24,6 +25,13 @@ import type { Ingredient } from "@/api/ingredients";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { LoadingState } from "@/components/network/LoadingState";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
@@ -54,7 +62,7 @@ export const Route = createFileRoute("/ingredients")({
 
 type IngredientFormState = {
   name: string;
-  category: string;
+  category_id: string;
   unit_price: string;
   stock: string;
   is_active: boolean;
@@ -62,7 +70,7 @@ type IngredientFormState = {
 
 const DEFAULT_FORM: IngredientFormState = {
   name: "",
-  category: "",
+  category_id: "",
   unit_price: "",
   stock: "",
   is_active: true,
@@ -83,10 +91,11 @@ function IngredientsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { session, user, loading: authLoading } = useAuth();
+  const { selectedRestaurantId } = useRestaurant();
 
   const [searchInput, setSearchInput] = React.useState("");
   const [search, setSearch] = React.useState("");
-  const [category, setCategory] = React.useState<string | null>(null);
+  const [category, setCategory] = React.useState<{ id: string; name: string } | null>(null);
   const [status, setStatus] = React.useState<(typeof statusOptions)[number]>(statusOptions[0]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 });
@@ -124,7 +133,8 @@ function IngredientsPage() {
   const ingredientsQuery = useIngredientsList(
     {
       search: search || undefined,
-      category: category || undefined,
+      category: category?.name || undefined,
+      restaurant_id: selectedRestaurantId ?? "",
       is_active: isActiveFilter,
       page: pagination.pageIndex + 1,
       page_size: pagination.pageSize,
@@ -150,9 +160,13 @@ function IngredientsPage() {
   const pageCount = Math.max(1, Math.ceil(total / pagination.pageSize));
 
   const categories = React.useMemo(() => {
-    const unique = new Set<string>();
-    data.forEach((item) => unique.add(item.category));
-    return Array.from(unique);
+    const unique = new Map<string, string>();
+    data.forEach((item) => {
+      if (!unique.has(item.category_id)) {
+        unique.set(item.category_id, item.category_name);
+      }
+    });
+    return Array.from(unique.entries()).map(([id, name]) => ({ id, name }));
   }, [data]);
 
   const columnHelper = React.useMemo(() => createColumnHelper<Ingredient>(), []);
@@ -162,7 +176,7 @@ function IngredientsPage() {
         header: t("ingredients.columns.name"),
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor("category", {
+      columnHelper.accessor("category_name", {
         header: t("ingredients.columns.category"),
         cell: (info) => info.getValue(),
       }),
@@ -243,7 +257,7 @@ function IngredientsPage() {
     setEditingIngredient(ingredient);
     setFormState({
       name: ingredient.name,
-      category: ingredient.category,
+      category_id: ingredient.category_id,
       unit_price: ingredient.unit_price,
       stock: String(ingredient.stock),
       is_active: ingredient.is_active,
@@ -259,7 +273,7 @@ function IngredientsPage() {
     const unitPrice = Number(formState.unit_price);
     const stock = Number(formState.stock);
 
-    if (!formState.name.trim() || !formState.category.trim() || Number.isNaN(unitPrice) || Number.isNaN(stock)) {
+    if (!formState.name.trim() || !formState.category_id.trim() || Number.isNaN(unitPrice) || Number.isNaN(stock)) {
       return;
     }
 
@@ -268,16 +282,20 @@ function IngredientsPage() {
         id: editingIngredient.id,
         payload: {
           name: formState.name.trim(),
-          category: formState.category.trim(),
+          category_id: formState.category_id.trim(),
           unit_price: unitPrice,
           stock,
           is_active: formState.is_active,
         },
       });
     } else {
+      if (!selectedRestaurantId) {
+        return;
+      }
       await createMutation.mutateAsync({
         name: formState.name.trim(),
-        category: formState.category.trim(),
+        category_id: formState.category_id.trim(),
+        restaurant_id: selectedRestaurantId,
         unit_price: unitPrice,
         stock,
         is_active: formState.is_active,
@@ -301,6 +319,10 @@ function IngredientsPage() {
 
   if (!user) {
     return null;
+  }
+
+  if (!selectedRestaurantId) {
+    return <EmptyState message={t("ingredients.selectRestaurant")} />;
   }
 
   if (ingredientsQuery.isLoading && data.length === 0) {
@@ -335,14 +357,14 @@ function IngredientsPage() {
             placeholder={t("ingredients.search")}
             className="min-w-[220px]"
           />
-          <SearchFilterDropdown
-            labelKey="ingredients.category"
-            options={categories}
-            selected={category}
-            onSelect={(value) => setCategory(value)}
-            getLabel={(option) => option}
-            getValue={(option) => option}
-          />
+            <SearchFilterDropdown
+              labelKey="ingredients.category"
+              options={categories}
+              selected={category}
+              onSelect={(value) => setCategory(value)}
+              getLabel={(option) => option.name}
+              getValue={(option) => option.name}
+            />
           <SearchFilterDropdown
             labelKey="ingredients.status"
             options={statusOptions}
@@ -446,11 +468,21 @@ function IngredientsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">{t("ingredients.form.category")}</Label>
-              <Input
-                id="category"
-                value={formState.category}
-                onChange={(event) => handleFormChange("category", event.target.value)}
-              />
+              <Select
+                value={formState.category_id}
+                onValueChange={(value) => handleFormChange("category_id", value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("ingredients.form.category")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((option) => (
+                    <SelectItem key={option.id} value={option.id}>
+                      {option.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="unitPrice">{t("ingredients.form.unitPrice")}</Label>
