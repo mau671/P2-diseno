@@ -5,6 +5,7 @@
   "nav": {
     "home": "Accueil",
     "ingredients": "Ingrédients",
+    "dashboard": "Tableau de bord",
     "restaurant": "Restaurant",
     "support": "Support"
   },

@@ -1,0 +1,4 @@
+-- Placeholder migration.
+-- This migration exists in the remote Supabase migration history (from a previous branch),
+-- but the original file was deleted locally.
+-- Keeping this file prevents "Remote migration versions not found locally".supabase db pull

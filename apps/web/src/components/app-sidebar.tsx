@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Command, LifeBuoy, Home, Leaf } from "lucide-react"
+import { Command, LifeBuoy, Home, Leaf, LayoutDashboard } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "@tanstack/react-router"
 
@@ -42,6 +42,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: t("nav.ingredients"),
         url: "/ingredients",
         icon: Leaf,
+      },
+      {
+        title: t("nav.dashboard"),
+        url: "/dashboard",
+        icon: LayoutDashboard,
       },
     ],
     navSecondary: [
