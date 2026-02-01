@@ -7,6 +7,7 @@
     "ingredients": "Ingredientes",
     "dashboard": "Tablero",
     "restaurant": "Restaurante",
+    "mealBases": "Bases de Platillos",
     "support": "Soporte"
   },
   "home": {
@@ -337,5 +338,55 @@
     "runNow": "Ejecutar ahora",
     "empty": "No tienes órdenes recurrentes",
     "emptyDesc": "Crea una recurrencia para automatizar tus pedidos"
+  },
+
+  "mealBases": {
+    "title": "Bases de Platillos",
+    "subtitle": "Crea y gestiona las recetas base para personalización",
+    "new": "Nueva Base",
+    "edit": "Editar Base",
+    "save": "Guardar",
+    "create": "Crear",
+    "search": "Buscar platillos...",
+    "category": "Categoría",
+    "status": "Estado",
+    "empty": "No se encontraron bases de platillos",
+    "selectRestaurant": "Por favor selecciona un restaurante",
+    "formDescription": "Complete la información de la base de platillo",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "pagination": "Página {{page}} de {{total}} ({{count}} platillos)",
+    "statusAll": "Todos",
+    "statusActive": "Activo",
+    "statusInactive": "Inactivo",
+    "columns": {
+      "name": "Nombre",
+      "categories": "Categorías",
+      "basePrice": "Precio Base",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "form": {
+      "name": "Nombre del platillo",
+      "namePlaceholder": "Ej: Bowl Mediterráneo",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Describe los ingredientes y características principales...",
+      "basePrice": "Precio base",
+      "isActive": "Activo",
+      "categories": "Categorías"
+    },
+    "actions": {
+      "view": "Ver detalles",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "detail": {
+      "basePrice": "Precio Base",
+      "status": "Estado",
+      "categories": "Categorías",
+      "warnings": "Advertencias de Restricciones Dietéticas"
+    },
+    "deleteTitle": "¿Eliminar base de platillo?",
+    "deleteDescription": "¿Estás seguro de que deseas eliminar \"{{name}}\"? Esta acción no se puede deshacer."
   }
 }

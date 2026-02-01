@@ -220,6 +220,161 @@ router.get('/', rateLimitPublic, optionalAuthMiddleware, async (req, res, next) 
   }
 })
 
+router.patch('/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params
+
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid meal base id' })
+    }
+
+    const {
+      name,
+      description,
+      base_price,
+      is_active,
+      image_asset_id,
+      category_ids
+    } = req.body
+
+    const updated = await db
+      .update(mealBases)
+      .set({
+        name,
+        description,
+        basePrice: base_price,
+        isActive: is_active,
+        imageAssetId: image_asset_id,
+        updatedAt: new Date()
+      })
+      .where(eq(mealBases.id, id))
+      .returning({ id: mealBases.id })
+
+    if (!updated.length) {
+      return res.status(404).json({ error: 'Meal base not found' })
+    }
+
+    if (Array.isArray(category_ids)) {
+      await db
+        .delete(mealBaseCategoryMap)
+        .where(eq(mealBaseCategoryMap.baseId, id))
+
+    if (category_ids.length > 0) {
+      await db.insert(mealBaseCategoryMap).values({
+        baseId: id,
+        categoryId: category_ids[0]
+      })
+    }
+  }
+
+
+
+    return res.status(200).json({ success: true })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params
+
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid meal base id' })
+    }
+
+    const deleted = await db
+      .delete(mealBases)
+      .where(eq(mealBases.id, id))
+      .returning({ id: mealBases.id })
+
+    if (!deleted.length) {
+      return res.status(404).json({ error: 'Meal base not found' })
+    }
+
+    return res.status(200).json({ success: true })
+  } catch (err) {
+    next(err)
+  }
+})
+
+
+router.post('/', async (req, res, next) => {
+  try {
+    const {
+      restaurant_id,
+      name,
+      description,
+      base_price,
+      image_asset_id,
+      is_active = true,
+      category_ids = []
+    } = req.body
+
+    if (!restaurant_id || !name || base_price == null) {
+      return res.status(400).json({
+        error: 'restaurant_id, name and base_price are required'
+      })
+    }
+
+    const inserted = await db
+    .insert(mealBases)
+    .values({
+      restaurantId: restaurant_id,
+      name,
+      description: description ?? null,
+      basePrice: base_price,
+      imageAssetId: image_asset_id ?? null,
+      isActive: is_active
+    })
+    .returning({
+      id: mealBases.id,
+      restaurantId: mealBases.restaurantId,
+      name: mealBases.name,
+      description: mealBases.description,
+      imageAssetId: mealBases.imageAssetId,
+      basePrice: mealBases.basePrice,
+      isActive: mealBases.isActive
+    })
+
+  const mealBase = inserted[0]
+
+    if (!mealBase) {
+      return res.status(500).json({
+        error: 'Failed to create meal base'
+      })
+    }
+
+    if (Array.isArray(category_ids) && category_ids.length > 0) {
+      await db.insert(mealBaseCategoryMap).values({
+        baseId: mealBase.id,
+        categoryId: category_ids[0]
+      })
+    }
+
+
+
+    return res.status(201).json({
+      meal_base: {
+        id: mealBase.id,
+        restaurant_id: mealBase.restaurantId,
+        restaurant_name: null,
+        name: mealBase.name,
+        description: mealBase.description,
+        image_asset_id: mealBase.imageAssetId,
+        base_price: Number(mealBase.basePrice),
+        is_active: mealBase.isActive,
+        categories: [],
+        restriction_warnings: [],
+        matches_user_restrictions: true
+      }
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+
 router.get('/:id', rateLimitPublic, optionalAuthMiddleware, async (req, res, next) => {
   try {
     const { id } = req.params

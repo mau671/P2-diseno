@@ -7,6 +7,7 @@
     "ingredients": "Ingredients",
     "dashboard": "Dashboard",
     "restaurant": "Restaurant",
+    "mealBases": "Meal Bases",
     "support": "Support"
   },
   "home": {
@@ -336,5 +337,54 @@
     "runNow": "Run now",
     "empty": "You have no recurring orders",
     "emptyDesc": "Create a recurrence to automate your orders"
+  },
+  "mealBases": {
+    "title": "Meal Bases",
+    "subtitle": "Create and manage base recipes for customization",
+    "new": "New Base",
+    "edit": "Edit Base",
+    "save": "Save",
+    "create": "Create",
+    "search": "Search meal bases...",
+    "category": "Category",
+    "status": "Status",
+    "empty": "No meal bases found",
+    "selectRestaurant": "Please select a restaurant",
+    "formDescription": "Complete the meal base information",
+    "prev": "Previous",
+    "next": "Next",
+    "pagination": "Page {{page}} of {{total}} ({{count}} meal bases)",
+    "statusAll": "All",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "columns": {
+      "name": "Name",
+      "categories": "Categories",
+      "basePrice": "Base Price",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "form": {
+      "name": "Meal name",
+      "namePlaceholder": "E.g: Mediterranean Bowl",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the main ingredients and characteristics...",
+      "basePrice": "Base price",
+      "isActive": "Active",
+      "Categories": "Categories"
+    },
+    "actions": {
+      "view": "View details",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "detail": {
+      "basePrice": "Base Price",
+      "status": "Status",
+      "categories": "Categories",
+      "warnings": "Dietary Restriction Warnings"
+    },
+    "deleteTitle": "Delete meal base?",
+    "deleteDescription": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
   }
 }
