@@ -7,6 +7,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
 }
 
+function getLocalTimeZone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
 export async function getRestaurantDashboard(restaurantId: string, accessToken: string) {
   if (!restaurantId) throw new Error("Missing restaurantId");
   if (!accessToken) throw new Error("Missing accessToken");
@@ -24,13 +32,13 @@ export async function getRestaurantDashboard(restaurantId: string, accessToken: 
     },
   });
 
+  const tz = getLocalTimeZone();
+
   const { data, error } = await authed.rpc("get_restaurant_dashboard", {
     target_restaurant_id: restaurantId,
+    target_tz: tz,
   });
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
+  if (error) throw new Error(error.message);
   return data;
 }

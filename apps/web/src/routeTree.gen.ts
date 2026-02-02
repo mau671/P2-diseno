@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as MealBasesRouteImport } from './routes/meal-bases'
 import { Route as IngredientsRouteImport } from './routes/ingredients'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -20,6 +21,11 @@ import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MealBasesRoute = MealBasesRouteImport.update({
   id: '/meal-bases',
   path: '/meal-bases',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/ingredients': typeof IngredientsRoute
   '/meal-bases': typeof MealBasesRoute
+  '/orders': typeof OrdersRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/ingredients': typeof IngredientsRoute
   '/meal-bases': typeof MealBasesRoute
+  '/orders': typeof OrdersRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/ingredients': typeof IngredientsRoute
   '/meal-bases': typeof MealBasesRoute
+  '/orders': typeof OrdersRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/ingredients'
     | '/meal-bases'
+    | '/orders'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/ingredients'
     | '/meal-bases'
+    | '/orders'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/ingredients'
     | '/meal-bases'
+    | '/orders'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
@@ -153,11 +165,19 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   IngredientsRoute: typeof IngredientsRoute
   MealBasesRoute: typeof MealBasesRoute
+  OrdersRoute: typeof OrdersRoute
   UserProfileRoute: typeof UserProfileRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/meal-bases': {
       id: '/meal-bases'
       path: '/meal-bases'
@@ -253,6 +273,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   IngredientsRoute: IngredientsRoute,
   MealBasesRoute: MealBasesRoute,
+  OrdersRoute: OrdersRoute,
   UserProfileRoute: UserProfileRoute,
 }
 export const routeTree = rootRouteImport

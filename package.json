@@ -8,5 +8,8 @@
   "scripts": {
     "dev:web": "bun --filter ./apps/web dev",
     "dev:mobile": "bun --filter ./apps/mobile start"
+  },
+  "dependencies": {
+    "@radix-ui/react-scroll-area": "^1.2.10"
   }
 }

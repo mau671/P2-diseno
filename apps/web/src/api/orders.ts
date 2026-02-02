@@ -1,58 +1,65 @@
-import { apiRequest } from "@/api/backend";
+// src/api/orders.ts
+export type OrdersQueryParams = { restaurantId: string };
 
-export type OrderItem = {
+export type OrderManageRow = {
   id: string;
-  baseName: string;
-  quantity: number;
-  unitPrice: string;
-  subtotal: string;
+  customer_name: string | null;
+  items_count: number;
+  total: number;
+  status: "pending" | "paid" | "preparing" | "delivering" | "completed" | string;
+  created_at: string;
 };
 
-export type OrderSummary = {
-  id: string;
-  status: string;
-  total: string;
-  currency: string;
-  createdAt: string;
-  items: OrderItem[];
-  deliveryAddress?: {
-    line1?: string | null;
-    line2?: string | null;
-    city?: string | null;
-    region?: string | null;
-    country?: string | null;
-  } | null;
-};
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-export type OrdersResponse = {
-  orders: OrderSummary[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-  };
-};
+async function rpc<T>(fn: string, body: unknown, accessToken: string): Promise<T> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body ?? {}),
+  });
 
-export type OrdersQueryParams = {
-  page?: number;
-  limit?: number;
-  status?: string;
-};
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `RPC ${fn} failed (${res.status})`);
+  }
 
-const buildQueryString = (params: OrdersQueryParams) => {
-  const query = new URLSearchParams();
-  if (params.page) query.set("page", String(params.page));
-  if (params.limit) query.set("limit", String(params.limit));
-  if (params.status) query.set("status", params.status);
-  const queryString = query.toString();
-  return queryString ? `?${queryString}` : "";
-};
+  return (await res.json()) as T;
+}
 
-export async function fetchOrders(params: OrdersQueryParams, accessToken?: string) {
-  const queryString = buildQueryString(params);
-  return apiRequest<OrdersResponse>(
-    `/profiles/me/orders${queryString}`,
-    { method: "GET" },
+/** Compat (por si un hook viejo la usa) */
+export async function fetchOrders(params: OrdersQueryParams, accessToken: string) {
+  return fetchOrdersManage(params.restaurantId, accessToken);
+}
+
+export async function fetchOrdersManage(
+  restaurantId: string,
+  accessToken: string,
+  limit = 200,
+  offset = 0
+): Promise<OrderManageRow[]> {
+  return rpc<OrderManageRow[]>(
+    "get_restaurant_orders_manage",
+    {
+      target_restaurant_id: restaurantId,
+      target_limit: limit,
+      target_offset: offset,
+    },
     accessToken
   );
+}
+
+/** Solo avanza estado; si entra a paid => crea payment (según tu RPC) */
+export async function advanceOrder(orderId: string, accessToken: string) {
+  return rpc("advance_order_status", { target_order_id: orderId }, accessToken);
+}
+
+/** Cancelar = borrar completo */
+export async function deleteOrder(orderId: string, accessToken: string) {
+  return rpc("delete_order", { target_order_id: orderId }, accessToken);
 }
