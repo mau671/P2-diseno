@@ -10,6 +10,8 @@ import { LoadingState } from "@/components/network/LoadingState";
 import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 
+import { Button } from "@/components/ui/button";
+
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
@@ -54,6 +56,8 @@ function statusLabel(status: string) {
 
 function StatusPill({ status }: { status: string }) {
   const base = "inline-flex items-center rounded-full px-2 py-0.5 text-xs border";
+
+  // ✅ Colores como pediste: pendiente amarillo, pagado verde, preparando azul, en camino morado
   const cls =
     status === "preparing"
       ? "border-blue-500/30 text-blue-300"
@@ -114,10 +118,9 @@ function DashboardPage() {
 
   const raw = (dashboardQuery.data ?? {}) as any;
 
-  // ✅ Soporta 2 formatos:
-  // - plano: orders_today, revenue_today, etc.
-  // - anidado: today.orders, today.revenue, today.active_customers, today.avg_prep_minutes
+  // RPC devuelve anidado: today.orders, today.revenue, etc.
   const today = raw.today ?? {};
+
   const restaurantName =
     raw.restaurant_name ??
     raw.restaurantName ??
@@ -125,9 +128,12 @@ function DashboardPage() {
 
   const ordersToday = toNumber(raw.orders_today ?? raw.ordersToday ?? today.orders ?? 0);
   const revenueToday = toNumber(raw.revenue_today ?? raw.revenueToday ?? today.revenue ?? 0);
-  const activeCustomers = toNumber(raw.active_customers ?? raw.activeCustomers ?? today.active_customers ?? 0);
 
-  // tiempo promedio (min) puede venir como avg_minutes / avg_prep_minutes
+  // en SQL ahora es "clientes del día" (usuarios únicos que ordenaron hoy)
+  const activeCustomers = toNumber(
+    raw.active_customers ?? raw.activeCustomers ?? today.active_customers ?? 0
+  );
+
   const avgMinutes = toNumber(
     raw.avg_minutes ??
       raw.avgMinutes ??
@@ -143,38 +149,42 @@ function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold">{t("dashboard.title", { defaultValue: "Tablero" })}</h1>
+        <h1 className="text-3xl font-bold">
+          {t("dashboard.title", { defaultValue: "Tablero" })}
+        </h1>
         <p className="text-muted-foreground">
           {t("dashboard.subtitle", { defaultValue: "Panel de {{name}}", name: restaurantName })}
-          {dashboardQuery.isFetching ? ` · ${t("common.loading", { defaultValue: "Cargando..." })}` : ""}
+          {dashboardQuery.isFetching
+            ? ` · ${t("common.loading", { defaultValue: "Cargando..." })}`
+            : ""}
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-xl border p-5">
           <p className="text-sm text-muted-foreground">
-            {t("dashboard.cards.ordersToday", { defaultValue: "Órdenes hoy" })}
+            {t("dashboard.cards.ordersToday", { defaultValue: "Órdenes del día (00:00–23:59)" })}
           </p>
           <p className="mt-2 text-3xl font-bold">{ordersToday}</p>
         </div>
 
         <div className="rounded-xl border p-5">
           <p className="text-sm text-muted-foreground">
-            {t("dashboard.cards.revenueToday", { defaultValue: "Ingresos del día" })}
+            {t("dashboard.cards.revenueToday", { defaultValue: "Ingresos del día (00:00–23:59)" })}
           </p>
           <p className="mt-2 text-3xl font-bold">{formatMoneyCRC(revenueToday)}</p>
         </div>
 
         <div className="rounded-xl border p-5">
           <p className="text-sm text-muted-foreground">
-            {t("dashboard.cards.activeCustomers", { defaultValue: "Clientes activos" })}
+            {t("dashboard.cards.activeCustomers", { defaultValue: "Clientes del día" })}
           </p>
           <p className="mt-2 text-3xl font-bold">{activeCustomers}</p>
         </div>
 
         <div className="rounded-xl border p-5">
           <p className="text-sm text-muted-foreground">
-            {t("dashboard.cards.avgTime", { defaultValue: "Tiempo promedio" })}
+            {t("dashboard.cards.avgTime", { defaultValue: "Tiempo promedio (del día)" })}
           </p>
           <p className="mt-2 text-3xl font-bold">{Math.round(avgMinutes)} min</p>
         </div>
@@ -182,13 +192,25 @@ function DashboardPage() {
 
       {/* Órdenes activas (TABLA) */}
       <div className="rounded-xl border p-5">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold">
-            {t("dashboard.activeOrders.title", { defaultValue: "Órdenes activas" })}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t("dashboard.activeOrders.subtitle", { defaultValue: "Monitoreo de pedidos actuales" })}
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold">
+              {t("dashboard.activeOrders.title", { defaultValue: "Órdenes activas" })}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t("dashboard.activeOrders.subtitle", {
+                defaultValue: "Pedidos de hoy (00:00–23:59)",
+              })}
+            </p>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate({ to: "/orders" as any })}
+          >
+            {t("dashboard.activeOrders.manage", { defaultValue: "Gestionar pedidos" })}
+          </Button>
         </div>
 
         <div className="mt-4">
@@ -201,11 +223,21 @@ function DashboardPage() {
               <table className="w-full text-sm">
                 <thead className="text-xs text-muted-foreground">
                   <tr className="border-b">
-                    <th className="py-2 text-left">{t("dashboard.table.customer", { defaultValue: "CLIENTE" })}</th>
-                    <th className="py-2 text-left">{t("dashboard.table.items", { defaultValue: "ITEMS" })}</th>
-                    <th className="py-2 text-right">{t("dashboard.table.total", { defaultValue: "TOTAL" })}</th>
-                    <th className="py-2 text-right">{t("dashboard.table.status", { defaultValue: "ESTADO" })}</th>
-                    <th className="py-2 text-right">{t("dashboard.table.time", { defaultValue: "HORA" })}</th>
+                    <th className="py-2 text-left">
+                      {t("dashboard.table.customer", { defaultValue: "CLIENTE" })}
+                    </th>
+                    <th className="py-2 text-left">
+                      {t("dashboard.table.items", { defaultValue: "ITEMS" })}
+                    </th>
+                    <th className="py-2 text-right">
+                      {t("dashboard.table.total", { defaultValue: "TOTAL" })}
+                    </th>
+                    <th className="py-2 text-right">
+                      {t("dashboard.table.status", { defaultValue: "ESTADO" })}
+                    </th>
+                    <th className="py-2 text-right">
+                      {t("dashboard.table.time", { defaultValue: "HORA" })}
+                    </th>
                   </tr>
                 </thead>
 
@@ -234,13 +266,17 @@ function DashboardPage() {
                           {items} {t("dashboard.table.dishes", { defaultValue: "platillos" })}
                         </td>
 
-                        <td className="py-3 text-right font-semibold">{formatMoneyCRC(total)}</td>
+                        <td className="py-3 text-right font-semibold">
+                          {formatMoneyCRC(total)}
+                        </td>
 
                         <td className="py-3 text-right font-semibold">
                           <StatusPill status={status} />
                         </td>
 
-                        <td className="py-3 text-right text-muted-foreground">{formatTime(time)}</td>
+                        <td className="py-3 text-right text-muted-foreground">
+                          {formatTime(time)}
+                        </td>
                       </tr>
                     );
                   })}
@@ -251,14 +287,16 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Platillos populares */}
+      {/* Platillos populares (MES) */}
       <div className="rounded-xl border p-5">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold">
-            {t("dashboard.popular.title", { defaultValue: "Platillos populares" })}
+            {t("dashboard.popular.title", { defaultValue: "Platillos populares del mes" })}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {t("dashboard.popular.subtitle", { defaultValue: "Basado en órdenes recientes" })}
+            {t("dashboard.popular.subtitle", {
+              defaultValue: "Del 1 al último día del mes (mes calendario)",
+            })}
           </p>
         </div>
 
