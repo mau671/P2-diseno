@@ -28,17 +28,34 @@ export type OrderStatusHistory = {
 export type Order = {
   id: string;
   restaurant_id: string;
+  restaurant_name?: string | null;
   status: string;
   subtotal: number;
   tax: number;
   total: number;
   currency_code: string;
+  item_count?: number;
   created_at: string;
 };
 
 export type OrderDetail = Order & {
   delivery_address_id: string | null;
+  delivery_address?: {
+    line1: string;
+    line2: string | null;
+    postal_code: string | null;
+    notes: string | null;
+    city: string;
+    region: string;
+    country: string;
+  } | null;
   payment_method_id: string | null;
+  payment_method?: {
+    id: string;
+    type: string;
+    name: string;
+    last_four: string | null;
+  } | null;
   items: OrderItem[];
   status_history: OrderStatusHistory[];
 };

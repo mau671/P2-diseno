@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View, ScrollView } from 'react-native';
+import { Pressable, StyleSheet, View, ScrollView, Image, TextInput } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -9,6 +10,7 @@ import { useThemePreference } from '@/context/theme-preference';
 import { useAuth } from '@/hooks/use-auth';
 import { useMealBase, useCustomizationOptions, useCalculatePrice } from '@/hooks/use-meal-bases';
 import { useAddToCart } from '@/hooks/use-cart';
+import { useCreateSavedMeal } from '@/hooks/use-saved-meals';
 
 function IngredientSection({
   title,
@@ -87,6 +89,7 @@ export default function MealBaseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { resolvedScheme } = useThemePreference();
   const colors = Colors[resolvedScheme];
+  const { t } = useTranslation();
   const { session } = useAuth();
   const accessToken = session?.access_token;
   const navigation = useNavigation();
@@ -98,12 +101,16 @@ export default function MealBaseScreen() {
   const [addedIngredients, setAddedIngredients] = useState<Set<string>>(new Set());
   const [feedback, setFeedback] = useState<string | null>(null);
   const [calculatedTotal, setCalculatedTotal] = useState<number | null>(null);
+  const [saveFormOpen, setSaveFormOpen] = useState(false);
+  const [savedMealName, setSavedMealName] = useState('');
+  const [saveFeedback, setSaveFeedback] = useState<string | null>(null);
   const calcRequestRef = useRef(0);
 
   const mealBaseQuery = useMealBase(mealBaseId, accessToken);
   const customizationQuery = useCustomizationOptions(mealBaseId, accessToken);
   const calculatePriceMutation = useCalculatePrice(mealBaseId, accessToken);
   const addToCartMutation = useAddToCart(accessToken);
+  const createSavedMealMutation = useCreateSavedMeal(accessToken);
 
   const options = customizationQuery.data?.customization_options;
   const mealBase = mealBaseQuery.data?.meal_base;
@@ -178,12 +185,42 @@ export default function MealBaseScreen() {
       },
       {
         onSuccess: () => {
-          setFeedback('Agregado al carrito');
+          setFeedback(t('cart.added', { defaultValue: 'Agregado al carrito' }));
         },
         onError: (error) => {
-          const message = error instanceof Error ? error.message : 'No se pudo agregar al carrito';
+          const message = error instanceof Error
+            ? error.message
+            : t('cart.addError', { defaultValue: 'No se pudo agregar al carrito' });
           setFeedback(message);
         },
+      }
+    );
+  };
+
+  const handleSaveMeal = () => {
+    if (!mealBaseId || !savedMealName.trim()) return;
+    setSaveFeedback(null);
+    createSavedMealMutation.mutate(
+      {
+        name: savedMealName.trim(),
+        meal_base_id: mealBaseId,
+        customizations: [
+          ...removedList.map((itemId) => ({ ingredient_id: itemId, action: 'remove', qty: 1 })),
+          ...addedList.map((itemId) => ({ ingredient_id: itemId, action: 'add', qty: 1 }))
+        ]
+      },
+      {
+        onSuccess: () => {
+          setSaveFeedback(t('savedMeals.saved', { defaultValue: 'Guardado' }));
+          setSavedMealName('');
+          setSaveFormOpen(false);
+        },
+        onError: (error) => {
+          const message = error instanceof Error
+            ? error.message
+            : t('savedMeals.saveError', { defaultValue: 'No se pudo guardar' });
+          setSaveFeedback(message);
+        }
       }
     );
   };
@@ -195,7 +232,7 @@ export default function MealBaseScreen() {
           <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
             <IconSymbol name="chevron.left" size={24} color={colors.text} />
           </Pressable>
-          <ThemedText type="title">Cargando...</ThemedText>
+          <ThemedText type="title">{t('common.loading')}</ThemedText>
         </View>
       </ThemedView>
     );
@@ -211,6 +248,9 @@ export default function MealBaseScreen() {
       </View>
 
       <ScrollView style={styles.scrollContent}>
+        {mealBase?.image_url ? (
+          <Image source={{ uri: mealBase.image_url }} style={styles.heroImage} />
+        ) : null}
         {mealBase?.description && (
           <ThemedText style={[styles.description, { color: colors.icon }]}>
             {mealBase.description}
@@ -218,7 +258,7 @@ export default function MealBaseScreen() {
         )}
 
         <View style={styles.quantityRow}>
-          <ThemedText style={styles.label}>Cantidad</ThemedText>
+          <ThemedText style={styles.label}>{t('mealBase.quantity', { defaultValue: 'Cantidad' })}</ThemedText>
           <View style={styles.quantityControls}>
             <Pressable
               onPress={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -238,7 +278,9 @@ export default function MealBaseScreen() {
 
         {options?.cooking_methods && options.cooking_methods.length > 0 && (
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Método de Cocción</ThemedText>
+            <ThemedText style={styles.sectionTitle}>
+              {t('mealBase.cookingMethod', { defaultValue: 'Metodo de coccion' })}
+            </ThemedText>
             {options.cooking_methods.map((method) => {
               const methodDelta = typeof method.price_delta === 'number'
                 ? method.price_delta
@@ -302,21 +344,66 @@ export default function MealBaseScreen() {
 
       <View style={[styles.footer, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
         <View style={styles.totalRow}>
-          <ThemedText style={styles.totalLabel}>Total:</ThemedText>
+          <ThemedText style={styles.totalLabel}>{t('common.total', { defaultValue: 'Total' })}:</ThemedText>
           <ThemedText style={styles.totalPrice}>${totalPrice.toFixed(2)}</ThemedText>
         </View>
+        {saveFormOpen ? (
+          <View style={styles.saveForm}>
+            <TextInput
+              style={[styles.saveInput, { borderColor: colors.cardBorder, color: colors.text }]}
+              placeholder={t('savedMeals.name', { defaultValue: 'Nombre para guardar' })}
+              placeholderTextColor={colors.icon}
+              value={savedMealName}
+              onChangeText={setSavedMealName}
+            />
+            <View style={styles.saveActions}>
+              <Pressable onPress={() => setSaveFormOpen(false)} style={styles.secondaryButton}>
+                <ThemedText style={{ color: colors.icon }}>
+                  {t('common.cancel', { defaultValue: 'Cancelar' })}
+                </ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={handleSaveMeal}
+                style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+                disabled={!savedMealName.trim() || createSavedMealMutation.isPending}
+              >
+                <ThemedText style={{ color: colors.primaryText, fontWeight: '600' }}>
+                  {createSavedMealMutation.isPending
+                    ? t('savedMeals.saving', { defaultValue: 'Guardando...' })
+                    : t('savedMeals.save', { defaultValue: 'Guardar' })}
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          <Pressable
+            onPress={() => setSaveFormOpen(true)}
+            style={[styles.saveButton, { backgroundColor: colors.secondary }]}
+          >
+            <ThemedText style={{ color: colors.text, fontWeight: '600' }}>
+              {t('savedMeals.saveAction', { defaultValue: 'Guardar comida' })}
+            </ThemedText>
+          </Pressable>
+        )}
         <Pressable
           onPress={handleAddToCart}
           style={[styles.addButton, { backgroundColor: colors.primary }]}
           disabled={!mealBaseId || addToCartMutation.isPending}
         >
           <ThemedText style={{ color: colors.primaryText, fontWeight: '600' }}>
-            {addToCartMutation.isPending ? 'Agregando...' : 'Agregar al Carrito'}
+            {addToCartMutation.isPending
+              ? t('cart.adding', { defaultValue: 'Agregando...' })
+              : t('cart.addToCart', { defaultValue: 'Agregar al carrito' })}
           </ThemedText>
         </Pressable>
         {feedback && (
           <ThemedText style={[styles.feedbackText, { color: colors.icon }]}>
             {feedback}
+          </ThemedText>
+        )}
+        {saveFeedback && (
+          <ThemedText style={[styles.feedbackText, { color: colors.icon }]}>
+            {saveFeedback}
           </ThemedText>
         )}
       </View>
@@ -334,6 +421,7 @@ const styles = StyleSheet.create({
   },
   backButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   scrollContent: { flex: 1, paddingHorizontal: 16 },
+  heroImage: { width: '100%', height: 220, borderRadius: 16, marginBottom: 16 },
   description: { fontSize: 15, marginBottom: 16, lineHeight: 22 },
   quantityRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   label: { fontSize: 16, fontWeight: '600' },
@@ -364,6 +452,12 @@ const styles = StyleSheet.create({
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   totalLabel: { fontSize: 18, fontWeight: '600' },
   totalPrice: { fontSize: 24, fontWeight: '700', color: '#22c55e' },
+  saveForm: { gap: 8 },
+  saveInput: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 },
+  saveActions: { flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'space-between' },
+  saveButton: { borderRadius: 12, padding: 12, alignItems: 'center' },
+  primaryButton: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
+  secondaryButton: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
   addButton: { borderRadius: 12, padding: 16, alignItems: 'center' },
   feedbackText: { fontSize: 13, textAlign: 'center' },
 });

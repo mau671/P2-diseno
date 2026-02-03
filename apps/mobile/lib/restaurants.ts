@@ -33,6 +33,8 @@ export type MenuCategory = {
     id: string;
     name: string;
     description: string | null;
+    image_asset_id?: string | null;
+    image_url?: string | null;
     base_price: number;
     is_active: boolean;
   }[];

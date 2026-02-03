@@ -70,8 +70,11 @@ function ProfileSection({ user, colors }: { user: any; colors: typeof Colors.lig
       [
         { text: t('common.cancel'), style: 'cancel' },
         { text: t('auth.logout'), style: 'destructive', onPress: async () => {
-          await logout();
-          router.replace('/(tabs)');
+          try {
+            await logout();
+          } finally {
+            router.replace('/auth/login');
+          }
         }}
       ]
     );
@@ -101,6 +104,18 @@ function ProfileSection({ user, colors }: { user: any; colors: typeof Colors.lig
         <View style={styles.optionItemRow}>
           <IconSymbol name="leaf.fill" size={20} color={colors.primary} />
           <ThemedText style={styles.optionItemText}>{t('settings.profile.dietary')}</ThemedText>
+          <IconSymbol name="chevron.right" size={18} color={colors.icon} />
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.optionItem, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
+        onPress={() => router.push('/profile')}
+        activeOpacity={0.7}
+      >
+        <View style={styles.optionItemRow}>
+          <IconSymbol name="person.fill" size={20} color={colors.primary} />
+          <ThemedText style={styles.optionItemText}>{t('settings.profile.details', { defaultValue: 'Perfil completo' })}</ThemedText>
           <IconSymbol name="chevron.right" size={18} color={colors.icon} />
         </View>
       </TouchableOpacity>

@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQueryClient } from '@tanstack/react-query';
 import { apiRequest, type AuthResponse, type AuthSession, type AuthUser } from '@/lib/api';
 
 type StoredAuth = {
@@ -21,6 +22,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_STORAGE_KEY = 'ce-auth-session';
+const DIETARY_RESTRICTIONS_CACHE_KEY = 'ce-dietary-restrictions';
+const USER_DIETARY_CACHE_PREFIX = 'ce-user-dietary:';
 const REFRESH_EARLY_MS = 60 * 1000;
 
 async function readStoredAuth(): Promise<StoredAuth | null> {
@@ -46,6 +49,7 @@ async function writeStoredAuth(data: StoredAuth | null) {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,9 +91,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         await writeStoredAuth(null);
         clearRefreshTimer();
+        queryClient.clear();
       }
     },
-    [clearRefreshTimer, scheduleRefresh]
+    [clearRefreshTimer, queryClient, scheduleRefresh]
   );
 
   const refreshSession = useCallback(async () => {
@@ -166,11 +171,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [applyAuth]);
 
   const logout = useCallback(async () => {
-    if (session?.access_token) {
-      await apiRequest('/auth/logout', { method: 'POST' }, session.access_token);
+    const previousUserId = user?.id;
+    const accessToken = session?.access_token;
+    const isJwt = typeof accessToken === 'string'
+      && /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/.test(accessToken);
+    if (isJwt) {
+      try {
+        await apiRequest('/auth/logout', { method: 'POST' }, accessToken);
+      } catch {
+        // Ignore logout errors and continue local cleanup
+      }
+    }
+    if (previousUserId) {
+      try {
+        const keys = await AsyncStorage.getAllKeys();
+        const userKeys = keys.filter((key) => key === DIETARY_RESTRICTIONS_CACHE_KEY || key.startsWith(USER_DIETARY_CACHE_PREFIX));
+        if (userKeys.length > 0) {
+          await AsyncStorage.multiRemove(userKeys);
+        }
+      } catch {
+        // Ignore storage cleanup errors
+      }
     }
     await applyAuth({ user: null, session: null });
-  }, [applyAuth, session?.access_token]);
+  }, [applyAuth, session?.access_token, user?.id]);
 
   const resetPassword = useCallback(async (email: string) => {
     await apiRequest('/auth/forgot-password', {

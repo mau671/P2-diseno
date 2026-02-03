@@ -31,7 +31,22 @@ const MAPPING = {
   'paintbrush.fill': 'brush',
   'checkmark': 'check',
   'trash': 'delete',
-  'location': 'location-on'
+  'location': 'location-on',
+  'location.fill': 'location-on',
+  'creditcard': 'credit-card',
+  'creditcard.fill': 'credit-card',
+  'leaf.fill': 'eco',
+  'list.bullet.rectangle': 'receipt-long',
+  'arrow.triangle.2.circlepath': 'autorenew',
+  'rectangle.portrait.and.arrow.right': 'logout',
+  'person.fill': 'person',
+  'arrow.clockwise': 'autorenew',
+  'checkmark.circle.fill': 'check-circle',
+  'circle': 'radio-button-unchecked',
+  'xmark': 'close',
+  'pencil': 'edit',
+  'list.bullet': 'list',
+  'leaf': 'eco'
 } as IconMapping;
 
 /**

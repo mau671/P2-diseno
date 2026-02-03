@@ -12,6 +12,17 @@ import {
   savedMealCustomizations,
   savedMeals
 } from '../db/schema'
+import {
+  TIME_ZONE_ID,
+  computeNextRunAt,
+  formatDateInTz,
+  formatTimeInTz,
+  normalizeDays,
+  normalizeTimeWindows,
+  parseTimeToMinutes,
+  validateFirstRun,
+  validateSchedule
+} from '../lib/recurring-schedule'
 import type { AuthRequest } from '../types/supabase'
 
 const router = Router()
@@ -29,8 +40,16 @@ router.get('/me/recurring-orders', authMiddleware, async (req, res, next) => {
       .select({
         id: recurringOrders.id,
         status: recurringOrders.status,
-        frequency: recurringOrders.frequency,
         nextRunAt: recurringOrders.nextRunAt,
+        intervalUnit: recurringOrders.intervalUnit,
+        intervalValue: recurringOrders.intervalValue,
+        daysOfWeek: recurringOrders.daysOfWeek,
+        daysOfMonth: recurringOrders.daysOfMonth,
+        timeWindows: recurringOrders.timeWindows,
+        timeZone: recurringOrders.timeZone,
+        startDate: recurringOrders.startDate,
+        endDate: recurringOrders.endDate,
+        lastRunAt: recurringOrders.lastRunAt,
         deliveryAddressId: recurringOrders.deliveryAddressId,
         paymentMethodId: recurringOrders.paymentMethodId,
         currencyCode: recurringOrders.currencyCode,
@@ -67,8 +86,16 @@ router.get('/me/recurring-orders', authMiddleware, async (req, res, next) => {
     const result = rows.map((row) => ({
       id: row.id,
       status: row.status,
-      frequency: row.frequency,
       next_run_at: row.nextRunAt,
+      interval_unit: row.intervalUnit,
+      interval_value: row.intervalValue,
+      days_of_week: row.daysOfWeek ?? [],
+      days_of_month: row.daysOfMonth ?? [],
+      time_windows: row.timeWindows ?? [],
+      time_zone: row.timeZone,
+      start_date: row.startDate,
+      end_date: row.endDate,
+      last_run_at: row.lastRunAt,
       delivery_address_id: row.deliveryAddressId,
       payment_method_id: row.paymentMethodId,
       currency_code: row.currencyCode,
@@ -104,8 +131,13 @@ router.post('/me/recurring-orders', authMiddleware, async (req, res, next) => {
       currency_code,
       exchange_rate,
       status,
-      frequency,
       next_run_at,
+      interval_unit,
+      interval_value,
+      days_of_week,
+      days_of_month,
+      time_windows,
+      end_date,
       delivery_address_id,
       payment_method_id,
       items,
@@ -115,10 +147,46 @@ router.post('/me/recurring-orders', authMiddleware, async (req, res, next) => {
       saved_meal_subtotal
     } = req.body ?? {}
 
-    if (!restaurant_id || !currency_code || !frequency || !next_run_at) {
+    if (!restaurant_id || !currency_code || !interval_unit || !interval_value || !next_run_at) {
       return res
         .status(400)
-        .json({ error: 'restaurant_id, currency_code, frequency, next_run_at are required' })
+        .json({ error: 'restaurant_id, currency_code, interval_unit, interval_value, next_run_at are required' })
+    }
+
+    const intervalUnit = typeof interval_unit === 'string' ? interval_unit : ''
+    const intervalValue = Number(interval_value)
+    const daysOfWeek = normalizeDays(days_of_week, 0, 6)
+    const daysOfMonth = normalizeDays(days_of_month, 1, 31)
+    const timeWindows = normalizeTimeWindows(time_windows)
+
+    const scheduleValidation = validateSchedule({
+      intervalUnit,
+      intervalValue,
+      daysOfWeek,
+      daysOfMonth,
+      timeWindows
+    })
+    if (!scheduleValidation.ok) {
+      return res.status(400).json({ error: scheduleValidation.error })
+    }
+
+    const firstRun = new Date(next_run_at)
+    if (Number.isNaN(firstRun.getTime())) {
+      return res.status(400).json({ error: 'next_run_at must be a valid date' })
+    }
+
+    const startDate = formatDateInTz(firstRun)
+    const firstRunValidation = validateFirstRun({
+      nextRunAt: firstRun,
+      startDate,
+      intervalUnit,
+      intervalValue,
+      daysOfWeek,
+      daysOfMonth,
+      timeWindows
+    })
+    if (!firstRunValidation.ok) {
+      return res.status(400).json({ error: firstRunValidation.error })
     }
 
     let normalizedItems = Array.isArray(items) ? items : []
@@ -179,8 +247,15 @@ router.post('/me/recurring-orders', authMiddleware, async (req, res, next) => {
           currencyCode: currency_code,
           exchangeRate: typeof exchange_rate === 'number' ? exchange_rate.toFixed(6) : null,
           status: typeof status === 'string' ? status : 'active',
-          frequency,
-          nextRunAt: next_run_at,
+          intervalUnit,
+          intervalValue,
+          daysOfWeek,
+          daysOfMonth,
+          timeWindows,
+          timeZone: TIME_ZONE_ID,
+          startDate,
+          endDate: typeof end_date === 'string' ? end_date : null,
+          nextRunAt: firstRun,
           deliveryAddressId: delivery_address_id ?? null,
           paymentMethodId: payment_method_id ?? null
         })
@@ -250,16 +325,104 @@ router.put('/me/recurring-orders/:id', authMiddleware, async (req, res, next) =>
     }
 
     const {
-      frequency,
+      interval_unit,
+      interval_value,
+      days_of_week,
+      days_of_month,
+      time_windows,
       next_run_at,
+      end_date,
       delivery_address_id,
       payment_method_id,
       status
     } = req.body ?? {}
 
+    const existingRows = await db
+      .select({
+        id: recurringOrders.id,
+        intervalUnit: recurringOrders.intervalUnit,
+        intervalValue: recurringOrders.intervalValue,
+        daysOfWeek: recurringOrders.daysOfWeek,
+        daysOfMonth: recurringOrders.daysOfMonth,
+        timeWindows: recurringOrders.timeWindows,
+        startDate: recurringOrders.startDate,
+        nextRunAt: recurringOrders.nextRunAt
+      })
+      .from(recurringOrders)
+      .where(and(eq(recurringOrders.userId, userId), eq(recurringOrders.id, id)))
+      .limit(1)
+
+    const existing = existingRows[0]
+    if (!existing) {
+      return res.status(404).json({ error: 'Recurring order not found' })
+    }
+
+    const hasScheduleUpdate =
+      interval_unit !== undefined ||
+      interval_value !== undefined ||
+      days_of_week !== undefined ||
+      days_of_month !== undefined ||
+      time_windows !== undefined ||
+      next_run_at !== undefined ||
+      end_date !== undefined
+
+    if (hasScheduleUpdate && !next_run_at) {
+      return res.status(400).json({ error: 'next_run_at is required when updating schedule' })
+    }
+
+    const intervalUnit = typeof interval_unit === 'string' ? interval_unit : existing.intervalUnit
+    const intervalValue = interval_value !== undefined ? Number(interval_value) : existing.intervalValue
+    const daysOfWeek = days_of_week !== undefined
+      ? normalizeDays(days_of_week, 0, 6)
+      : (existing.daysOfWeek ?? [])
+    const daysOfMonth = days_of_month !== undefined
+      ? normalizeDays(days_of_month, 1, 31)
+      : (existing.daysOfMonth ?? [])
+    const timeWindows = time_windows !== undefined
+      ? normalizeTimeWindows(time_windows)
+      : ((existing.timeWindows ?? []) as { start: string; end: string }[])
+
+    if (hasScheduleUpdate) {
+      const scheduleValidation = validateSchedule({
+        intervalUnit,
+        intervalValue,
+        daysOfWeek,
+        daysOfMonth,
+        timeWindows
+      })
+      if (!scheduleValidation.ok) {
+        return res.status(400).json({ error: scheduleValidation.error })
+      }
+    }
+
     const updateData: Record<string, unknown> = {}
-    if (frequency) updateData.frequency = frequency
-    if (next_run_at) updateData.nextRunAt = next_run_at
+    if (interval_unit !== undefined) updateData.intervalUnit = intervalUnit
+    if (interval_value !== undefined) updateData.intervalValue = intervalValue
+    if (days_of_week !== undefined) updateData.daysOfWeek = daysOfWeek
+    if (days_of_month !== undefined) updateData.daysOfMonth = daysOfMonth
+    if (time_windows !== undefined) updateData.timeWindows = timeWindows
+    if (end_date !== undefined) updateData.endDate = typeof end_date === 'string' ? end_date : null
+    if (next_run_at) {
+      const firstRun = new Date(next_run_at)
+      if (Number.isNaN(firstRun.getTime())) {
+        return res.status(400).json({ error: 'next_run_at must be a valid date' })
+      }
+      const startDate = formatDateInTz(firstRun)
+      const firstRunValidation = validateFirstRun({
+        nextRunAt: firstRun,
+        startDate,
+        intervalUnit,
+        intervalValue,
+        daysOfWeek,
+        daysOfMonth,
+        timeWindows
+      })
+      if (!firstRunValidation.ok) {
+        return res.status(400).json({ error: firstRunValidation.error })
+      }
+      updateData.nextRunAt = firstRun
+      updateData.startDate = startDate
+    }
     if (delivery_address_id !== undefined) updateData.deliveryAddressId = delivery_address_id
     if (payment_method_id !== undefined) updateData.paymentMethodId = payment_method_id
     if (status) updateData.status = status
@@ -268,15 +431,10 @@ router.put('/me/recurring-orders/:id', authMiddleware, async (req, res, next) =>
       return res.status(400).json({ error: 'No valid fields provided' })
     }
 
-    const rows = await db
+    await db
       .update(recurringOrders)
       .set(updateData)
       .where(and(eq(recurringOrders.userId, userId), eq(recurringOrders.id, id)))
-      .returning({ id: recurringOrders.id })
-
-    if (!rows.length) {
-      return res.status(404).json({ error: 'Recurring order not found' })
-    }
 
     return res.status(200).json({ recurring_order_id: id })
   } catch (err) {
@@ -338,6 +496,13 @@ router.post('/me/recurring-orders/:id/run', authMiddleware, async (req, res, nex
         restaurantId: recurringOrders.restaurantId,
         currencyCode: recurringOrders.currencyCode,
         exchangeRate: recurringOrders.exchangeRate,
+        intervalUnit: recurringOrders.intervalUnit,
+        intervalValue: recurringOrders.intervalValue,
+        daysOfWeek: recurringOrders.daysOfWeek,
+        daysOfMonth: recurringOrders.daysOfMonth,
+        timeWindows: recurringOrders.timeWindows,
+        startDate: recurringOrders.startDate,
+        nextRunAt: recurringOrders.nextRunAt,
         deliveryAddressId: recurringOrders.deliveryAddressId,
         paymentMethodId: recurringOrders.paymentMethodId
       })
@@ -442,7 +607,110 @@ router.post('/me/recurring-orders/:id/run', authMiddleware, async (req, res, nex
       return orderId
     })
 
+    const nextRunAt = computeNextRunAt({
+      startDate: recurring.startDate,
+      intervalUnit: recurring.intervalUnit,
+      intervalValue: recurring.intervalValue,
+      daysOfWeek: recurring.daysOfWeek ?? [],
+      daysOfMonth: recurring.daysOfMonth ?? [],
+      timeWindows: (recurring.timeWindows ?? []) as { start: string; end: string }[],
+      fromDate: new Date(recurring.nextRunAt)
+    })
+
+    await db
+      .update(recurringOrders)
+      .set({
+        lastRunAt: new Date(),
+        nextRunAt: nextRunAt ?? recurring.nextRunAt
+      })
+      .where(and(eq(recurringOrders.userId, userId), eq(recurringOrders.id, id)))
+
     return res.status(201).json({ order_id: createdOrderId })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.post('/me/recurring-orders/:id/skip', authMiddleware, async (req, res, next) => {
+  try {
+    const authRequest = req as AuthRequest
+    const userId = authRequest.locals?.userId
+    const { id } = req.params
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid recurring order id' })
+    }
+
+    const rows = await db
+      .select({
+        id: recurringOrders.id,
+        nextRunAt: recurringOrders.nextRunAt,
+        intervalUnit: recurringOrders.intervalUnit,
+        intervalValue: recurringOrders.intervalValue,
+        daysOfWeek: recurringOrders.daysOfWeek,
+        daysOfMonth: recurringOrders.daysOfMonth,
+        timeWindows: recurringOrders.timeWindows,
+        startDate: recurringOrders.startDate
+      })
+      .from(recurringOrders)
+      .where(and(eq(recurringOrders.userId, userId), eq(recurringOrders.id, id)))
+      .limit(1)
+
+    const recurring = rows[0]
+    if (!recurring) {
+      return res.status(404).json({ error: 'Recurring order not found' })
+    }
+
+    const nextRunAt = computeNextRunAt({
+      startDate: recurring.startDate,
+      intervalUnit: recurring.intervalUnit,
+      intervalValue: recurring.intervalValue,
+      daysOfWeek: recurring.daysOfWeek ?? [],
+      daysOfMonth: recurring.daysOfMonth ?? [],
+      timeWindows: (recurring.timeWindows ?? []) as { start: string; end: string }[],
+      fromDate: new Date(recurring.nextRunAt)
+    })
+    if (!nextRunAt) {
+      return res.status(400).json({ error: 'Unable to compute next run time' })
+    }
+
+    await db
+      .update(recurringOrders)
+      .set({ nextRunAt })
+      .where(and(eq(recurringOrders.userId, userId), eq(recurringOrders.id, id)))
+
+    return res.status(200).json({ success: true, next_run_at: nextRunAt.toISOString() })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.delete('/me/recurring-orders/:id', authMiddleware, async (req, res, next) => {
+  try {
+    const authRequest = req as AuthRequest
+    const userId = authRequest.locals?.userId
+    const { id } = req.params
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid recurring order id' })
+    }
+
+    const rows = await db
+      .delete(recurringOrders)
+      .where(and(eq(recurringOrders.userId, userId), eq(recurringOrders.id, id)))
+      .returning({ id: recurringOrders.id })
+
+    if (!rows.length) {
+      return res.status(404).json({ error: 'Recurring order not found' })
+    }
+
+    return res.status(204).send()
   } catch (err) {
     next(err)
   }

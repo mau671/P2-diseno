@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, Image } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -13,6 +14,7 @@ type MenuBase = {
   id: string;
   name: string;
   description: string | null;
+  image_url?: string | null;
   base_price: number;
   is_active: boolean;
 };
@@ -37,6 +39,9 @@ function MenuBaseCard({ item, restaurantId }: { item: MenuBase; restaurantId: st
       ]}
     >
       <ThemedText style={styles.cardTitle}>{item.name}</ThemedText>
+      {item.image_url ? (
+        <Image source={{ uri: item.image_url }} style={styles.cardImage} />
+      ) : null}
       {item.description && (
         <ThemedText style={[styles.cardDescription, { color: colors.icon }]}>
           {item.description}
@@ -78,6 +83,7 @@ export default function RestaurantScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { resolvedScheme } = useThemePreference();
   const colors = Colors[resolvedScheme];
+  const { t } = useTranslation();
   const { session } = useAuth();
   const accessToken = session?.access_token;
   const navigation = useNavigation();
@@ -92,7 +98,7 @@ export default function RestaurantScreen() {
           <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
             <IconSymbol name="chevron.left" size={24} color={colors.text} />
           </Pressable>
-          <ThemedText type="title">Cargando...</ThemedText>
+          <ThemedText type="title">{t('common.loading')}</ThemedText>
         </View>
       </ThemedView>
     );
@@ -182,6 +188,7 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
   },
+  cardImage: { width: '100%', height: 140, borderRadius: 10, marginBottom: 10 },
   cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
   cardDescription: { fontSize: 13, marginBottom: 8 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

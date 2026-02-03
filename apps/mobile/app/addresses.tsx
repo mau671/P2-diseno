@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FlashList } from '@shopify/flash-list';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { LayoutAnimation, Platform, Pressable, StyleSheet, TextInput, UIManager, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
@@ -43,6 +43,16 @@ export default function AddressesScreen() {
 
   const isFormValid = useMemo(() => line1 && countryId && regionId && cityId, [line1, countryId, regionId, cityId]);
 
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      UIManager.setLayoutAnimationEnabledExperimental?.(true);
+    }
+  }, []);
+
+  const animateLayout = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  };
+
   const renderAddress = ({ item }: { item: NonNullable<typeof addressesQuery.data>['addresses'][0] }) => (
     <AddressCard address={item} />
   );
@@ -50,8 +60,15 @@ export default function AddressesScreen() {
   const renderCountry = ({ item }: { item: Country }) => (
     <Pressable
       key={item.id}
-      style={[styles.optionRow, { borderColor: colors.cardBorder }]}
+      style={[
+        styles.optionRow,
+        {
+          borderColor: countryId === item.id ? colors.primary : colors.cardBorder,
+          backgroundColor: countryId === item.id ? colors.secondary : colors.card,
+        }
+      ]}
       onPress={() => {
+        animateLayout();
         setCountryId(item.id);
         setRegionId('');
         setCityId('');
@@ -71,8 +88,15 @@ export default function AddressesScreen() {
   const renderRegion = ({ item }: { item: Region }) => (
     <Pressable
       key={item.id}
-      style={[styles.optionRow, { borderColor: colors.cardBorder }]}
+      style={[
+        styles.optionRow,
+        {
+          borderColor: regionId === item.id ? colors.primary : colors.cardBorder,
+          backgroundColor: regionId === item.id ? colors.secondary : colors.card,
+        }
+      ]}
       onPress={() => {
+        animateLayout();
         setRegionId(item.id);
         setCityId('');
       }}
@@ -91,7 +115,13 @@ export default function AddressesScreen() {
   const renderCity = ({ item }: { item: City }) => (
     <Pressable
       key={item.id}
-      style={[styles.optionRow, { borderColor: colors.cardBorder }]}
+      style={[
+        styles.optionRow,
+        {
+          borderColor: cityId === item.id ? colors.primary : colors.cardBorder,
+          backgroundColor: cityId === item.id ? colors.secondary : colors.card,
+        }
+      ]}
       onPress={() => setCityId(item.id)}
     >
       {({ pressed }) => (
@@ -147,40 +177,96 @@ export default function AddressesScreen() {
               onChangeText={setLabel}
             />
 
-            <ThemedText style={styles.optionLabel}>{t('addresses.country')}</ThemedText>
-            <FlashList
-              data={countryOptions}
-              renderItem={renderCountry}
-              estimatedItemSize={48}
-              scrollEnabled={false}
-              ListEmptyComponent={<ThemedText style={[styles.subText, { color: colors.icon }]}>Loading...</ThemedText>}
-            />
+            <View style={[styles.stepCard, { borderColor: colors.cardBorder, backgroundColor: colors.card }]}>
+              <View style={styles.stepHeader}>
+                <View style={[styles.stepBadge, { backgroundColor: colors.primary }]}>
+                  <ThemedText style={[styles.stepBadgeText, { color: colors.primaryText }]}>1</ThemedText>
+                </View>
+                <ThemedText style={styles.optionLabel}>{t('addresses.country')}</ThemedText>
+              </View>
+              <FlashList
+                data={countryOptions}
+                renderItem={renderCountry}
+                estimatedItemSize={48}
+                scrollEnabled={false}
+                ListEmptyComponent={
+                  countriesQuery.isLoading ? (
+                    <ThemedText style={[styles.subText, { color: colors.icon }]}>{t('common.loading')}</ThemedText>
+                  ) : null
+                }
+              />
+              {!countryId ? (
+                <ThemedText style={[styles.helperText, { color: colors.icon }]}>
+                  {t('addresses.selectCountryHint', { defaultValue: 'Selecciona un pais para continuar' })}
+                </ThemedText>
+              ) : null}
+            </View>
 
-            {countryId ? (
-              <>
+            <View style={[styles.stepCard, { borderColor: colors.cardBorder, backgroundColor: colors.card }]}>
+              <View style={styles.stepHeader}>
+                <View style={[styles.stepBadge, { backgroundColor: countryId ? colors.primary : colors.cardBorder }]}>
+                  <ThemedText
+                    style={[
+                      styles.stepBadgeText,
+                      { color: countryId ? colors.primaryText : colors.text }
+                    ]}
+                  >
+                    2
+                  </ThemedText>
+                </View>
                 <ThemedText style={styles.optionLabel}>{t('addresses.region')}</ThemedText>
+              </View>
+              {countryId ? (
                 <FlashList
                   data={regionOptions}
                   renderItem={renderRegion}
                   estimatedItemSize={48}
                   scrollEnabled={false}
-                  ListEmptyComponent={<ThemedText style={[styles.subText, { color: colors.icon }]}>Loading...</ThemedText>}
+                  ListEmptyComponent={
+                    regionsQuery.isLoading ? (
+                      <ThemedText style={[styles.subText, { color: colors.icon }]}>{t('common.loading')}</ThemedText>
+                    ) : null
+                  }
                 />
-              </>
-            ) : null}
+              ) : (
+                <ThemedText style={[styles.helperText, { color: colors.icon }]}>
+                  {t('addresses.selectRegionHint', { defaultValue: 'Selecciona un pais primero' })}
+                </ThemedText>
+              )}
+            </View>
 
-            {regionId ? (
-              <>
+            <View style={[styles.stepCard, { borderColor: colors.cardBorder, backgroundColor: colors.card }]}>
+              <View style={styles.stepHeader}>
+                <View style={[styles.stepBadge, { backgroundColor: regionId ? colors.primary : colors.cardBorder }]}>
+                  <ThemedText
+                    style={[
+                      styles.stepBadgeText,
+                      { color: regionId ? colors.primaryText : colors.text }
+                    ]}
+                  >
+                    3
+                  </ThemedText>
+                </View>
                 <ThemedText style={styles.optionLabel}>{t('addresses.city')}</ThemedText>
+              </View>
+              {regionId ? (
                 <FlashList
                   data={cityOptions}
                   renderItem={renderCity}
                   estimatedItemSize={48}
                   scrollEnabled={false}
-                  ListEmptyComponent={<ThemedText style={[styles.subText, { color: colors.icon }]}>Loading...</ThemedText>}
+                  ListEmptyComponent={
+                    citiesQuery.isLoading ? (
+                      <ThemedText style={[styles.subText, { color: colors.icon }]}>{t('common.loading')}</ThemedText>
+                    ) : null
+                  }
                 />
-              </>
-            ) : null}
+              ) : (
+                <ThemedText style={[styles.helperText, { color: colors.icon }]}>
+                  {t('addresses.selectCityHint', { defaultValue: 'Selecciona una region primero' })}
+                </ThemedText>
+              )}
+            </View>
 
             <Pressable
               style={[
@@ -223,12 +309,17 @@ const styles = StyleSheet.create({
   header: { padding: 20, paddingTop: 60 },
   backButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   content: { paddingHorizontal: 16, paddingBottom: 40 },
-  card: { borderWidth: 1, borderRadius: 16, padding: 16, marginBottom: 16 },
+  card: { borderWidth: 1, borderRadius: 16, padding: 16, marginBottom: 16, gap: 12 },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 10 },
   subText: { fontSize: 13, marginTop: 4 },
   input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 12 },
-  optionLabel: { fontSize: 13, fontWeight: '600', marginTop: 8, marginBottom: 6 },
+  optionLabel: { fontSize: 13, fontWeight: '600' },
   optionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderRadius: 12, padding: 12, marginBottom: 8 },
+  stepCard: { borderWidth: 1, borderRadius: 14, padding: 12, gap: 10 },
+  stepHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  stepBadge: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  stepBadgeText: { color: 'white', fontSize: 12, fontWeight: '700' },
+  helperText: { fontSize: 12 },
   primaryButton: { borderRadius: 12, padding: 14, alignItems: 'center', marginTop: 8 },
   primaryButtonText: { fontSize: 16, fontWeight: '600' },
   disabledButton: { opacity: 0.6 },

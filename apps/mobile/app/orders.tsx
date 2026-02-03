@@ -21,7 +21,7 @@ export default function OrdersScreen() {
   const ordersQuery = useOrders({}, accessToken);
 
   const renderOrder = ({ item }: { item: NonNullable<typeof ordersQuery.data>['orders'][0] }) => (
-    <OrderCard order={item} />
+    <OrderCard order={item} onPress={() => router.push(`/order-detail?orderId=${item.id}`)} />
   );
 
   return (

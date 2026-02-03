@@ -3,6 +3,7 @@ import { and, desc, eq, ilike, inArray, sql } from 'drizzle-orm'
 import { db } from '../db'
 import {
   addresses,
+  assets,
   cities,
   countries,
   kitchens,
@@ -14,6 +15,7 @@ import {
   restaurants
 } from '../db/schema'
 import { rateLimitPublic } from '../middleware/rate-limit'
+import { getPublicAssetUrl } from '../lib/assets'
 
 const router = Router()
 
@@ -88,10 +90,14 @@ router.get('/:id/menu', rateLimitPublic, async (req, res, next) => {
         id: mealBases.id,
         name: mealBases.name,
         description: mealBases.description,
+        imageAssetId: mealBases.imageAssetId,
+        assetBucketId: assets.bucketId,
+        assetPath: assets.path,
         basePrice: mealBases.basePrice,
         isActive: mealBases.isActive
       })
       .from(mealBases)
+      .leftJoin(assets, eq(mealBases.imageAssetId, assets.id))
       .where(and(eq(mealBases.restaurantId, id), eq(mealBases.isActive, true)))
       .orderBy(desc(mealBases.createdAt))
 
@@ -148,6 +154,11 @@ router.get('/:id/menu', rateLimitPublic, async (req, res, next) => {
             id: base.id,
             name: base.name,
             description: base.description,
+            image_asset_id: base.imageAssetId,
+            image_url:
+              base.assetBucketId && base.assetPath
+                ? getPublicAssetUrl(base.assetBucketId, base.assetPath)
+                : null,
             base_price: typeof base.basePrice === 'string' ? Number(base.basePrice) : base.basePrice,
             is_active: base.isActive
           }))

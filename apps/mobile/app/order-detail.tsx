@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, ScrollView } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -13,6 +14,7 @@ export default function OrderDetailScreen() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const { resolvedScheme } = useThemePreference();
   const colors = Colors[resolvedScheme];
+  const { t } = useTranslation();
   const { session } = useAuth();
   const accessToken = session?.access_token;
   const navigation = useNavigation();
@@ -33,7 +35,7 @@ export default function OrderDetailScreen() {
           <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
             <IconSymbol name="chevron.left" size={24} color={colors.text} />
           </Pressable>
-          <ThemedText type="title">Cargando...</ThemedText>
+          <ThemedText type="title">{t('common.loading')}</ThemedText>
         </View>
       </ThemedView>
     );
@@ -45,34 +47,72 @@ export default function OrderDetailScreen() {
         <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
           <IconSymbol name="chevron.left" size={24} color={colors.text} />
         </Pressable>
-        <ThemedText type="title">Pedido #{order?.id.slice(0, 8)}</ThemedText>
+        <ThemedText type="title">
+          {t('orderDetail.title', { defaultValue: 'Pedido #{{id}}', id: order?.id.slice(0, 8) ?? '' })}
+        </ThemedText>
       </View>
       <View style={styles.tabRow}>
         <Pressable onPress={() => setActiveTab('details')} style={[styles.tab, activeTab === 'details' && { borderColor: colors.primary }]}>
-          <ThemedText>Detalles</ThemedText>
+          <ThemedText>{t('orderDetail.details', { defaultValue: 'Detalles' })}</ThemedText>
         </Pressable>
         <Pressable onPress={() => setActiveTab('tracking')} style={[styles.tab, activeTab === 'tracking' && { borderColor: colors.primary }]}>
-          <ThemedText>Seguimiento</ThemedText>
+          <ThemedText>{t('orderDetail.tracking', { defaultValue: 'Seguimiento' })}</ThemedText>
         </Pressable>
       </View>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         {activeTab === 'details' ? (
           <>
             <View style={[styles.statusBadge, { backgroundColor: colors.primary }]}>
-              <ThemedText style={styles.statusText}>{order?.status.toUpperCase()}</ThemedText>
+              <ThemedText style={[styles.statusText, { color: colors.primaryText }]}>
+                {order?.status.toUpperCase()}
+              </ThemedText>
             </View>
+            {order?.restaurant_name ? (
+              <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+                <ThemedText style={styles.infoTitle}>{t('orderDetail.restaurant', { defaultValue: 'Restaurante' })}</ThemedText>
+                <ThemedText style={styles.infoValue}>{order.restaurant_name}</ThemedText>
+              </View>
+            ) : null}
+            {order?.delivery_address ? (
+              <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+                <ThemedText style={styles.infoTitle}>{t('orderDetail.address', { defaultValue: 'Direccion' })}</ThemedText>
+                <ThemedText style={styles.infoValue}>{order.delivery_address.line1}</ThemedText>
+                {order.delivery_address.line2 ? (
+                  <ThemedText style={styles.infoValue}>{order.delivery_address.line2}</ThemedText>
+                ) : null}
+                <ThemedText style={styles.infoValue}>
+                  {order.delivery_address.city}, {order.delivery_address.region}
+                </ThemedText>
+                <ThemedText style={[styles.infoValue, { color: colors.icon }]}>
+                  {order.delivery_address.country}
+                </ThemedText>
+              </View>
+            ) : null}
+            {order?.payment_method ? (
+              <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+                <ThemedText style={styles.infoTitle}>{t('orderDetail.payment', { defaultValue: 'Pago' })}</ThemedText>
+                <ThemedText style={styles.infoValue}>{order.payment_method.name}</ThemedText>
+                {order.payment_method.last_four ? (
+                  <ThemedText style={[styles.infoValue, { color: colors.icon }]}>
+                    **** {order.payment_method.last_four}
+                  </ThemedText>
+                ) : null}
+              </View>
+            ) : null}
             {order?.items.map((item) => (
               <View key={item.id} style={[styles.itemCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
                 <ThemedText style={styles.itemName}>{item.base_name}</ThemedText>
-                <ThemedText style={[styles.itemQty, { color: colors.icon }]}>Qty: {item.quantity}</ThemedText>
+                <ThemedText style={[styles.itemQty, { color: colors.icon }]}>
+                  {t('orderDetail.qty', { defaultValue: 'Qty' })}: {item.quantity}
+                </ThemedText>
                 <ThemedText style={styles.itemPrice}>${Number(item.subtotal).toFixed(2)}</ThemedText>
               </View>
             ))}
           </>
         ) : (
           <View style={styles.trackingContainer}>
-            {tracking?.status_history.map((h, i) => (
-              <View key={i} style={styles.trackingItem}>
+            {(tracking?.status_history ?? []).map((h, i) => (
+              <View key={`${h.status}-${h.changed_at}-${i}`} style={styles.trackingItem}>
                 <View style={[styles.dot, { backgroundColor: colors.primary }]} />
                 <View>
                   <ThemedText style={styles.trackingStatus}>{h.status}</ThemedText>
@@ -82,20 +122,22 @@ export default function OrderDetailScreen() {
             ))}
           </View>
         )}
-      </View>
+      </ScrollView>
       <View style={[styles.footer, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
         <View style={styles.totalRow}>
-          <ThemedText style={styles.totalLabel}>Total</ThemedText>
+          <ThemedText style={styles.totalLabel}>{t('common.total', { defaultValue: 'Total' })}</ThemedText>
           <ThemedText style={styles.totalValue}>${Number(order?.total).toFixed(2)}</ThemedText>
         </View>
         <View style={styles.actionsRow}>
           {order?.status === 'pending' && (
             <Pressable onPress={() => cancelMutation.mutate(orderId)} style={[styles.actionBtn, { backgroundColor: '#ef4444' }]}>
-              <ThemedText style={{ color: 'white' }}>Cancelar</ThemedText>
+              <ThemedText style={{ color: 'white' }}>{t('common.cancel', { defaultValue: 'Cancelar' })}</ThemedText>
             </Pressable>
           )}
           <Pressable onPress={() => reorderMutation.mutate(orderId)} style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
-            <ThemedText style={{ color: colors.primaryText }}>Volver a pedir</ThemedText>
+            <ThemedText style={{ color: colors.primaryText }}>
+              {t('orderDetail.reorder', { defaultValue: 'Volver a pedir' })}
+            </ThemedText>
           </Pressable>
         </View>
       </View>
@@ -109,10 +151,13 @@ const styles = StyleSheet.create({
   backButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   tabRow: { flexDirection: 'row', borderBottomWidth: 1, borderColor: '#e5e7eb' },
   tab: { flex: 1, padding: 16, alignItems: 'center', borderBottomWidth: 2 },
-  content: { flex: 1, padding: 16 },
+  content: { padding: 16 },
   statusBadge: { borderRadius: 8, padding: 12, alignItems: 'center', marginBottom: 16 },
   statusText: { color: 'white', fontWeight: '700' },
   itemCard: { borderWidth: 1, borderRadius: 12, padding: 14, marginBottom: 10 },
+  infoCard: { borderWidth: 1, borderRadius: 12, padding: 14, marginBottom: 10 },
+  infoTitle: { fontSize: 13, fontWeight: '600', marginBottom: 6 },
+  infoValue: { fontSize: 14, fontWeight: '500' },
   itemName: { fontSize: 16, fontWeight: '600' },
   itemQty: { fontSize: 13, marginTop: 4 },
   itemPrice: { fontSize: 15, fontWeight: '500', marginTop: 4, color: '#22c55e' },

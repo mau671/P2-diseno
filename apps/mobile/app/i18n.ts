@@ -7,6 +7,7 @@ import enUS from "./locales/en-US/common.json";
 import es419 from "./locales/es-419/common.json";
 
 const LANGUAGE_STORAGE_KEY = "lng";
+const isServer = typeof window === "undefined";
 
 const languageDetector = {
   type: "languageDetector" as const,
@@ -15,6 +16,11 @@ const languageDetector = {
 
   detect: async (callback: (lng: string) => void) => {
     try {
+      if (isServer) {
+        callback("es-419");
+        return;
+      }
+
       const saved = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
       if (saved) {
         callback(saved);
@@ -35,6 +41,7 @@ const languageDetector = {
 
   cacheUserLanguage: async (lng: string) => {
     try {
+      if (isServer) return;
       await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
     } catch (e) {
       console.error("Error caching language:", e);
