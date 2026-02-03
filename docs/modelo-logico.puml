@@ -364,8 +364,16 @@ class "public.recurring_orders" as recurring_orders <<tabla>> {
   user_id : UUID <<FK public.profiles.id>>
   restaurant_id : UUID <<FK public.restaurants.id>>
   status : TEXT
-  frequency : TEXT
   next_run_at : TIMESTAMPTZ
+  interval_unit : TEXT
+  interval_value : INTEGER
+  days_of_week : INTEGER[]
+  days_of_month : INTEGER[]
+  time_windows : JSONB
+  time_zone : TEXT
+  start_date : DATE
+  end_date : DATE
+  last_run_at : TIMESTAMPTZ
   delivery_address_id : UUID <<FK public.addresses.id>>
   payment_method_id : UUID <<FK public.payment_methods.id>>
   currency_code : TEXT <<FK public.currencies.code>>

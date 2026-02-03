@@ -258,6 +258,7 @@ entity "Pago" as payment {
 entity "Historial de estado" as order_status_history {
   id
   estado
+  cambiado por
   fecha cambio
 }
 
@@ -281,8 +282,16 @@ entity "Metodo de pago" as payment_method {
 entity "Pedido recurrente" as recurring_order {
   id
   estado
-  frecuencia
   prox ejecucion
+  unidad intervalo
+  valor intervalo
+  dias semana
+  dias mes
+  ventanas horarias
+  zona horaria
+  fecha inicio
+  fecha fin
+  ultima ejecucion
   moneda
   tipo de pago
   metodo pago
