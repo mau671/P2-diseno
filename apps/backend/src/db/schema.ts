@@ -581,6 +581,7 @@ export const payments = pgTable('payments', {
   }),
   amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
   transactionRef: text('transaction_ref'),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 })
 
