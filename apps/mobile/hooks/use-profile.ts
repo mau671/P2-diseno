@@ -13,7 +13,15 @@ export function useProfile(accessToken?: string) {
 
 export function useUpdateProfile(accessToken?: string) {
   return useMutation({
-    mutationFn: (params: { full_name?: string; phone?: string }) =>
+    mutationFn: (params: {
+      full_name?: string;
+      phone?: string;
+      avatar_url?: string | null;
+      date_of_birth?: string | null;
+      preferred_language?: string;
+      preferred_currency_code?: string;
+      notification_preferences?: Record<string, unknown> | null;
+    }) =>
       updateProfile(params, accessToken),
   });
 }

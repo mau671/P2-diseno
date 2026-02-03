@@ -100,7 +100,11 @@ export async function addSavedMealToCart(
 export async function createRecurringFromSavedMeal(
   id: string,
   params: {
-    frequency: string;
+    interval_unit: string;
+    interval_value: number;
+    days_of_week: number[];
+    days_of_month: number[];
+    time_windows: { start: string; end: string }[];
     next_run_at: string;
     delivery_address_id?: string;
     payment_method_id?: string;

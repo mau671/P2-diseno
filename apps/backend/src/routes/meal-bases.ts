@@ -4,6 +4,7 @@ import { db } from '../db'
 import {
   baseCookingMethods,
   baseIngredients,
+  assets,
   cookingMethods,
   ingredientCategories,
   ingredientRestrictions,
@@ -16,6 +17,7 @@ import {
   userDietaryRestrictions,
   dietaryRestrictions
 } from '../db/schema'
+import { getPublicAssetUrl } from '../lib/assets'
 import { optionalAuthMiddleware } from '../middleware/auth'
 import { rateLimitPublic } from '../middleware/rate-limit'
 import type { AuthRequest } from '../types/supabase'
@@ -151,6 +153,8 @@ router.get('/', rateLimitPublic, optionalAuthMiddleware, async (req, res, next) 
         name: mealBases.name,
         description: mealBases.description,
         imageAssetId: mealBases.imageAssetId,
+        assetBucketId: assets.bucketId,
+        assetPath: assets.path,
         basePrice: mealBases.basePrice,
         isActive: mealBases.isActive,
         createdAt: mealBases.createdAt,
@@ -158,6 +162,7 @@ router.get('/', rateLimitPublic, optionalAuthMiddleware, async (req, res, next) 
       })
       .from(mealBases)
       .innerJoin(restaurants, eq(mealBases.restaurantId, restaurants.id))
+      .leftJoin(assets, eq(mealBases.imageAssetId, assets.id))
 
     const rows = await (whereClause ? baseQuery.where(whereClause) : baseQuery)
       .orderBy(desc(mealBases.createdAt))
@@ -206,6 +211,10 @@ router.get('/', rateLimitPublic, optionalAuthMiddleware, async (req, res, next) 
           name: row.name,
           description: row.description,
           image_asset_id: row.imageAssetId,
+          image_url:
+            row.assetBucketId && row.assetPath
+              ? getPublicAssetUrl(row.assetBucketId, row.assetPath)
+              : null,
           base_price: typeof row.basePrice === 'string' ? Number(row.basePrice) : row.basePrice,
           is_active: row.isActive,
           categories: categoriesByBase[row.id] ?? [],
@@ -390,6 +399,8 @@ router.get('/:id', rateLimitPublic, optionalAuthMiddleware, async (req, res, nex
         name: mealBases.name,
         description: mealBases.description,
         imageAssetId: mealBases.imageAssetId,
+        assetBucketId: assets.bucketId,
+        assetPath: assets.path,
         basePrice: mealBases.basePrice,
         isActive: mealBases.isActive,
         createdAt: mealBases.createdAt,
@@ -397,6 +408,7 @@ router.get('/:id', rateLimitPublic, optionalAuthMiddleware, async (req, res, nex
       })
       .from(mealBases)
       .innerJoin(restaurants, eq(mealBases.restaurantId, restaurants.id))
+      .leftJoin(assets, eq(mealBases.imageAssetId, assets.id))
       .where(eq(mealBases.id, id))
       .limit(1)
 
@@ -474,6 +486,10 @@ router.get('/:id', rateLimitPublic, optionalAuthMiddleware, async (req, res, nex
         name: mealBase.name,
         description: mealBase.description,
         image_asset_id: mealBase.imageAssetId,
+        image_url:
+          mealBase.assetBucketId && mealBase.assetPath
+            ? getPublicAssetUrl(mealBase.assetBucketId, mealBase.assetPath)
+            : null,
         base_price: typeof mealBase.basePrice === 'string' ? Number(mealBase.basePrice) : mealBase.basePrice,
         is_active: mealBase.isActive,
         categories: categoryRows.map((category) => ({

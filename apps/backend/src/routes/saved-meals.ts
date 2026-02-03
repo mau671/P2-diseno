@@ -15,6 +15,14 @@ import {
   savedMealCustomizations,
   savedMeals
 } from '../db/schema'
+import {
+  TIME_ZONE_ID,
+  formatDateInTz,
+  normalizeDays,
+  normalizeTimeWindows,
+  validateFirstRun,
+  validateSchedule
+} from '../lib/recurring-schedule'
 import { authMiddleware } from '../middleware/auth'
 import { rateLimitSensitive, rateLimitUser } from '../middleware/rate-limit'
 import type { AuthRequest } from '../types/supabase'
@@ -451,12 +459,58 @@ router.post('/', authMiddleware, rateLimitSensitive, async (req, res, next) => {
         return res.status(400).json({ error: 'Invalid saved meal id' })
       }
 
-    const { frequency, next_run_at, delivery_address_id, payment_method_id, currency_code } = req.body ?? {}
+    const {
+      interval_unit,
+      interval_value,
+      days_of_week,
+      days_of_month,
+      time_windows,
+      next_run_at,
+      end_date,
+      delivery_address_id,
+      payment_method_id,
+      currency_code
+    } = req.body ?? {}
 
-    if (!frequency || !next_run_at || !currency_code) {
+    if (!interval_unit || !interval_value || !next_run_at || !currency_code) {
       return res
         .status(400)
-        .json({ error: 'frequency, next_run_at, currency_code are required' })
+        .json({ error: 'interval_unit, interval_value, next_run_at, currency_code are required' })
+    }
+
+    const intervalUnit = typeof interval_unit === 'string' ? interval_unit : ''
+    const intervalValue = Number(interval_value)
+    const daysOfWeek = normalizeDays(days_of_week, 0, 6)
+    const daysOfMonth = normalizeDays(days_of_month, 1, 31)
+    const timeWindows = normalizeTimeWindows(time_windows)
+
+    const scheduleValidation = validateSchedule({
+      intervalUnit,
+      intervalValue,
+      daysOfWeek,
+      daysOfMonth,
+      timeWindows
+    })
+    if (!scheduleValidation.ok) {
+      return res.status(400).json({ error: scheduleValidation.error })
+    }
+
+    const firstRun = new Date(next_run_at)
+    if (Number.isNaN(firstRun.getTime())) {
+      return res.status(400).json({ error: 'next_run_at must be a valid date' })
+    }
+    const startDate = formatDateInTz(firstRun)
+    const firstRunValidation = validateFirstRun({
+      nextRunAt: firstRun,
+      startDate,
+      intervalUnit,
+      intervalValue,
+      daysOfWeek,
+      daysOfMonth,
+      timeWindows
+    })
+    if (!firstRunValidation.ok) {
+      return res.status(400).json({ error: firstRunValidation.error })
     }
 
     const savedMealRows = await db
@@ -524,8 +578,15 @@ router.post('/', authMiddleware, rateLimitSensitive, async (req, res, next) => {
           userId,
           restaurantId: savedMeal.restaurantId,
           currencyCode: currency_code,
-          frequency,
-          nextRunAt: next_run_at,
+          intervalUnit,
+          intervalValue,
+          daysOfWeek,
+          daysOfMonth,
+          timeWindows,
+          timeZone: TIME_ZONE_ID,
+          startDate,
+          endDate: typeof end_date === 'string' ? end_date : null,
+          nextRunAt: firstRun,
           deliveryAddressId: delivery_address_id ?? null,
           paymentMethodId: payment_method_id ?? null
         })

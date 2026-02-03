@@ -7,6 +7,7 @@ export type MealBase = {
   name: string;
   description: string | null;
   image_asset_id: string | null;
+  image_url?: string | null;
   base_price: number;
   is_active: boolean;
   categories: { id: string; name: string }[];
@@ -25,6 +26,7 @@ export type MealBaseDetail = {
   name: string;
   description: string | null;
   image_asset_id: string | null;
+  image_url?: string | null;
   base_price: number;
   is_active: boolean;
   categories: { id: string; name: string }[];

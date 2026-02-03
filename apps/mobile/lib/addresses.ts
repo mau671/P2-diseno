@@ -19,11 +19,24 @@ export type AddressesResponse = {
 
 export type CreateAddressPayload = {
   label?: string;
+  isDefault?: boolean;
   line1: string;
   line2?: string;
   cityId: string;
   regionId: string;
   countryId: string;
+};
+
+export type UpdateAddressPayload = {
+  label?: string | null;
+  isDefault?: boolean;
+  line1?: string;
+  line2?: string | null;
+  cityId?: string;
+  regionId?: string;
+  countryId?: string;
+  postalCode?: string | null;
+  notes?: string | null;
 };
 
 export async function fetchAddresses(accessToken?: string) {
@@ -34,6 +47,30 @@ export async function createAddress(payload: CreateAddressPayload, accessToken?:
   return apiRequest<{ address_id: string }>(
     '/profiles/me/addresses',
     { method: 'POST', body: JSON.stringify(payload) },
+    accessToken
+  );
+}
+
+export async function updateAddress(addressId: string, payload: UpdateAddressPayload, accessToken?: string) {
+  return apiRequest<{ address_id: string }>(
+    `/profiles/me/addresses/${addressId}`,
+    { method: 'PUT', body: JSON.stringify(payload) },
+    accessToken
+  );
+}
+
+export async function deleteAddress(addressId: string, accessToken?: string) {
+  return apiRequest<void>(
+    `/profiles/me/addresses/${addressId}`,
+    { method: 'DELETE' },
+    accessToken
+  );
+}
+
+export async function setDefaultAddress(addressId: string, accessToken?: string) {
+  return apiRequest<{ address_id: string }>(
+    `/profiles/me/addresses/${addressId}/default`,
+    { method: 'PATCH' },
     accessToken
   );
 }

@@ -623,8 +623,16 @@ export const recurringOrders = pgTable('recurring_orders', {
     onDelete: 'restrict'
   }),
   status: text('status').notNull().default('active'),
-  frequency: text('frequency').notNull(),
   nextRunAt: timestamp('next_run_at', { withTimezone: true }).notNull(),
+  intervalUnit: text('interval_unit').notNull().default('week'),
+  intervalValue: integer('interval_value').notNull().default(1),
+  daysOfWeek: integer('days_of_week').array(),
+  daysOfMonth: integer('days_of_month').array(),
+  timeWindows: jsonb('time_windows').notNull().default('[]'),
+  timeZone: text('time_zone').notNull().default('America/Costa_Rica'),
+  startDate: date('start_date').notNull().default(sql`current_date`),
+  endDate: date('end_date'),
+  lastRunAt: timestamp('last_run_at', { withTimezone: true }),
   deliveryAddressId: uuid('delivery_address_id').references(() => addresses.id, {
     onDelete: 'set null'
   }),

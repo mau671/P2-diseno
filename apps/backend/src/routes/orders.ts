@@ -3,9 +3,12 @@ import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import { authMiddleware } from '../middleware/auth'
 import { db } from '../db'
 import {
+  addresses,
   cartItemCustomizations,
   cartItems,
   carts,
+  cities,
+  countries,
   ingredients,
   itemCustomizations,
   mealBases,
@@ -13,7 +16,9 @@ import {
   orderStatusHistory,
   orders,
   paymentMethods,
+  regions,
   restaurantCurrencies,
+  restaurants,
   restaurantUsers
 } from '../db/schema'
 import { rateLimitAdmin, rateLimitSensitive, rateLimitUser } from '../middleware/rate-limit'
@@ -57,6 +62,7 @@ router.get('/', authMiddleware, rateLimitUser, async (req, res, next) => {
       .select({
         id: orders.id,
         restaurantId: orders.restaurantId,
+        restaurantName: restaurants.name,
         status: orders.status,
         subtotal: orders.subtotal,
         tax: orders.tax,
@@ -65,20 +71,40 @@ router.get('/', authMiddleware, rateLimitUser, async (req, res, next) => {
         createdAt: orders.createdAt
       })
       .from(orders)
+      .leftJoin(restaurants, eq(orders.restaurantId, restaurants.id))
       .where(and(...conditions))
       .orderBy(desc(orders.createdAt))
       .limit(limit)
       .offset((page - 1) * limit)
 
+    const orderIds = rows.map((row) => row.id)
+    const counts = orderIds.length
+      ? await db
+          .select({
+            orderId: orderItems.orderId,
+            count: sql<number>`count(${orderItems.id})`
+          })
+          .from(orderItems)
+          .where(inArray(orderItems.orderId, orderIds))
+          .groupBy(orderItems.orderId)
+      : []
+
+    const countByOrder = counts.reduce<Record<string, number>>((acc, row) => {
+      acc[row.orderId] = Number(row.count ?? 0)
+      return acc
+    }, {})
+
     return res.status(200).json({
       orders: rows.map((row) => ({
         id: row.id,
         restaurant_id: row.restaurantId,
+        restaurant_name: row.restaurantName,
         status: row.status,
         subtotal: typeof row.subtotal === 'string' ? Number(row.subtotal) : row.subtotal,
         tax: typeof row.tax === 'string' ? Number(row.tax) : row.tax,
         total: typeof row.total === 'string' ? Number(row.total) : row.total,
         currency_code: row.currencyCode,
+        item_count: countByOrder[row.id] ?? 0,
         created_at: row.createdAt
       })),
       pagination: { page, limit, total }
@@ -108,6 +134,7 @@ router.get('/:orderId', authMiddleware, rateLimitUser, async (req, res, next) =>
         id: orders.id,
         userId: orders.userId,
         restaurantId: orders.restaurantId,
+        restaurantName: restaurants.name,
         status: orders.status,
         deliveryAddressId: orders.deliveryAddressId,
         currencyCode: orders.currencyCode,
@@ -118,6 +145,7 @@ router.get('/:orderId', authMiddleware, rateLimitUser, async (req, res, next) =>
         createdAt: orders.createdAt
       })
       .from(orders)
+      .leftJoin(restaurants, eq(orders.restaurantId, restaurants.id))
       .where(eq(orders.id, orderId))
       .limit(1)
 
@@ -169,6 +197,51 @@ router.get('/:orderId', authMiddleware, rateLimitUser, async (req, res, next) =>
       .where(eq(orderStatusHistory.orderId, order.id))
       .orderBy(desc(orderStatusHistory.changedAt))
 
+    const uniqueHistory = historyRows.filter((row, index, list) => {
+      return (
+        list.findIndex(
+          (item) => item.status === row.status && String(item.changedAt) === String(row.changedAt)
+        ) === index
+      )
+    })
+
+    const addressRows = order.deliveryAddressId
+      ? await db
+          .select({
+            line1: addresses.line1,
+            line2: addresses.line2,
+            postalCode: addresses.postalCode,
+            notes: addresses.notes,
+            cityName: cities.name,
+            regionName: regions.name,
+            countryNameEs: countries.nameEs,
+            countryNameEn: countries.nameEn
+          })
+          .from(addresses)
+          .innerJoin(cities, eq(addresses.cityId, cities.id))
+          .innerJoin(regions, eq(addresses.regionId, regions.id))
+          .innerJoin(countries, eq(addresses.countryId, countries.id))
+          .where(eq(addresses.id, order.deliveryAddressId))
+          .limit(1)
+      : []
+
+    const address = addressRows[0]
+
+    const paymentRows = order.paymentMethodId
+      ? await db
+          .select({
+            id: paymentMethods.id,
+            type: paymentMethods.type,
+            name: paymentMethods.name,
+            lastFour: paymentMethods.lastFour
+          })
+          .from(paymentMethods)
+          .where(and(eq(paymentMethods.userId, userId), eq(paymentMethods.id, order.paymentMethodId)))
+          .limit(1)
+      : []
+
+    const paymentMethod = paymentRows[0]
+
     const customizationByItem = customizationRows.reduce<Record<string, typeof customizationRows>>(
       (acc, row) => {
         const list = acc[row.orderItemId] ?? []
@@ -183,10 +256,30 @@ router.get('/:orderId', authMiddleware, rateLimitUser, async (req, res, next) =>
       order: {
         id: order.id,
         restaurant_id: order.restaurantId,
+        restaurant_name: order.restaurantName,
         status: order.status,
         delivery_address_id: order.deliveryAddressId,
+        delivery_address: address
+          ? {
+              line1: address.line1,
+              line2: address.line2,
+              postal_code: address.postalCode,
+              notes: address.notes,
+              city: address.cityName,
+              region: address.regionName,
+              country: address.countryNameEs
+            }
+          : null,
         currency_code: order.currencyCode,
         payment_method_id: order.paymentMethodId,
+        payment_method: paymentMethod
+          ? {
+              id: paymentMethod.id,
+              type: paymentMethod.type,
+              name: paymentMethod.name,
+              last_four: paymentMethod.lastFour
+            }
+          : null,
         subtotal: typeof order.subtotal === 'string' ? Number(order.subtotal) : order.subtotal,
         tax: typeof order.tax === 'string' ? Number(order.tax) : order.tax,
         total: typeof order.total === 'string' ? Number(order.total) : order.total,
@@ -209,7 +302,7 @@ router.get('/:orderId', authMiddleware, rateLimitUser, async (req, res, next) =>
               : customization.deltaPrice
           }))
         })),
-        status_history: historyRows.map((row) => ({
+        status_history: uniqueHistory.map((row) => ({
           status: row.status,
           changed_at: row.changedAt,
           changed_by: row.changedBy
@@ -259,11 +352,19 @@ router.get('/:orderId/tracking', authMiddleware, rateLimitUser, async (req, res,
       .where(eq(orderStatusHistory.orderId, order.id))
       .orderBy(desc(orderStatusHistory.changedAt))
 
+    const uniqueHistory = historyRows.filter((row, index, list) => {
+      return (
+        list.findIndex(
+          (item) => item.status === row.status && String(item.changedAt) === String(row.changedAt)
+        ) === index
+      )
+    })
+
     return res.status(200).json({
       order_id: order.id,
       status: order.status,
       created_at: order.createdAt,
-      status_history: historyRows.map((row) => ({
+      status_history: uniqueHistory.map((row) => ({
         status: row.status,
         changed_at: row.changedAt
       }))
