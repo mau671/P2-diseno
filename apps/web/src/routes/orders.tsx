@@ -27,22 +27,27 @@ import { ErrorState } from "@/components/network/ErrorState";
 import { EmptyState } from "@/components/network/EmptyState";
 import type { OrderManageRow, RecurringOrderManageRow } from "@/api/orders";
 
+// Aquí registra la ruta /orders en TanStack Router y define cuál componente se renderiza
 export const Route = createFileRoute("/orders")({
   component: OrdersManagePage,
 });
 
+// Aquí define el flujo válido de estados para órdenes del día (usado para "avanzar" status)
 const FLOW = ["pending", "paid", "preparing", "delivering", "completed"] as const;
 
+// Aquí normaliza valores numéricos que pueden venir como string o number desde el backend
 function toNumber(v: unknown) {
   const n = typeof v === "string" ? Number(v) : (v as number);
   return Number.isFinite(n) ? n : 0;
 }
 
+// Aquí formatea colones CRC con 2 decimales y coma como separador decimal
 function formatMoneyCRC(value: unknown) {
   const n = toNumber(value);
   return `₡${n.toFixed(2).replace(".", ",")}`;
 }
 
+// Aquí decide un locale para Intl según el idioma actual de i18n
 function resolveLocale(lang?: string) {
   const l = String(lang ?? "").toLowerCase();
   if (l.startsWith("es")) return "es-CR";
@@ -53,6 +58,7 @@ function resolveLocale(lang?: string) {
   return "es-CR";
 }
 
+// Aquí formatea solo hora:minuto desde un ISO usando Intl (si falla, devuelve placeholder)
 function formatTime(iso: string, locale: string) {
   try {
     return new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
@@ -61,6 +67,7 @@ function formatTime(iso: string, locale: string) {
   }
 }
 
+// Aquí formatea fecha+hora en 1 línea para mostrar "última ejecución" o "próxima"
 function formatDateTime(iso: string | null | undefined, locale: string) {
   if (!iso) return "—";
   try {
@@ -71,12 +78,13 @@ function formatDateTime(iso: string | null | undefined, locale: string) {
       hour: "2-digit",
       minute: "2-digit",
     }).format(new Date(iso));
-    return s.replace(",", ""); // quita coma para que sea 1 línea más limpio
+    return s.replace(",", ""); // Aquí quita la coma que meten algunos locales para dejarlo más compacto
   } catch {
     return "—";
   }
 }
 
+// Aquí transforma el status interno de una orden a un label traducido
 function statusLabel(status: string, t: TFunction) {
   switch (status) {
     case "pending":
@@ -94,6 +102,7 @@ function statusLabel(status: string, t: TFunction) {
   }
 }
 
+// Aquí traduce el estado de una recurrencia (active/paused/cancelled) a label UI
 function recurringStatusLabel(status: string, t: TFunction) {
   const s = String(status ?? "").toLowerCase();
   if (s === "active") return t("recurringOrders.statusActive", { defaultValue: "Activa" });
@@ -104,9 +113,11 @@ function recurringStatusLabel(status: string, t: TFunction) {
   return status;
 }
 
+// Aquí renderiza un "pill" de estado con colores según status (UI rápida de lectura)
 function StatusPill({ status, t }: { status: string; t: TFunction }) {
   const base = "inline-flex items-center justify-center rounded-full px-3 py-1 text-xs border whitespace-nowrap";
 
+  // Aquí define colores por estado para que el usuario identifique rápido el flujo
   const cls =
     status === "pending"
       ? "border-yellow-500/30 text-yellow-300 bg-yellow-500/10"
@@ -123,12 +134,15 @@ function StatusPill({ status, t }: { status: string; t: TFunction }) {
   return <span className={`${base} ${cls}`}>{statusLabel(status, t)}</span>;
 }
 
+// Aquí decide si una orden puede avanzar al siguiente estado dentro del flujo definido
 function canGoNext(status: string) {
   const i = FLOW.indexOf(status as any);
   return i >= 0 && i < FLOW.length - 1 && status !== "completed";
 }
 
 /** ===== helpers recurrentes ===== */
+
+// Aquí crea el label del intervalo (cada X semanas/meses/días) con traducción + fallback
 function intervalLabel(unit: string | null | undefined, value: unknown, t: TFunction) {
   const v = Math.max(1, toNumber(value) || 1);
   const u = String(unit ?? "").toLowerCase();
@@ -154,6 +168,7 @@ function intervalLabel(unit: string | null | undefined, value: unknown, t: TFunc
   return t("ordersManage.recurring.intervalFallback", { defaultValue: "Intervalo" });
 }
 
+// Aquí convierte un número de día (0-6) a la key esperada por i18n (sun/mon/...)
 function weekdayShortKey(n: number) {
   // 0=Sun, 1=Mon...
   const map: Record<number, string> = {
@@ -168,11 +183,13 @@ function weekdayShortKey(n: number) {
   return map[n] ?? String(n);
 }
 
+// Aquí define fallback en español si falta la traducción de weekdaysShort
 function weekdayShortDefault(n: number) {
   const map: Record<number, string> = { 0: "Dom", 1: "Lun", 2: "Mar", 3: "Mié", 4: "Jue", 5: "Vie", 6: "Sáb" };
   return map[n] ?? String(n);
 }
 
+// Aquí formatea la lista de días de semana de una recurrencia, ordenada y sin duplicados
 function daysOfWeekLabel(arr: unknown, t: TFunction) {
   if (!Array.isArray(arr) || arr.length === 0) return "—";
   const nums = arr.map((x) => Number(x)).filter((n) => Number.isFinite(n));
@@ -187,6 +204,7 @@ function daysOfWeekLabel(arr: unknown, t: TFunction) {
     .join(", ");
 }
 
+// Aquí formatea la lista de días del mes (ej: 1, 15, 30), ordenada y sin duplicados
 function daysOfMonthLabel(arr: unknown) {
   if (!Array.isArray(arr) || arr.length === 0) return "—";
   const nums = arr.map((x) => Number(x)).filter((n) => Number.isFinite(n));
@@ -194,10 +212,11 @@ function daysOfMonthLabel(arr: unknown) {
   return uniq.join(", ");
 }
 
+// Aquí normaliza time_windows porque puede venir como string JSON, objeto o array mixto
 function normalizeTimeWindows(input: unknown): Array<{ start?: string; end?: string }> {
   if (!input) return [];
 
-  // si viene string: intenta JSON.parse
+  // Aquí soporta cuando viene como string (por ejemplo JSON serializado)
   if (typeof input === "string") {
     try {
       const parsed = JSON.parse(input);
@@ -207,11 +226,12 @@ function normalizeTimeWindows(input: unknown): Array<{ start?: string; end?: str
     }
   }
 
-  // si viene objeto: lo envolvemos en array
+  // Aquí soporta cuando viene como objeto {start, end} en lugar de array
   if (typeof input === "object" && !Array.isArray(input)) {
     return [input as any];
   }
 
+  // Aquí soporta array donde algunos elementos podrían venir string JSON
   if (Array.isArray(input)) {
     return input
       .map((x) => {
@@ -230,10 +250,11 @@ function normalizeTimeWindows(input: unknown): Array<{ start?: string; end?: str
   return [];
 }
 
+// Aquí genera un label "HH:mm-HH:mm" usando la primera ventana (UI compacta)
 function timeWindowsLabel(tw: unknown) {
   const list = normalizeTimeWindows(tw);
   if (list.length === 0) return "—";
-  // mostramos solo la primera ventana (la mayoría de ustedes usa 1)
+  // Aquí se muestra solo la primera ventana porque casi siempre se usa una
   const first = list[0] ?? {};
   const s = typeof first.start === "string" ? first.start : "";
   const e = typeof first.end === "string" ? first.end : "";
@@ -242,6 +263,7 @@ function timeWindowsLabel(tw: unknown) {
   return "—";
 }
 
+// Aquí limpia nombres de items (array) para evitar strings vacíos o espacios
 function joinItemNames(names?: unknown) {
   if (!Array.isArray(names) || names.length === 0) return [];
   return names.map((x) => String(x)).filter((s) => s.trim().length > 0);
@@ -250,24 +272,29 @@ function joinItemNames(names?: unknown) {
 function OrdersManagePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const locale = resolveLocale(i18n.language);
+  const locale = resolveLocale(i18n.language); // Aquí define locale para formato de fecha/hora
 
   const { session, user, loading: authLoading } = useAuth();
   const { selectedRestaurantId } = useRestaurant();
-  const accessToken = session?.access_token;
+  const accessToken = session?.access_token; // Aquí se usa token para acciones protegidas (mutations)
 
+  // Aquí se consultan órdenes del día y recurrencias (ambos dependen del restaurante seleccionado)
   const ordersQuery = useOrdersManage(selectedRestaurantId, accessToken);
   const recurringQuery = useRecurringOrdersManage(selectedRestaurantId, accessToken);
 
+  // Aquí se inicializan mutations para avanzar estado y cancelar/borrar órdenes
   const actions = useOrderActions(selectedRestaurantId, accessToken);
 
+  // Aquí redirige a login si ya terminó authLoading y no hay usuario
   React.useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/auth/login" });
   }, [authLoading, user, navigate]);
 
+  // Aquí se maneja loading inicial de auth
   if (authLoading) return <LoadingState />;
-  if (!user) return null;
+  if (!user) return null; // Aquí evita render si todavía no hay usuario
 
+  // Aquí se obliga a seleccionar restaurante antes de mostrar data
   if (!selectedRestaurantId) {
     return (
       <EmptyState
@@ -278,6 +305,7 @@ function OrdersManagePage() {
     );
   }
 
+  // Aquí se normalizan data arrays para evitar null/undefined
   const rows: OrderManageRow[] = ordersQuery.data ?? [];
   const recurringRows: RecurringOrderManageRow[] = recurringQuery.data ?? [];
 
@@ -296,6 +324,7 @@ function OrdersManagePage() {
           </p>
         </div>
 
+        {/* Aquí vuelve al dashboard */}
         <Button variant="outline" onClick={() => navigate({ to: "/dashboard" })}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           {t("common.back", { defaultValue: "Volver" })}
@@ -320,6 +349,7 @@ function OrdersManagePage() {
           </p>
         </div>
 
+        {/* Aquí renderiza estados de red para recurrentes (loading/error/empty) */}
         {recurringQuery.isLoading && !recurringQuery.data ? (
           <div className="px-4 pb-4">
             <LoadingState />
@@ -342,6 +372,7 @@ function OrdersManagePage() {
         ) : (
           <div className="max-h-[420px] overflow-auto">
             <div className="min-w-[1040px]">
+              {/* Aquí define header de tabla con grid fijo para alineación consistente */}
               <div className="grid grid-cols-[220px_110px_minmax(330px,1fr)_140px_90px_120px_170px] gap-3 border-t border-b px-4 py-3 text-xs font-semibold text-muted-foreground">
                 <div>{t("ordersManage.table.customer", { defaultValue: "CLIENTE" })}</div>
                 <div>{t("ordersManage.table.status", { defaultValue: "ESTADO" })}</div>
@@ -354,6 +385,7 @@ function OrdersManagePage() {
 
               <div className="divide-y">
                 {recurringRows.map((r) => {
+                  // Aquí usa un fallback si el nombre del cliente viene vacío
                   const customer = r.customer_name?.trim()
                     ? r.customer_name
                     : t("ordersManage.customerFallback", { defaultValue: "Cliente" });
@@ -363,6 +395,7 @@ function OrdersManagePage() {
 
                   const unit = String(r.interval_unit).toLowerCase();
 
+                  // Aquí arma una línea compacta que resume la programación
                   const programLine =
                     `${intervalLabel(r.interval_unit, r.interval_value, t)} · ` +
                     (unit === "week"
@@ -385,6 +418,7 @@ function OrdersManagePage() {
                       </div>
 
                       <div>
+                        {/* Aquí se muestra el estado de la recurrencia en un pill fijo */}
                         <span className="inline-flex items-center rounded-full px-3 py-1 text-xs border border-emerald-500/30 text-emerald-300 bg-emerald-500/10">
                           {statusText}
                         </span>
@@ -395,6 +429,7 @@ function OrdersManagePage() {
                           {programLine}
                         </p>
 
+                        {/* Aquí abre un modal con detalle para no saturar la tabla */}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
@@ -419,6 +454,7 @@ function OrdersManagePage() {
                               </AlertDialogDescription>
                             </AlertDialogHeader>
 
+                            {/* Aquí se muestran campos clave en un grid label-valor */}
                             <div className="space-y-2 text-sm">
                               <div className="grid grid-cols-[150px_1fr] gap-2">
                                 <span className="text-muted-foreground">
@@ -492,12 +528,10 @@ function OrdersManagePage() {
                         </AlertDialog>
                       </div>
 
-                      {/* nombres */}
+                      {/* Aquí muestra nombres de items (si existen) en forma compacta por línea */}
                       <div className="min-w-0">
                         {names.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">
-                            {t("common.na", { defaultValue: "N/A" })}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{t("common.na", { defaultValue: "N/A" })}</p>
                         ) : (
                           <div className="space-y-1">
                             {names.map((n, idx) => (
@@ -511,6 +545,8 @@ function OrdersManagePage() {
 
                       <div className="text-right text-sm text-muted-foreground">{toNumber(r.items_count)}</div>
                       <div className="text-right text-sm font-semibold">{formatMoneyCRC(r.total)}</div>
+
+                      {/* Aquí muestra la próxima ejecución formateada con fecha y hora */}
                       <div className="text-right text-sm text-muted-foreground whitespace-nowrap">
                         {formatDateTime(r.next_run_at, locale)}
                       </div>
@@ -534,6 +570,7 @@ function OrdersManagePage() {
           </p>
         </div>
 
+        {/* Aquí renderiza estados de red para pedidos del día */}
         {ordersQuery.isLoading && !ordersQuery.data ? (
           <LoadingState />
         ) : ordersQuery.isError ? (
@@ -548,6 +585,7 @@ function OrdersManagePage() {
         ) : (
           <div className="max-h-[520px] overflow-auto">
             <div className="min-w-[1020px]">
+              {/* Aquí define columnas del grid de pedidos del día */}
               <div className="grid grid-cols-[240px_260px_140px_minmax(280px,1fr)_120px] gap-3 border-b px-4 py-3 text-xs font-semibold text-muted-foreground">
                 <div>{t("ordersManage.table.customer", { defaultValue: "CLIENTE" })}</div>
                 <div>{t("ordersManage.dayOrders.table.itemsNames", { defaultValue: "ITEMS (nombres)" })}</div>
@@ -559,13 +597,15 @@ function OrdersManagePage() {
               <div className="divide-y">
                 {rows.map((o) => {
                   const total = toNumber(o.total);
-                  const locked = o.status === "completed";
+                  const locked = o.status === "completed"; // Aquí evita borrar/acciones en completadas
+
                   const customer = o.customer_name?.trim()
                     ? o.customer_name
                     : t("ordersManage.customerFallback", { defaultValue: "Cliente" });
 
                   const names = joinItemNames(o.item_names);
 
+                  // Aquí habilita "avanzar" solo si hay token, el status permite y no hay mutation corriendo
                   const canNext = Boolean(accessToken) && canGoNext(o.status) && !actions.advance.isPending;
 
                   return (
@@ -582,6 +622,8 @@ function OrdersManagePage() {
                           {toNumber(o.items_count)}{" "}
                           {t("ordersManage.dayOrders.dishes", { defaultValue: "platillos" })}
                         </p>
+
+                        {/* Aquí lista los nombres de items debajo del conteo si existen */}
                         {names.length > 0 ? (
                           <div className="mt-1 space-y-1">
                             {names.map((n, idx) => (
@@ -596,7 +638,7 @@ function OrdersManagePage() {
                       <div className="text-sm font-semibold">{formatMoneyCRC(total)}</div>
 
                       <div className="flex flex-wrap items-center justify-end gap-2 overflow-hidden">
-                        {/* avanzar */}
+                        {/* Aquí abre confirmación antes de avanzar el estado */}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
@@ -621,10 +663,11 @@ function OrdersManagePage() {
                                 })}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
+
                             <AlertDialogFooter>
-                              <AlertDialogCancel>
-                                {t("common.cancel", { defaultValue: "Cancelar" })}
-                              </AlertDialogCancel>
+                              <AlertDialogCancel>{t("common.cancel", { defaultValue: "Cancelar" })}</AlertDialogCancel>
+
+                              {/* Aquí dispara mutation para avanzar status */}
                               <AlertDialogAction onClick={() => actions.advance.mutate(o.id)}>
                                 {t("ordersManage.actions.advanceConfirm", { defaultValue: "Aceptar y avanzar" })}
                               </AlertDialogAction>
@@ -634,19 +677,20 @@ function OrdersManagePage() {
 
                         <StatusPill status={o.status} t={t} />
 
+                        {/* Aquí muestra indicador "OK" cuando ya finalizó */}
                         {o.status === "completed" ? (
                           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
                             <CheckCircle2 className="h-4 w-4" /> {t("ordersManage.ok", { defaultValue: "OK" })}
                           </span>
                         ) : null}
 
-                        {/* borrar */}
+                        {/* Aquí abre confirmación antes de cancelar/borrar el pedido */}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
                               size="icon"
                               variant="destructive"
-                              disabled={!accessToken || locked || actions.cancelDelete.isPending}
+                              disabled={!accessToken || locked || actions.cancelDelete.isPending} // Aquí bloquea si no hay token o ya completó
                               title={t("ordersManage.actions.cancelDelete", { defaultValue: "Cancelar (borrar)" })}
                             >
                               <X className="h-4 w-4" />
@@ -664,10 +708,13 @@ function OrdersManagePage() {
                                 })}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
+
                             <AlertDialogFooter>
                               <AlertDialogCancel>
                                 {t("ordersManage.actions.back", { defaultValue: "Volver" })}
                               </AlertDialogCancel>
+
+                              {/* Aquí dispara mutation para eliminar/cancelar la orden */}
                               <AlertDialogAction onClick={() => actions.cancelDelete.mutate(o.id)}>
                                 {t("ordersManage.actions.deleteConfirm", { defaultValue: "Sí, eliminar" })}
                               </AlertDialogAction>
@@ -676,6 +723,7 @@ function OrdersManagePage() {
                         </AlertDialog>
                       </div>
 
+                      {/* Aquí muestra la hora de creación en el locale actual */}
                       <div className="text-right text-sm text-muted-foreground whitespace-nowrap">
                         {formatTime(o.created_at, locale)}
                       </div>

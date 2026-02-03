@@ -60,23 +60,23 @@
     "user": "User"
   },
   "common": {
-  "loading": "Loading...",
-  "error": "Something went wrong",
-  "retry": "Retry",
-  "noInternet": "No connection. Check your internet.",
-  "loadError": "Failed to load data.",
-  "scrollLeft": "Scroll left",
-  "scrollRight": "Scroll right",
-  "scrollUp": "Scroll up",
-  "scrollDown": "Scroll down",
-  "tooManyRequests": "Too many requests. Please try again.",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "noInternet": "No connection. Check your internet.",
+    "loadError": "Failed to load data.",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
+    "scrollUp": "Scroll up",
+    "scrollDown": "Scroll down",
+    "tooManyRequests": "Too many requests. Please try again.",
     "back": "Back",
     "forward": "Forward",
     "notFound": "Not found",
     "loadMore": "Load more",
     "cancel": "Cancel",
     "na": "N/A"
-},
+  },
   "theme": {
     "toggle": "Toggle theme",
     "light": "Light",
@@ -181,8 +181,8 @@
     }
   },
   "user": {
-  "defaultName": "User",
-  "myProfile": "My Profile"
+    "defaultName": "User",
+    "myProfile": "My Profile"
   },
   "profile": {
     "title": "My Profile",
@@ -386,5 +386,116 @@
     },
     "deleteTitle": "Delete meal base?",
     "deleteDescription": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Panel for {{name}}",
+    "selectRestaurant": "Select a restaurant to view the dashboard.",
+    "restaurant": "Restaurant",
+    "minutes": "min",
+    "customerFallback": "Customer",
+    "cards": {
+      "ordersToday": "Today's orders (00:00–23:59)",
+      "revenueToday": "Today's revenue (00:00–23:59)",
+      "activeCustomers": "Customers today",
+      "avgTime": "Average time (today)"
+    },
+    "activeOrders": {
+      "title": "Active orders",
+      "subtitle": "Today's orders (00:00–23:59)",
+      "manage": "Manage orders",
+      "empty": "No active orders."
+    },
+    "table": {
+      "customer": "CUSTOMER",
+      "items": "ITEMS",
+      "total": "TOTAL",
+      "status": "STATUS",
+      "time": "TIME",
+      "dishes": "dishes"
+    },
+    "popular": {
+      "title": "Popular dishes this month",
+      "subtitle": "From the 1st to the last day of the month (calendar month)",
+      "empty": "Not enough orders yet to calculate popular dishes.",
+      "fallbackDish": "Dish"
+    }
+  },
+  "ordersManage": {
+    "title": "Manage orders",
+    "subtitle": "Today's orders + recurring orders",
+    "selectRestaurant": "Select a restaurant to manage orders.",
+    "showing": "Showing {{count}}",
+    "customerFallback": "Customer",
+    "ok": "OK",
+    "table": {
+      "customer": "CUSTOMER",
+      "status": "STATUS",
+      "schedule": "SCHEDULE",
+      "names": "NAMES",
+      "items": "ITEMS",
+      "total": "TOTAL",
+      "next": "NEXT"
+    },
+    "labels": {
+      "customer": "Customer",
+      "status": "Status",
+      "interval": "Interval",
+      "weekDays": "Week days",
+      "monthDays": "Month days",
+      "window": "Window",
+      "timeZone": "Time zone",
+      "start": "Start",
+      "end": "End",
+      "lastRun": "Last run",
+      "nextRun": "Next",
+      "id": "ID"
+    },
+    "weekdaysShort": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "recurring": {
+      "title": "Recurring orders",
+      "subtitle": "Active/paused schedules (run by day/time)",
+      "empty": "No recurring orders.",
+      "loadError": "Error loading recurring orders.",
+      "daysOfMonthPrefix": "Day(s):",
+      "intervalWeek": "Every {{count}} week(s)",
+      "intervalMonth": "Every {{count}} month(s)",
+      "intervalDay": "Every {{count}} day(s)",
+      "intervalFallback": "Interval",
+      "viewDetails": "View details",
+      "detail": {
+        "title": "Schedule details",
+        "description": "Here are all recurrence details, without cluttering the table.",
+        "done": "Done"
+      }
+    },
+    "dayOrders": {
+      "showing": "Showing {{count}} orders",
+      "loadError": "Error loading orders.",
+      "dishes": "dishes",
+      "table": {
+        "itemsNames": "ITEMS (names)",
+        "time": "TIME"
+      }
+    },
+    "actions": {
+      "advance": "Advance",
+      "advanceTitle": "Advance status?",
+      "advanceDesc": "If you advance the order, you can't go back to a previous status.",
+      "advanceConfirm": "Confirm and advance",
+      "cancelDelete": "Cancel (delete)",
+      "deleteTitle": "Cancel order?",
+      "deleteDesc": "This will permanently delete the order (items, history and payments).",
+      "deleteConfirm": "Yes, delete",
+      "back": "Back"
+    }
   }
 }

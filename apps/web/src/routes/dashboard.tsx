@@ -13,20 +13,24 @@ import { EmptyState } from "@/components/network/EmptyState";
 
 import { Button } from "@/components/ui/button";
 
+// Aquí registra la ruta /dashboard y asigna el componente principal
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
+// Aquí normaliza un valor a número (por si viene string desde el backend)
 function toNumber(value: unknown) {
   const n = typeof value === "string" ? Number(value) : (value as number);
   return Number.isFinite(n) ? n : 0;
 }
 
+// Aquí formatea colones CRC con dos decimales y coma decimal
 function formatMoneyCRC(value: unknown) {
   const n = toNumber(value);
   return `₡${n.toFixed(2).replace(".", ",")}`;
 }
 
+// Aquí decide el locale para Intl en función del idioma de i18n
 function resolveLocale(lang?: string) {
   const l = String(lang ?? "").toLowerCase();
   if (l.startsWith("es")) return "es-CR";
@@ -37,6 +41,7 @@ function resolveLocale(lang?: string) {
   return "es-CR";
 }
 
+// Aquí formatea hora:minuto y valida fechas inválidas con placeholders
 function formatTime(value: unknown, locale: string) {
   if (!value) return "--:--";
   const d = new Date(String(value));
@@ -48,6 +53,7 @@ function formatTime(value: unknown, locale: string) {
   }).format(d);
 }
 
+// Aquí traduce el status interno a texto de UI usando i18n
 function statusLabel(status: string, t: TFunction) {
   switch (status) {
     case "preparing":
@@ -65,10 +71,11 @@ function statusLabel(status: string, t: TFunction) {
   }
 }
 
+// Aquí renderiza un pill de estado con colores por status (lectura rápida en tabla)
 function StatusPill({ status, t }: { status: string; t: TFunction }) {
   const base = "inline-flex items-center rounded-full px-2 py-0.5 text-xs border";
 
-  // ✅ Colores como pediste: pendiente amarillo, pagado verde, preparando azul, en camino morado
+  // Aquí asigna colores según el estado, para diferenciar el flujo visualmente
   const cls =
     status === "preparing"
       ? "border-blue-500/30 text-blue-300"
@@ -87,25 +94,28 @@ function StatusPill({ status, t }: { status: string; t: TFunction }) {
 
 function DashboardPage() {
   const { t, i18n } = useTranslation();
-  const locale = resolveLocale(i18n.language);
+  const locale = resolveLocale(i18n.language); // Aquí define locale para formato de hora
 
   const navigate = useNavigate();
 
   const { session, user, loading: authLoading } = useAuth();
   const { selectedRestaurantId } = useRestaurant();
 
-  // ✅ Hook SIEMPRE se llama
+  // Aquí se llama el hook siempre (regla de hooks), aunque selectedRestaurantId sea null
   const dashboardQuery = useDashboard(selectedRestaurantId, session?.access_token);
 
+  // Aquí redirige a login si ya terminó authLoading y no hay usuario
   React.useEffect(() => {
     if (!authLoading && !user) {
       navigate({ to: "/auth/login" });
     }
   }, [authLoading, navigate, user]);
 
+  // Aquí se maneja loading inicial de auth y evita render prematuro
   if (authLoading) return <LoadingState />;
   if (!user) return null;
 
+  // Aquí exige selección de restaurante antes de cargar dashboard
   if (!selectedRestaurantId) {
     return (
       <EmptyState
@@ -116,10 +126,12 @@ function DashboardPage() {
     );
   }
 
+  // Aquí maneja loading mientras no exista data inicial
   if (dashboardQuery.isLoading && !dashboardQuery.data) {
     return <LoadingState />;
   }
 
+  // Aquí maneja error de consulta y ofrece reintentar
   if (dashboardQuery.isError) {
     const message =
       dashboardQuery.error instanceof Error
@@ -131,22 +143,25 @@ function DashboardPage() {
 
   const raw = (dashboardQuery.data ?? {}) as any;
 
-  // RPC devuelve anidado: today.orders, today.revenue, etc.
+  // Aquí el RPC puede devolver datos anidados bajo today (today.orders, today.revenue, etc.)
   const today = raw.today ?? {};
 
+  // Aquí define el nombre del restaurante con compatibilidad de keys (snake_case y camelCase)
   const restaurantName =
     raw.restaurant_name ??
     raw.restaurantName ??
     t("dashboard.restaurant", { defaultValue: "Restaurante" });
 
+  // Aquí normaliza métricas de "hoy" soportando varias keys posibles del backend
   const ordersToday = toNumber(raw.orders_today ?? raw.ordersToday ?? today.orders ?? 0);
   const revenueToday = toNumber(raw.revenue_today ?? raw.revenueToday ?? today.revenue ?? 0);
 
-  // en SQL ahora es "clientes del día" (usuarios únicos que ordenaron hoy)
+  // Aquí "clientes del día" representa usuarios únicos que ordenaron hoy
   const activeCustomers = toNumber(
     raw.active_customers ?? raw.activeCustomers ?? today.active_customers ?? 0
   );
 
+  // Aquí obtiene el promedio de minutos (varias keys por cambios de SQL/RPC)
   const avgMinutes = toNumber(
     raw.avg_minutes ??
       raw.avgMinutes ??
@@ -156,6 +171,7 @@ function DashboardPage() {
       0
   );
 
+  // Aquí lista órdenes activas y platillos populares, con compatibilidad de nombres
   const activeOrders = (raw.active_orders ?? raw.activeOrders ?? []) as any[];
   const popularDishes = (raw.popular_dishes ?? raw.popularDishes ?? []) as any[];
 
@@ -163,14 +179,15 @@ function DashboardPage() {
     <div className="space-y-6">
       <div className="space-y-1">
         <h1 className="text-3xl font-bold">{t("dashboard.title", { defaultValue: "Tablero" })}</h1>
+
+        {/* Aquí agrega un indicador de "fetching" sin bloquear la UI */}
         <p className="text-muted-foreground">
           {t("dashboard.subtitle", { defaultValue: "Panel de {{name}}", name: restaurantName })}
-          {dashboardQuery.isFetching
-            ? ` · ${t("common.loading", { defaultValue: "Cargando..." })}`
-            : ""}
+          {dashboardQuery.isFetching ? ` · ${t("common.loading", { defaultValue: "Cargando..." })}` : ""}
         </p>
       </div>
 
+      {/* Aquí renderiza tarjetas resumen con métricas del día */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-xl border p-5">
           <p className="text-sm text-muted-foreground">
@@ -217,12 +234,14 @@ function DashboardPage() {
             </p>
           </div>
 
+          {/* Aquí navega a /orders para gestión completa */}
           <Button variant="outline" size="sm" onClick={() => navigate({ to: "/orders" as any })}>
             {t("dashboard.activeOrders.manage", { defaultValue: "Gestionar pedidos" })}
           </Button>
         </div>
 
         <div className="mt-4">
+          {/* Aquí muestra empty state cuando no hay órdenes activas */}
           {activeOrders.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t("dashboard.activeOrders.empty", { defaultValue: "No hay órdenes activas." })}
@@ -251,7 +270,9 @@ function DashboardPage() {
                 </thead>
 
                 <tbody>
+                  {/* Aquí limita a 10 filas para mantener dashboard liviano */}
                   {activeOrders.slice(0, 10).map((o) => {
+                    // Aquí soporta múltiples posibles nombres para el cliente (compatibilidad backend)
                     const customer =
                       o.customer_name ??
                       o.customerName ??
@@ -311,6 +332,7 @@ function DashboardPage() {
         </div>
 
         <div className="mt-4">
+          {/* Aquí se muestra un mensaje si aún no hay data suficiente */}
           {popularDishes.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t("dashboard.popular.empty", {
@@ -319,6 +341,7 @@ function DashboardPage() {
             </p>
           ) : (
             <div className="space-y-2">
+              {/* Aquí limita a 8 para que el dashboard no se haga largo */}
               {popularDishes.slice(0, 8).map((p) => {
                 const name =
                   p.name ??

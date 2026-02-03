@@ -5,14 +5,55 @@
   "nav": {
     "home": "Início",
     "ingredients": "Ingredientes",
-    "dashboard": "Painel",
+    "dashboard": "Dashboard",
     "restaurant": "Restaurante",
-    "mealBases": "Bases de Refeições",
+    "mealBases": "Bases de refeição",
     "support": "Suporte"
   },
   "home": {
     "title": "Início",
-    "description": "Visão principal com SidebarInset (shadcn) e navegação com TanStack Router."
+    "description": "Visão principal com SidebarInset (shadcn) e navegação do TanStack Router."
+  },
+  "ingredients": {
+    "title": "Ingredientes",
+    "subtitle": "Gerencie o catálogo de ingredientes",
+    "search": "Buscar ingrediente",
+    "category": "Categoria",
+    "status": "Status",
+    "selectRestaurant": "Selecione um restaurante para ver ingredientes",
+    "statusAll": "Todos",
+    "statusActive": "Ativo",
+    "statusInactive": "Inativo",
+    "new": "Novo ingrediente",
+    "edit": "Editar ingrediente",
+    "create": "Criar ingrediente",
+    "save": "Salvar alterações",
+    "empty": "Nenhum ingrediente para exibir.",
+    "formDescription": "Preencha os detalhes do ingrediente.",
+    "form": {
+      "name": "Nome",
+      "category": "Categoria",
+      "unitPrice": "Preço unitário",
+      "stock": "Estoque",
+      "isActive": "Ativo"
+    },
+    "columns": {
+      "name": "Nome",
+      "category": "Categoria",
+      "unitPrice": "Preço unitário",
+      "stock": "Estoque",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "actions": {
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "deleteTitle": "Excluir ingrediente",
+    "deleteDescription": "Isso desativará \"{{name}}\".",
+    "pagination": "Página {{page}} de {{total}} ({{count}} ingredientes)",
+    "prev": "Anterior",
+    "next": "Próximo"
   },
   "sections": {
     "label": "Seção",
@@ -32,10 +73,9 @@
     "back": "Voltar",
     "forward": "Avançar",
     "notFound": "Não encontrado",
-    "comingSoon": "Em breve",
-    "na": "N/A",
     "loadMore": "Carregar mais",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "na": "N/A"
   },
   "theme": {
     "toggle": "Alternar tema",
@@ -44,7 +84,7 @@
     "system": "Sistema"
   },
   "themeColors": {
-    "default": "Padrão",
+    "default": "Default",
     "blue": "Azul",
     "green": "Verde",
     "red": "Vermelho",
@@ -60,50 +100,61 @@
   },
   "language": {
     "toggle": "Mudar idioma",
-    "es": "Español (América Latina)",
+    "es": "Español (Latin America)",
     "en": "English (United States)",
-    "pt": "Português (Brasil)",
-    "fr": "Français (França)",
-    "it": "Italiano (Itália)"
+    "pt": "Português (Brazil)",
+    "fr": "Français (France)",
+    "it": "Italiano (Italy)"
   },
   "auth": {
     "logout": "Sair",
     "adminOnlyTitle": "Acesso restrito",
-    "adminOnlyDescription": "Esta interface é apenas para administradores associados a um restaurante.",
-    "adminOnlyAction": "Voltar ao login",
+    "adminOnlyDescription": "Esta interface é apenas para admins associados a um restaurante.",
+    "adminOnlyAction": "Voltar para o login",
+    "verify": {
+      "title": "Verifique seu e-mail",
+      "description": "Estamos confirmando seu endereço de e-mail.",
+      "success": "E-mail verificado.",
+      "redirecting": "Redirecionando para entrar...",
+      "checkEmail": "Verifique seu e-mail",
+      "pending": "Se você acabou de clicar no link, aguarde um momento.",
+      "pendingWithEmail": "Enviamos um link de verificação para {{email}}.",
+      "errorDefault": "Falha na verificação do e-mail.",
+      "goToLogin": "Ir para entrar"
+    },
     "login": {
       "title": "Entrar",
       "welcomeBack": "Bem-vindo de volta",
       "accessAccount": "Acesse sua conta",
       "signIn": "Entrar",
       "description": "Entre com seu e-mail e senha",
-      "socialLogin": "Entre com sua conta Google",
+      "socialLogin": "Entrar com sua conta do Google",
       "loginWithGoogle": "Entrar com Google",
       "orContinueWith": "Ou continue com",
       "email": "E-mail",
-      "emailPlaceholder": "m@exemplo.com",
+      "emailPlaceholder": "m@example.com",
       "password": "Senha",
       "forgotPassword": "Esqueceu sua senha?",
       "submit": "Entrar",
       "loading": "Entrando...",
-      "noAccount": "Não tem uma conta?",
-      "registerLink": "Cadastrar-se"
+      "noAccount": "Não tem conta?",
+      "registerLink": "Cadastrar"
     },
     "register": {
       "title": "Criar conta",
       "createYourAccount": "Crie sua conta",
-      "enterEmailToCreate": "Digite seu e-mail abaixo para criar sua conta",
+      "enterEmailToCreate": "Digite seu e-mail para criar sua conta",
       "fullName": "Nome completo",
-      "fullNamePlaceholder": "João Silva",
+      "fullNamePlaceholder": "John Doe",
       "email": "E-mail",
-      "emailPlaceholder": "m@exemplo.com",
+      "emailPlaceholder": "m@example.com",
       "password": "Senha",
       "confirmPassword": "Confirmar senha",
       "passwordMinLength": "Deve ter pelo menos 6 caracteres.",
       "createAccount": "Criar conta",
       "submit": "Criar conta",
       "loading": "Criando conta...",
-      "hasAccount": "Já tem uma conta?",
+      "hasAccount": "Já tem conta?",
       "loginLink": "Entrar",
       "passwordMismatch": "As senhas não coincidem",
       "passwordTooShort": "A senha deve ter pelo menos 6 caracteres"
@@ -123,7 +174,7 @@
       "resetFailed": "Falha ao enviar e-mail"
     },
     "legal": {
-      "byClickingContinue": "Ao clicar em continuar, você concorda com nossos",
+      "byClickingContinue": "Ao continuar, você concorda com nossos",
       "termsOfService": "Termos de serviço",
       "and": "e",
       "privacyPolicy": "Política de privacidade"
@@ -134,82 +185,82 @@
     "myProfile": "Meu perfil"
   },
   "profile": {
-    "title": "Meu Perfil",
+    "title": "Meu perfil",
     "profileTab": "Perfil",
     "securityTab": "Segurança",
     "appearanceTab": "Aparência",
-    "userInfo": "Informações do Usuário",
+    "userInfo": "Informações do usuário",
     "fullName": "Nome completo",
     "email": "E-mail",
-    "displayName": "Nome de Exibição",
+    "displayName": "Nome de exibição",
     "displayNamePlaceholder": "Digite seu nome",
-    "avatar": "Foto de Perfil",
-    "avatarURLHint": "Digite a URL da sua foto de perfil (deixe em branco para remover)",
+    "avatar": "Foto de perfil",
+    "avatarURLHint": "Digite a URL da foto (vazio para remover)",
     "phone": "Telefone",
     "dateOfBirth": "Data de nascimento",
     "preferredLanguage": "Idioma preferido",
     "preferredCurrency": "Moeda preferida",
     "notifications": "Notificações",
-    "emailNotifications": "Notificações por email",
+    "emailNotifications": "Notificações por e-mail",
     "pushNotifications": "Notificações push",
     "preferences": "Preferências",
     "language": "Idioma",
     "theme": "Tema",
     "save": "Salvar",
     "saving": "Salvando...",
-    "saved": "Mudanças salvas",
+    "saved": "Alterações salvas",
     "error": "Erro ao salvar",
     "invalidURL": "URL inválida. Deve ser uma URL válida (http:// ou https://)",
-    "changePassword": "Alterar Senha",
-    "currentPassword": "Senha Atual",
+    "changePassword": "Alterar senha",
+    "currentPassword": "Senha atual",
     "currentPasswordPlaceholder": "Digite sua senha atual",
-    "newPassword": "Nova Senha",
+    "newPassword": "Nova senha",
     "newPasswordPlaceholder": "Digite sua nova senha",
-    "confirmPassword": "Confirmar Senha",
+    "confirmPassword": "Confirmar senha",
     "confirmPasswordPlaceholder": "Confirme sua nova senha",
     "passwordRequired": "Todos os campos de senha são obrigatórios",
     "passwordsDoNotMatch": "As senhas não coincidem",
     "passwordTooShort": "A senha deve ter pelo menos 6 caracteres",
     "incorrectPassword": "Senha incorreta",
     "passwordChanged": "Senha alterada com sucesso",
-    "twoFactorAuth": "Autenticação de Dois Fatores",
+    "twoFactorAuth": "Autenticação de dois fatores",
     "twoFactorAuthHint": "Em breve",
     "enable": "Ativar",
-    "deleteAccount": "Deletar Conta",
-    "deleteAccountWarning": "Esta ação não pode ser desfeita. Isso excluirá permanentemente sua conta e todos os seus dados.",
+    "deleteAccount": "Excluir conta",
+    "deleteAccountWarning": "Esta ação não pode ser desfeita. Sua conta e todos os dados serão excluídos.",
     "deleteAccountConfirm": "Tem certeza?",
-    "deleteAccountConfirmDescription": "Esta ação não pode ser desfeita. Isso excluirá permanentemente sua conta e todos os dados associados.",
-    "deleting": "Deletando...",
-    "themeColor": "Cor do Tema",
+    "deleteAccountConfirmDescription": "Esta ação não pode ser desfeita. Sua conta e todos os dados associados serão excluídos.",
+    "deleting": "Excluindo...",
+    "themeColor": "Cor do tema",
     "themeColorHint": "Selecione uma cor para personalizar botões e elementos principais",
     "selectedTheme": "Tema selecionado",
     "currentTheme": "Tema atual",
-    "reset": "Restaurar",
+    "reset": "Redefinir",
     "addPassword": "Adicionar senha",
-    "addPasswordHint": "Adicione uma senha para poder fazer login com seu endereço de e-mail.",
-    "linkGoogle": "Vincular com Google",
-    "linkGoogleHint": "Vincule seu conta do Google para ter mais opções de login.",
-    "linkWithGoogle": "Vincular com Google",
+    "addPasswordHint": "Adicione uma senha para poder entrar com e-mail.",
+    "linkGoogle": "Vincular Google",
+    "linkGoogleHint": "Vincule sua conta Google para mais opções de login.",
+    "linkWithGoogle": "Vincular Google",
     "googleLinked": "Conta Google vinculada com sucesso",
     "googleAlreadyInUse": "Esta conta Google já está em uso",
     "passwordAdded": "Senha adicionada com sucesso",
     "adding": "Adicionando...",
     "linking": "Vinculando...",
-    "unlinkGoogle": "Dissociar Google",
-    "unlinkGoogleHint": "Dissociez sua conta do Google. Você poderá continuar a fazer login com seu endereço de e-mail e senha.",
-    "unlinkGoogleConfirm": "Confirmar a dissociação",
-    "unlinkGoogleConfirmDescription": "Tem certeza de que deseja dissociar sua conta do Google? Você ainda poderá fazer login com seu endereço de e-mail e senha.",
-    "unlinking": "Dissociação em andamento...",
-    "googleUnlinked": "Conta Google dissociada com sucesso",
-    "cannotUnlinkOnlyMethod": "Você não pode dissociar a única forma de autenticação"
+    "unlinkGoogle": "Desvincular Google",
+    "unlinkGoogleHint": "Desvincule sua conta Google do seu perfil.",
+    "unlinkGoogleConfirm": "Desvincular conta Google?",
+    "unlinkGoogleConfirmDescription": "Após desvincular, você não poderá mais entrar com Google. Certifique-se de lembrar sua senha.",
+    "unlinking": "Desvinculando...",
+    "googleUnlinked": "Conta Google desvinculada com sucesso",
+    "cannotUnlinkOnlyMethod": "Você não pode desvincular o único método de autenticação"
   },
   "addresses": {
     "title": "Endereços",
     "addNew": "Adicionar endereço",
     "edit": "Editar endereço",
-    "delete": "Excluir endereço",
+    "delete": "Excluir",
     "setDefault": "Definir como padrão",
-    "label": "Etiqueta (ex. Casa, Trabalho)",
+    "label": "Etiqueta (ex: Casa, Trabalho)",
     "line1": "Endereço linha 1",
     "line2": "Endereço linha 2 (opcional)",
     "city": "Cidade",
@@ -224,13 +275,13 @@
     "deleteConfirmDesc": "Esta ação não pode ser desfeita.",
     "empty": "Você não tem endereços salvos",
     "emptyAdd": "Adicione seu primeiro endereço",
-    "formDescription": "Preencha os dados do endereço."
+    "formDescription": "Preencha os detalhes do seu endereço."
   },
   "paymentMethods": {
-    "title": "Métodos de pagamento",
-    "addNew": "Adicionar método de pagamento",
-    "edit": "Editar método",
-    "delete": "Excluir método",
+    "title": "Formas de pagamento",
+    "addNew": "Adicionar forma de pagamento",
+    "edit": "Editar forma",
+    "delete": "Excluir",
     "setDefault": "Definir como padrão",
     "type": "Tipo",
     "name": "Nome do método",
@@ -244,9 +295,9 @@
     "saved": "Método salvo",
     "deleteConfirm": "Excluir este método de pagamento?",
     "deleteConfirmDesc": "Esta ação não pode ser desfeita.",
-    "empty": "Você não tem métodos de pagamento salvos",
-    "emptyAdd": "Adicione seu primeiro método de pagamento",
-    "note": "Observação: por enquanto salvamos apenas o nome e os últimos 4 dígitos"
+    "empty": "Você não tem métodos salvos",
+    "emptyAdd": "Adicione seu primeiro método",
+    "note": "Nota: por enquanto, armazenamos apenas o nome e os últimos 4 dígitos"
   },
   "orders": {
     "title": "Meus pedidos",
@@ -264,8 +315,8 @@
     "items": "Itens",
     "deliveryAddress": "Endereço de entrega",
     "empty": "Você ainda não tem pedidos",
-    "emptyDesc": "Quando fizer seu primeiro pedido, ele aparecerá aqui",
-    "loadError": "Erro ao carregar pedidos",
+    "emptyDesc": "Quando você fizer seu primeiro pedido, ele aparecerá aqui",
+    "loadError": "Falha ao carregar pedidos",
     "retry": "Tentar novamente"
   },
   "recurringOrders": {
@@ -286,5 +337,165 @@
     "runNow": "Executar agora",
     "empty": "Você não tem pedidos recorrentes",
     "emptyDesc": "Crie uma recorrência para automatizar seus pedidos"
+  },
+  "mealBases": {
+    "title": "Bases de refeição",
+    "subtitle": "Crie e gerencie receitas base para personalização",
+    "new": "Nova base",
+    "edit": "Editar base",
+    "save": "Salvar",
+    "create": "Criar",
+    "search": "Buscar bases de refeição...",
+    "category": "Categoria",
+    "status": "Status",
+    "empty": "Nenhuma base encontrada",
+    "selectRestaurant": "Selecione um restaurante",
+    "formDescription": "Complete as informações da base",
+    "prev": "Anterior",
+    "next": "Próximo",
+    "pagination": "Página {{page}} de {{total}} ({{count}} bases)",
+    "statusAll": "Todos",
+    "statusActive": "Ativo",
+    "statusInactive": "Inativo",
+    "columns": {
+      "name": "Nome",
+      "categories": "Categorias",
+      "basePrice": "Preço base",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "form": {
+      "name": "Nome da refeição",
+      "namePlaceholder": "Ex: Bowl Mediterrâneo",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Descreva ingredientes e características...",
+      "basePrice": "Preço base",
+      "isActive": "Ativo",
+      "Categories": "Categorias"
+    },
+    "actions": {
+      "view": "Ver detalhes",
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "detail": {
+      "basePrice": "Preço base",
+      "status": "Status",
+      "categories": "Categorias",
+      "warnings": "Avisos de restrição alimentar"
+    },
+    "deleteTitle": "Excluir base?",
+    "deleteDescription": "Tem certeza que deseja excluir \"{{name}}\"? Esta ação não pode ser desfeita."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Painel de {{name}}",
+    "selectRestaurant": "Selecione um restaurante para ver a dashboard.",
+    "restaurant": "Restaurante",
+    "minutes": "min",
+    "customerFallback": "Cliente",
+    "cards": {
+      "ordersToday": "Pedidos do dia (00:00–23:59)",
+      "revenueToday": "Receita do dia (00:00–23:59)",
+      "activeCustomers": "Clientes do dia",
+      "avgTime": "Tempo médio (hoje)"
+    },
+    "activeOrders": {
+      "title": "Pedidos ativos",
+      "subtitle": "Pedidos de hoje (00:00–23:59)",
+      "manage": "Gerenciar pedidos",
+      "empty": "Não há pedidos ativos."
+    },
+    "table": {
+      "customer": "CLIENTE",
+      "items": "ITENS",
+      "total": "TOTAL",
+      "status": "STATUS",
+      "time": "HORA",
+      "dishes": "pratos"
+    },
+    "popular": {
+      "title": "Pratos populares do mês",
+      "subtitle": "Do dia 1 ao último dia do mês (mês calendário)",
+      "empty": "Ainda não há pedidos suficientes para calcular pratos populares.",
+      "fallbackDish": "Prato"
+    }
+  },
+  "ordersManage": {
+    "title": "Gerenciar pedidos",
+    "subtitle": "Pedidos do dia + pedidos recorrentes",
+    "selectRestaurant": "Selecione um restaurante para gerenciar pedidos.",
+    "showing": "Mostrando {{count}}",
+    "customerFallback": "Cliente",
+    "ok": "OK",
+    "table": {
+      "customer": "CLIENTE",
+      "status": "STATUS",
+      "schedule": "PROGRAMAÇÃO",
+      "names": "NOMES",
+      "items": "ITENS",
+      "total": "TOTAL",
+      "next": "PRÓXIMA"
+    },
+    "labels": {
+      "customer": "Cliente",
+      "status": "Status",
+      "interval": "Intervalo",
+      "weekDays": "Dias da semana",
+      "monthDays": "Dias do mês",
+      "window": "Janela",
+      "timeZone": "Fuso horário",
+      "start": "Início",
+      "end": "Fim",
+      "lastRun": "Última execução",
+      "nextRun": "Próxima",
+      "id": "ID"
+    },
+    "weekdaysShort": {
+      "sun": "Dom",
+      "mon": "Seg",
+      "tue": "Ter",
+      "wed": "Qua",
+      "thu": "Qui",
+      "fri": "Sex",
+      "sat": "Sáb"
+    },
+    "recurring": {
+      "title": "Pedidos recorrentes",
+      "subtitle": "Programações ativas/pausadas (executam por dia/hora)",
+      "empty": "Não há pedidos recorrentes.",
+      "loadError": "Erro ao carregar recorrentes.",
+      "daysOfMonthPrefix": "Dia(s):",
+      "intervalWeek": "A cada {{count}} semana(s)",
+      "intervalMonth": "A cada {{count}} mês(es)",
+      "intervalDay": "A cada {{count}} dia(s)",
+      "intervalFallback": "Intervalo",
+      "viewDetails": "Ver detalhes",
+      "detail": {
+        "title": "Detalhes da programação",
+        "description": "Aqui estão todos os detalhes da recorrência, sem poluir a tabela.",
+        "done": "Pronto"
+      }
+    },
+    "dayOrders": {
+      "showing": "Mostrando {{count}} pedidos",
+      "loadError": "Erro ao carregar pedidos.",
+      "dishes": "pratos",
+      "table": {
+        "itemsNames": "ITENS (nomes)",
+        "time": "HORA"
+      }
+    },
+    "actions": {
+      "advance": "Avançar",
+      "advanceTitle": "Avançar status?",
+      "advanceDesc": "Ao avançar o pedido, você não poderá voltar para um status anterior.",
+      "advanceConfirm": "Confirmar e avançar",
+      "cancelDelete": "Cancelar (excluir)",
+      "deleteTitle": "Cancelar pedido?",
+      "deleteDesc": "Isso excluirá o pedido por completo (itens, histórico e pagamentos).",
+      "deleteConfirm": "Sim, excluir",
+      "back": "Voltar"
+    }
   }
 }
