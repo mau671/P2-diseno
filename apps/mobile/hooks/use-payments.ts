@@ -1,5 +1,6 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { processPayment, fetchPaymentHistory } from '@/lib/payments';
+import { orderQueryKey, orderTrackingQueryKey, ordersQueryKey } from '@/hooks/use-orders';
 
 export const paymentHistoryQueryKey = ['payments', 'history'];
 
@@ -15,6 +16,7 @@ export function usePaymentHistory(
 }
 
 export function useProcessPayment(accessToken?: string) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (params: {
       order_id: string;
@@ -22,5 +24,10 @@ export function useProcessPayment(accessToken?: string) {
       amount: number;
       currency_code: string;
     }) => processPayment(params, accessToken),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ordersQueryKey });
+      queryClient.invalidateQueries({ queryKey: orderQueryKey(variables.order_id) });
+      queryClient.invalidateQueries({ queryKey: orderTrackingQueryKey(variables.order_id) });
+    },
   });
 }
