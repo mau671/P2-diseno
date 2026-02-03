@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useRestaurant } from "@/context/restaurant-context";
@@ -26,35 +27,45 @@ function formatMoneyCRC(value: unknown) {
   return `₡${n.toFixed(2).replace(".", ",")}`;
 }
 
-function formatTime(value: unknown) {
+function resolveLocale(lang?: string) {
+  const l = String(lang ?? "").toLowerCase();
+  if (l.startsWith("es")) return "es-CR";
+  if (l.startsWith("en")) return "en-US";
+  if (l.startsWith("pt")) return "pt-BR";
+  if (l.startsWith("fr")) return "fr-FR";
+  if (l.startsWith("it")) return "it-IT";
+  return "es-CR";
+}
+
+function formatTime(value: unknown, locale: string) {
   if (!value) return "--:--";
   const d = new Date(String(value));
   if (Number.isNaN(d.getTime())) return "--:--";
 
-  return new Intl.DateTimeFormat("es-CR", {
+  return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
   }).format(d);
 }
 
-function statusLabel(status: string) {
+function statusLabel(status: string, t: TFunction) {
   switch (status) {
     case "preparing":
-      return "Preparando";
+      return t("orders.statusPreparing", { defaultValue: "Preparando" });
     case "pending":
-      return "Pendiente";
+      return t("orders.statusPending", { defaultValue: "Pendiente" });
     case "delivering":
-      return "En camino";
+      return t("orders.statusDelivering", { defaultValue: "En camino" });
     case "paid":
-      return "Pagado";
+      return t("orders.statusPaid", { defaultValue: "Pagado" });
     case "completed":
-      return "Entregado";
+      return t("orders.statusCompleted", { defaultValue: "Entregado" });
     default:
       return status;
   }
 }
 
-function StatusPill({ status }: { status: string }) {
+function StatusPill({ status, t }: { status: string; t: TFunction }) {
   const base = "inline-flex items-center rounded-full px-2 py-0.5 text-xs border";
 
   // ✅ Colores como pediste: pendiente amarillo, pagado verde, preparando azul, en camino morado
@@ -71,11 +82,13 @@ function StatusPill({ status }: { status: string }) {
       ? "border-emerald-500/30 text-emerald-300"
       : "border-muted-foreground/30 text-muted-foreground";
 
-  return <span className={`${base} ${cls}`}>{statusLabel(status)}</span>;
+  return <span className={`${base} ${cls}`}>{statusLabel(status, t)}</span>;
 }
 
 function DashboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveLocale(i18n.language);
+
   const navigate = useNavigate();
 
   const { session, user, loading: authLoading } = useAuth();
@@ -149,9 +162,7 @@ function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold">
-          {t("dashboard.title", { defaultValue: "Tablero" })}
-        </h1>
+        <h1 className="text-3xl font-bold">{t("dashboard.title", { defaultValue: "Tablero" })}</h1>
         <p className="text-muted-foreground">
           {t("dashboard.subtitle", { defaultValue: "Panel de {{name}}", name: restaurantName })}
           {dashboardQuery.isFetching
@@ -186,7 +197,9 @@ function DashboardPage() {
           <p className="text-sm text-muted-foreground">
             {t("dashboard.cards.avgTime", { defaultValue: "Tiempo promedio (del día)" })}
           </p>
-          <p className="mt-2 text-3xl font-bold">{Math.round(avgMinutes)} min</p>
+          <p className="mt-2 text-3xl font-bold">
+            {Math.round(avgMinutes)} {t("dashboard.minutes", { defaultValue: "min" })}
+          </p>
         </div>
       </div>
 
@@ -204,11 +217,7 @@ function DashboardPage() {
             </p>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate({ to: "/orders" as any })}
-          >
+          <Button variant="outline" size="sm" onClick={() => navigate({ to: "/orders" as any })}>
             {t("dashboard.activeOrders.manage", { defaultValue: "Gestionar pedidos" })}
           </Button>
         </div>
@@ -249,7 +258,7 @@ function DashboardPage() {
                       o.full_name ??
                       o.fullName ??
                       o.username ??
-                      "Cliente";
+                      t("dashboard.customerFallback", { defaultValue: "Cliente" });
 
                     const items = toNumber(o.items_count ?? o.itemsCount ?? o.items ?? 0);
                     const total = o.total ?? o.amount ?? 0;
@@ -263,19 +272,20 @@ function DashboardPage() {
                         </td>
 
                         <td className="py-3 text-muted-foreground">
-                          {items} {t("dashboard.table.dishes", { defaultValue: "platillos" })}
+                          {items}{" "}
+                          {t("dashboard.table.dishes", {
+                            defaultValue: "platillos",
+                          })}
                         </td>
 
-                        <td className="py-3 text-right font-semibold">
-                          {formatMoneyCRC(total)}
-                        </td>
+                        <td className="py-3 text-right font-semibold">{formatMoneyCRC(total)}</td>
 
                         <td className="py-3 text-right font-semibold">
-                          <StatusPill status={status} />
+                          <StatusPill status={status} t={t} />
                         </td>
 
                         <td className="py-3 text-right text-muted-foreground">
-                          {formatTime(time)}
+                          {formatTime(time, locale)}
                         </td>
                       </tr>
                     );
@@ -310,7 +320,12 @@ function DashboardPage() {
           ) : (
             <div className="space-y-2">
               {popularDishes.slice(0, 8).map((p) => {
-                const name = p.name ?? p.base_name ?? p.baseName ?? "Platillo";
+                const name =
+                  p.name ??
+                  p.base_name ??
+                  p.baseName ??
+                  t("dashboard.popular.fallbackDish", { defaultValue: "Platillo" });
+
                 const count = toNumber(p.orders_count ?? p.count ?? p.qty ?? p.orders ?? 0);
 
                 return (

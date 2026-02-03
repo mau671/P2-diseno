@@ -1,11 +1,26 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { advanceOrder, deleteOrder, fetchOrdersManage } from "@/api/orders";
+import {
+  advanceOrder,
+  deleteOrder,
+  fetchOrdersManage,
+  fetchRecurringOrdersManage,
+} from "@/api/orders";
 
 export function useOrdersManage(restaurantId?: string | null, accessToken?: string) {
   return useQuery({
     queryKey: ["orders-manage", restaurantId ?? ""],
     enabled: Boolean(restaurantId && accessToken),
     queryFn: async () => fetchOrdersManage(restaurantId as string, accessToken as string),
+    staleTime: 5_000,
+    refetchOnWindowFocus: false,
+  });
+}
+
+export function useRecurringOrdersManage(restaurantId?: string | null, accessToken?: string) {
+  return useQuery({
+    queryKey: ["recurring-orders-manage", restaurantId ?? ""],
+    enabled: Boolean(restaurantId && accessToken),
+    queryFn: async () => fetchRecurringOrdersManage(restaurantId as string, accessToken as string),
     staleTime: 5_000,
     refetchOnWindowFocus: false,
   });
@@ -22,7 +37,7 @@ export function useOrderActions(restaurantId?: string | null, accessToken?: stri
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orders-manage", restaurantId ?? ""] });
-      qc.invalidateQueries({ queryKey: ["dashboard", restaurantId ?? ""] }); // ✅ clave
+      qc.invalidateQueries({ queryKey: ["dashboard", restaurantId ?? ""] });
     },
   });
 
