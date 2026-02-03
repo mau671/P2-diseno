@@ -7,6 +7,9 @@ const allowedOrigins = [
   'http://localhost:19000',
   'exp://192.168.*.*',
   'http://192.168.*.*:19000',
+  'https://p2-diseno-1.onrender.com',
+  'https://p2-diseno.onrender.com',
+  /\.onrender\.com$/,
   /\.pages\.dev$/,
   /\.workers\.dev$/
 ]
