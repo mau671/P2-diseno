@@ -6,7 +6,7 @@ export const ordersQueryKey = (params: OrdersQueryParams) => ["orders", params];
 export function useOrders(params: OrdersQueryParams, accessToken?: string) {
   return useQuery({
     queryKey: ordersQueryKey(params),
-    queryFn: () => fetchOrders(params, accessToken),
+    queryFn: () => fetchOrders(params, accessToken!),
     enabled: !!accessToken,
   });
 }
